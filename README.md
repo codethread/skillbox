@@ -43,6 +43,15 @@ Local repositories also use explicit bundle names: `skillbox add ../my-skills de
 
 Bundles live under `skillbox/<bundle>/<skill>/SKILL.md`. The command copies each selected skill and its supporting files into the client's `.agents/skills/` and links `.claude/skills` to it. Unmanaged skill paths and name collisions are rejected without overwriting their contents.
 
+Ignore both generated installation paths in the workspace's `.gitignore` (the Claude path is a symlink, so its rule has no trailing slash):
+
+```gitignore
+/.agents/skills/
+/.claude/skills
+```
+
+The CLI does not add these rules automatically. If either path is already tracked, use `git rm -r --cached -- <path>` to untrack it without deleting the installation.
+
 Two files record the installation; commit both:
 
 - `skillbox/config.json` records source repositories and requested bundles. Local source paths are relative to the workspace root; Git sources retain their source string.
