@@ -4,6 +4,11 @@
 - Write unit tests to help shape and validate, delete once finished.
 - Write blackbox tests to verify the system as a user would.
 
+## Features
+
+If not working from a pre-assigned task, study [PRD](./docs/engdocs/PRD.md).  
+Keep this in sync with your new behavior and ensure behaviour is verified as a user would use it.
+
 ## Development cycle
 
 1. build (make it work)
