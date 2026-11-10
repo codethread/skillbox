@@ -3,16 +3,11 @@ import { Command } from "commander";
 import { match, P } from "ts-pattern";
 import { z } from "zod";
 import { add } from "./add.ts";
-import { defaultConfigPath } from "./config.ts";
 
 const program = new Command()
 	.name("skillbox")
 	.description("Install repository-local skill bundles.")
-	.option(
-		"--config <file>",
-		"config file; workspace is the parent of its containing directory",
-		defaultConfigPath,
-	)
+	.option("--config <dir>", "workspace directory containing skillbox/config.json", ".")
 	.showHelpAfterError();
 
 program

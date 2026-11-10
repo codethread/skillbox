@@ -443,16 +443,8 @@ test("uses config-relative workspace roots for frontend and backend", async () =
 	await mkdir(join(cwd, "backend"));
 
 	for (const workspace of ["frontend", "backend"]) {
-		expect(
-			await run(
-				cwd,
-				"--config",
-				`${workspace}/skillbox/config.json`,
-				"add",
-				"../source",
-				"development",
-			),
-		).toMatchInlineSnapshot(`
+		expect(await run(cwd, "--config", workspace, "add", "../source", "development"))
+			.toMatchInlineSnapshot(`
 		  {
 		    "exitCode": 0,
 		    "stderr": [
@@ -557,11 +549,11 @@ test("records portable SDK sources when the bundle lives in the client itself", 
 	).toBe(await readFile(join(cwd, ".agents/skills/blackbox-testing/SKILL.md"), "utf8"));
 });
 
-test("accepts an absolute custom config path from another invocation directory", async () => {
+test("accepts an absolute config directory from another invocation directory", async () => {
 	const cwd = await client();
 	await mkdir(join(cwd, "frontend"));
 	await mkdir(join(cwd, "invocation"));
-	const config = join(cwd, "frontend/settings/local-skills.json");
+	const config = join(cwd, "frontend");
 
 	expect(await run(cwd, "--config", config, "add", "../source", "development"))
 		.toMatchInlineSnapshot(`
@@ -598,7 +590,7 @@ test("accepts an absolute custom config path from another invocation directory",
 	    ],
 	  }
 	`);
-	expect(await json(cwd, "frontend/settings/local-skills.json")).toMatchInlineSnapshot(`
+	expect(await json(cwd, "frontend/skillbox/config.json")).toMatchInlineSnapshot(`
 	  {
 	    "sources": [
 	      {
@@ -614,7 +606,7 @@ test("accepts an absolute custom config path from another invocation directory",
 	  [
 	    ".agents",
 	    ".claude",
-	    "settings",
+	    "skillbox",
 	    "skills-lock.json",
 	  ]
 	`);

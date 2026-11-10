@@ -2,7 +2,7 @@ import { join } from "node:path";
 import { z } from "zod";
 import { readOptional } from "./paths.ts";
 
-export const defaultConfigPath = "skillbox/config.json";
+export const configPath = "skillbox/config.json";
 export const bundleSchema = z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/, {
 	error: "Bundle names must be single directory names (letters, numbers, hyphens or underscores).",
 });
@@ -18,7 +18,7 @@ const configSchema = z.strictObject({
 
 export type Config = z.infer<typeof configSchema>;
 
-export async function readConfig(cwd: string, configPath: string) {
+export async function readConfig(cwd: string) {
 	const text = await readOptional(join(cwd, configPath));
 	if (text === undefined) return undefined;
 	try {

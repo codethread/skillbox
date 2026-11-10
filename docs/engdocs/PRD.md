@@ -11,10 +11,10 @@ As a user, I want to install skills from other repositories into my project, pin
 These checks record implementation coverage, not new acceptance criteria or completion of sync, exact pinning, cache, or patches. Fixtures run the public CLI in real disposable directories and use inline snapshots for generated payloads.
 
 - [x] Record requested local sources and bundles in `skillbox/config.json`, and use the SDK to write native `skills-lock.json`: [config and lock fixture](../../tests/add.test.ts#L57).
-- [x] Anchor outputs and lockfiles to the config-selected workspace through `--config`, rather than the invocation directory: [frontend/backend fixture](../../tests/add.test.ts#L440) and [absolute custom config fixture](../../tests/add.test.ts#L560).
+- [x] Anchor outputs and lockfiles to the config-selected workspace through `--config <dir>` (with `skillbox/config.json` implied), rather than the invocation directory: [frontend/backend fixture](../../tests/add.test.ts#L440) and [absolute directory fixture](../../tests/add.test.ts#L552).
 - [x] Make repeated adds write-free: [repeated-add fixture](../../tests/add.test.ts#L244). This does not verify sync idempotence.
 - [x] Preserve existing skill contents and lock entries when adding [another bundle](../../tests/add.test.ts#L289) or [another source](../../tests/add.test.ts#L371).
-- [x] Keep local source paths portable when publishing the SDK lock out of staging: [multiple-source fixture](../../tests/add.test.ts#L371) and [same-repository fixture](../../tests/add.test.ts#L513).
+- [x] Keep local source paths portable when publishing the SDK lock out of staging: [multiple-source fixture](../../tests/add.test.ts#L371) and [same-repository fixture](../../tests/add.test.ts#L505).
 - [x] Preserve unmanaged local skills: [shared skills fixture](../../tests/add.test.ts#L187) and [Claude directory fixture](../../tests/add.test.ts#L216). Migrating them is not implemented.
 
 ## Repository-local installation and provenance

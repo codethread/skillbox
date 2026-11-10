@@ -10,10 +10,10 @@ import {
 	symlink,
 	writeFile,
 } from "node:fs/promises";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { installSkills, resolveSource, type SkillInfo, type SkillsConfig } from "skills";
 import { z } from "zod";
-import { bundleSchema, defaultConfigPath, readConfig, withBundles } from "./config.ts";
+import { bundleSchema, configPath, readConfig, withBundles } from "./config.ts";
 import { lockPath, readLock, relocateLock } from "./lock.ts";
 import { localPath, readOptional, statOptional } from "./paths.ts";
 import { publish } from "./publish.ts";
@@ -22,7 +22,7 @@ const inputSchema = z.object({
 	cwd: z.string().min(1),
 	source: z.string().min(1),
 	bundles: z.array(bundleSchema).min(1),
-	config: z.string().min(1).default(defaultConfigPath),
+	config: z.string().min(1).default("."),
 });
 
 const sdkConfig = {
@@ -49,12 +49,9 @@ function inBundle(skill: SkillInfo, bundle: string) {
 
 export async function add(input: z.input<typeof inputSchema>) {
 	const parsed = inputSchema.parse(input);
-	const configFile = resolve(parsed.cwd, parsed.config);
-	const workspace = dirname(dirname(configFile));
-	const cwd = await realpath(workspace);
-	const configPath = relative(workspace, configFile);
+	const cwd = await realpath(resolve(parsed.cwd, parsed.config));
 	const source = localPath(cwd, await realpath(resolve(parsed.cwd, parsed.source)));
-	const config = await readConfig(cwd, configPath);
+	const config = await readConfig(cwd);
 	const lockText = await readOptional(join(cwd, lockPath));
 	const lock = lockText === undefined ? undefined : readLock(lockText);
 	if (!config) {
@@ -161,7 +158,7 @@ export async function add(input: z.input<typeof inputSchema>) {
 			await mkdir(join(staging, ".claude"));
 			await symlink("../.agents/skills", join(staging, ".claude/skills"));
 			try {
-				await publish(staging, cwd, configPath);
+				await publish(staging, cwd);
 			} catch (cause) {
 				retainStaging = true;
 				throw new Error(

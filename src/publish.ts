@@ -1,9 +1,10 @@
 import { mkdir, rename, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { configPath } from "./config.ts";
 import { lockPath } from "./lock.ts";
 import { statOptional } from "./paths.ts";
 
-export async function publish(staging: string, cwd: string, configPath: string) {
+export async function publish(staging: string, cwd: string) {
 	const changes: { target: string; backup?: string; installed: boolean }[] = [];
 	try {
 		for (const path of [".agents/skills", ".claude/skills", lockPath, configPath]) {

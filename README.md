@@ -38,11 +38,11 @@ Adding another source or bundle preserves existing installed skills and lock ent
 ### Workspace config override
 
 ```sh
-bun run src/cli.ts --config frontend/skillbox/config.json add ../my-skills development
-bun run src/cli.ts --config backend/skillbox/config.json add ../my-skills development
+bun run src/cli.ts --config frontend add ../my-skills development
+bun run src/cli.ts --config backend add ../my-skills development
 ```
 
-The workspace root is the parent of the config file's containing directory. In these examples, the existing `frontend/` and `backend/` directories each get their own `.agents/skills/`, `.claude/skills` link, config, and SDK lockfile. `--config` accepts relative or absolute paths. Source arguments are resolved from the invocation directory, then saved relative to the workspace root.
+`--config` selects a workspace directory, defaulting to the current directory; `skillbox/config.json` is implied. In these examples, the existing `frontend/` and `backend/` directories each get their own `.agents/skills/`, `.claude/skills` link, config, and SDK lockfile. Relative and absolute directory paths are supported. Source arguments are resolved from the invocation directory, then saved relative to the workspace root.
 
 Remote sources, exact revision pins, restoring from config (`sync`), automatic ignores, migration, patches, and multi-workspace orchestration are not implemented yet.
 
