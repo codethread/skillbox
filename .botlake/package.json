@@ -6,13 +6,13 @@
 		"@botlake/core": "latest",
 		"@botlake/extension-agents": "latest",
 		"@botlake/extension-batteries": "latest",
+		"@botlake/extension-ct-config": "latest",
 		"@botlake/extension-flags": "latest",
 		"@botlake/extension-identity": "latest",
 		"@botlake/extension-references": "latest",
 		"@botlake/extension-work": "latest",
 		"@botlake/extension-work-agents": "latest",
-		"@botlake/native-session": "latest",
-		"ct-config": "file:../../botlake/dist/private/ct-config-0.1.1.tgz"
+		"@botlake/native-session": "latest"
 	},
 	"botlake": {
 		"name": "skillbox",
