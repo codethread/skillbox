@@ -8,64 +8,122 @@ As a user, I want to install skills from other repositories into my project, pin
 
 ## Repository-local installation and provenance
 
-- Skills install into the consuming repository, rather than requiring a mix of globally and locally installed packages.
-- Each installed skill has recorded provenance: its source repository, location within that repository, and pinned version.
-- The pin identifies an exact source revision, so subsequent installs can reproduce the same source contents.
-- Another project can consume the same source revision without depending on the first project's installed files.
+### Install an external skill
+
+- **Given** an external repository contains a skill with `SKILL.md` and supporting files,
+- **When** I add that skill to my project,
+- **Then** the skill and its supporting files are installed into my project without requiring a global skill installation,
+- **And** Skillbox records the source repository, the skill's location within it, and an exact source revision,
+- **And** the fetched source revision is stored in a shared local cache on my machine.
+
+### Reproduce a pinned installation
+
+- **Given** my project records a skill's source and pinned revision,
+- **When** I sync in a fresh checkout,
+- **Then** Skillbox installs the contents from that exact revision, together with any recorded patches.
 
 ## Sync and updates
 
-- Sync materializes the pinned upstream skill and applies any recorded patches.
-- Repeating sync with unchanged inputs produces the same installed contents, without duplicate installations or repeatedly applying a patch to already-patched files.
-- Sync does not advance an existing version pin merely because a newer upstream version exists.
-- Updating the pinned version is an explicit user action. Whether this is a separate command or a sync flag is undecided.
-- Unchanged syncs avoid unnecessary network requests, downloads, and writes wherever possible.
+### Repeat sync without changes
+
+- **Given** my installed skills match their pins and recorded patches,
+- **When** I run sync repeatedly without changing those inputs,
+- **Then** the installed contents remain identical, without duplicate installations or patches being applied repeatedly to already-patched files,
+- **And** Skillbox avoids unnecessary network requests, downloads, and file writes wherever possible.
+
+### Keep updates explicit
+
+- **Given** my project pins a skill and a newer upstream revision exists,
+- **When** I run ordinary sync,
+- **Then** Skillbox keeps the existing pin and installs that revision rather than advancing to the newer one.
+
+### Update a pinned skill
+
+- **Given** my project pins a skill and a newer upstream revision is available,
+- **When** I explicitly request an update to that revision,
+- **Then** Skillbox uses the requested revision as the new pin,
+- **And** any recorded patches are checked against the new source before the skill is reported as successfully updated.
 
 ## Shared local cache
 
-- Downloaded source versions are cached on the user's machine and reusable across consuming repositories.
-- Given project A has fetched a source revision, project B can install that same revision from the cache without downloading it again.
-- Sync can run offline when the pinned source revision and all required skill files are cached locally.
-- For a new add without a pin, the desired behavior is to check for the latest upstream version when possible, while allowing installation from the cache if the network or source host is unavailable.
-- A cache-backed installation records the revision actually installed; it must not claim an unverified cached version is the latest.
-- If the required revision is not cached and cannot be fetched, the operation reports the missing source rather than substituting a different revision.
+### Reuse a revision across projects
 
-The freshness policy for new adds and the choice among cached versions remain open decisions.
+- **Given** project A has fetched a source revision into the shared local cache,
+- **When** I add that same revision to project B,
+- **Then** Skillbox installs it from the cache without downloading it again,
+- **And** project B does not depend on project A's installed files.
+
+### Sync offline
+
+- **Given** my project's pinned source revisions and all required skill files are cached locally,
+- **When** I run sync without network access,
+- **Then** Skillbox installs those exact revisions and applies the project's recorded patches without requiring the source host.
+
+### Check for the latest version on a new add
+
+- **Given** I am adding a skill without an existing pin and its source host is reachable,
+- **When** Skillbox resolves the version to install,
+- **Then** it checks for the latest upstream version according to the freshness policy,
+- **And** it records the exact revision it installs.
+
+### Add from cache when the source host is unavailable
+
+- **Given** a skill has a locally cached source revision and I am adding it without an existing pin,
+- **When** the network is unreliable or the source host is unavailable,
+- **Then** Skillbox can install a cached revision,
+- **And** it records the revision actually installed without claiming that revision was verified as the latest.
+
+### Report an unavailable pinned revision
+
+- **Given** a required pinned revision is not cached locally,
+- **When** Skillbox cannot fetch that revision,
+- **Then** the operation reports the missing source rather than substituting a different revision.
 
 ## Intent-backed patches
 
-- A skill can contain `SKILL.md` and multiple supporting files; customization is not limited to `SKILL.md`.
-- Each customized skill has a patch directory that can contain multiple patch files, with TOML metadata connecting concrete changes to their intent.
-- Intent is human-readable guidance for an agent, including what should change and why.
-- Target paths are relative to the distributed skill root, such as `./references/strict-types.md`, not absolute filesystem paths or source-host URLs.
-- An agent can record the user's intent in the TOML metadata and create the concrete patch artifacts alongside it. Intent alone is not an executable patch.
-- The patch directory and metadata are repository-local artifacts that can be version-controlled with the consuming project.
-- Ordinary sync starts from the pinned original source and applies the concrete recorded patches. It does not require an agent to reinterpret prompts on every run.
+### Record intent and concrete changes
 
-### Example
+- **Given** an upstream TypeScript skill includes `SKILL.md` and `references/strict-types.md`, which recommends type aliases,
+- **When** I ask my agent to prefer interfaces in that reference because my project standardizes on interfaces,
+- **Then** the agent records what should change and why in TOML metadata within a repository-local patch directory for that skill,
+- **And** the target is recorded relative to the distributed skill root as `./references/strict-types.md`, not as an absolute filesystem path or URL,
+- **And** the agent creates concrete patch artifacts alongside the metadata, leaving the rest of the skill unchanged,
+- **And** the metadata and patch artifacts can be version-controlled with my project.
 
-An upstream TypeScript skill includes `SKILL.md` and `references/strict-types.md`. The user wants the skill unchanged except for guidance recommending type aliases.
+### Patch multiple files in a skill
 
-The agent records intent equivalent to:
+- **Given** a skill contains `SKILL.md` and multiple supporting files,
+- **When** I ask my agent to customize multiple files,
+- **Then** the skill's patch directory can hold multiple patch files,
+- **And** its TOML metadata connects the changes to their intent and relative target paths.
 
-> In `./references/strict-types.md`, change the guidance to prefer interfaces over type aliases because this project standardizes on interfaces.
+### Apply recorded patches during sync
 
-The agent then creates the corresponding patch. Sync reproduces that customization over the pinned upstream source.
+- **Given** my project contains concrete patches for a pinned skill,
+- **When** I run sync,
+- **Then** Skillbox starts from the original pinned source and applies the recorded patches over it,
+- **And** it does not require an agent to reinterpret the intent prompts on every run.
 
 ## Updating a patched skill
 
-- After an explicit upstream version update, patches must be checked against the new source.
-- If a patch no longer applies, sync must not silently drop the customization or report the skill as successfully patched.
-- The original intent and previous patch artifacts remain available to guide regeneration.
-- An agent can inspect the new upstream structure and regenerate the skill's patch artifacts while preserving the user's intent.
-- For example, if upstream renames `references/strict-types.md` to `references/aliases.md`, the agent can update the target path and generate a new patch against that file.
-- Once regeneration is complete, sync reproduces the new pinned source with the regenerated patches, and repeated syncs remain idempotent.
+### Detect a patch that no longer applies
 
-Whether regeneration requires an explicit flag or a separate workflow remains undecided. Skillbox applying patches and an agent regenerating patches are distinct responsibilities.
+- **Given** my skill has recorded intent and patches against an older upstream revision,
+- **When** I explicitly update to a revision where those patches no longer apply,
+- **Then** Skillbox reports that the patches need regeneration rather than silently dropping the customization or reporting success,
+- **And** the original intent and previous patch artifacts remain available to guide regeneration.
+
+### Regenerate a patch after an upstream rename
+
+- **Given** my intent is to prefer interfaces over type aliases and upstream has renamed `references/strict-types.md` to `references/aliases.md`,
+- **When** I ask my agent to regenerate the patches against the new revision,
+- **Then** the agent preserves my intent, updates the relative target path, and generates new patch artifacts against the renamed file,
+- **And** subsequent syncs reproduce the new pinned source with those patches applied,
+- **And** repeating sync produces identical installed contents.
 
 ## Open design decisions
 
-- Command syntax for add, sync, explicit updates, and patch regeneration.
+- Command syntax for add, sync, explicit updates, and patch regeneration, including whether regeneration needs an additional flag.
 - Manifest, lock, cache, and per-skill patch directory layouts; exact TOML fields and patch format.
 - Freshness checks, cache selection, and user-visible reporting when a new add uses cached data without verifying the latest upstream version.
 - Whether still-valid patches carry forward automatically during an update or all updates require explicit patch regeneration.
