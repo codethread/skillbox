@@ -9,6 +9,16 @@
 If not working from a pre-assigned task, study [PRD](./docs/engdocs/PRD.md).  
 Keep this in sync with your new behavior and ensure behaviour is verified as a user would use it.
 
+### PRD
+
+Only add/edit/remove AC with explicit user agreement. AC must be stated and all conflicting AC's must also be discussed and agreed on intended scope before changing.
+
+### PHILOSOPHY
+
+Before editing PRD.md ALWAYS read [PHILOSOPHY](./docs/engdocs/PHILOSOPHY.md) and ensure all changes are in alignment. Implementation and review agents must reject a violation of this intent.
+
+read-only work, or implementation of AC's does not require this check.
+
 ## Development cycle
 
 1. build (make it work)
