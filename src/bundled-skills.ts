@@ -5,6 +5,7 @@ import configure from "./skills/skillbox-configure/SKILL.md" with { type: "text"
 import configuration from "./skills/skillbox-configure/references/configuration.md" with { type: "text" };
 import author from "./skills/skillbox-author/SKILL.md" with { type: "text" };
 import example from "./skills/skillbox-author/references/example.md" with { type: "text" };
+import migrate from "./skills/skillbox-migrate/SKILL.md" with { type: "text" };
 
 const metadataSchema = z.object({ name: z.string(), description: z.string() });
 const listInputSchema = z.object({
@@ -36,6 +37,7 @@ const failureSchema = z.object({
 const catalog = [
 	parseBundledSkill(configure, new Map([["references/configuration.md", configuration]])),
 	parseBundledSkill(author, new Map([["references/example.md", example]])),
+	parseBundledSkill(migrate, new Map()),
 ].sort((left, right) => left.name.localeCompare(right.name));
 
 interface BundledSkill {

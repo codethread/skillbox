@@ -7,6 +7,8 @@ description: Configure repository-local Skillbox sources and bundles, select a w
 
 Use `skillbox --help` and the selected command's `--help` for current syntax. All operational results are JSON with `success`, `data`, and `errors`; a nonzero exit means failure. Inspect structured errors before retrying.
 
+For existing unmanaged skills or `MIGRATION_REQUIRED` during first add, use `skillbox skills get skillbox-migrate` before changing installation paths.
+
 ## Choose the operation
 
 ```text
@@ -36,4 +38,4 @@ For configuration fields, source examples, or a failed command, load:
 skillbox skills file skillbox-configure references/configuration.md
 ```
 
-Treat managed installed files as generated output: sync can replace edits within managed skill directories. Change an owned source instead. Immutable revision replay, shared/offline caching, explicit updates, migration, and intent-backed patches are not implemented; do not invent commands or promise those guarantees.
+Treat managed installed files as generated output: sync can replace edits within managed skill directories. Change an owned source instead. Immutable revision replay, shared/offline caching, explicit updates, automatic migration, and intent-backed patches are not implemented; do not invent commands or promise those guarantees.

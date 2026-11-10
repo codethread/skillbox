@@ -2,7 +2,7 @@
 
 Status: `@codethread/skillbox@0.1.1` is published under MIT. The first slice delivers add, basic hash-checked sync, optional `--workspace`, and default JSON outcomes. Checked outcomes have fixture coverage; partial coverage is called out explicitly. Immutable Git revision capture/replay, shared/offline cache, explicit updates, migration, info/search, patches, and the remaining response-disclosure/failure contracts are not complete.
 
-Current source builds additionally expose offline CLI-bundled configuration and authoring guidance through `skillbox skills list/get/file`, with bounded discovery and on-demand response schemas. This is distinct from searching installed workspace skills; it does not implement patching or updates.
+Current source builds additionally expose offline CLI-bundled configuration, authoring, and manual migration guidance through `skillbox skills list/get/file`, with bounded discovery and on-demand response schemas. This is distinct from searching installed workspace skills; it does not implement patching or updates.
 
 ## User goal
 
