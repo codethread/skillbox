@@ -11,6 +11,14 @@ run = [
 	"bun run setup:hooks",
 ]
 
+[tasks.install]
+description = "Build and install the compiled binary to ~/.local/bin"
+run = [
+	"bun run build:binary",
+	'mkdir -p "$HOME/.local/bin"',
+	'install -m 755 dist/skillbox "$HOME/.local/bin/skillbox"',
+]
+
 [tasks.fmt]
 description = "Format repository files"
 run = "bun run fmt"
