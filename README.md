@@ -64,7 +64,7 @@ Run `./dist/skillbox add --help` for command options.
 
 ## Setup
 
-Install [mise](https://mise.jdx.dev/getting-started.html). Botlake uses the same named local dependencies as the dots lake: first register `ct-config` and the Botlake packages listed in [`.botlake/package.json`](.botlake/package.json) by running [`bun link`](https://bun.com/docs/pm/cli/link) from each package's directory in the Botlake checkout.
+Install [mise](https://mise.jdx.dev/getting-started.html). Prepare the shared private `ct-config` archive through the Botlake checkout’s install task. This lake installs public Botlake packages from npm and private configuration from that packed tarball, using its committed lockfile.
 
 Then run from the repository root:
 
