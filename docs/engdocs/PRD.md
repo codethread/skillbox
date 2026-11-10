@@ -1,10 +1,21 @@
 # Skillbox acceptance criteria
 
-Status: intended product behavior, not a description of the current implementation. CLI syntax, storage layout, and TOML schema remain to be designed.
+Status: intended product behavior. Checked outcomes have fixture coverage; partial coverage is called out explicitly. Exact revision pins, sync, shared cache, and patches remain unimplemented.
 
 ## User goal
 
 As a user, I want to install skills from other repositories into my project, pin their versions, and reproduce or update them with minimal effort. I want to customize upstream skills while retaining both my concrete changes and the intent behind them.
+
+## Verified local-add slice
+
+These checks record implementation coverage, not new acceptance criteria or completion of sync, exact pinning, cache, or patches. Fixtures run the public CLI in real disposable directories and use inline snapshots for generated payloads.
+
+- [x] Record requested local sources and bundles in `skillbox/config.json`, and use the SDK to write native `skills-lock.json`: [config and lock fixture](../../tests/add.test.ts#L57).
+- [x] Anchor outputs and lockfiles to the config-selected workspace through `--config`, rather than the invocation directory: [frontend/backend fixture](../../tests/add.test.ts#L440) and [absolute custom config fixture](../../tests/add.test.ts#L560).
+- [x] Make repeated adds write-free: [repeated-add fixture](../../tests/add.test.ts#L244). This does not verify sync idempotence.
+- [x] Preserve existing skill contents and lock entries when adding [another bundle](../../tests/add.test.ts#L289) or [another source](../../tests/add.test.ts#L371).
+- [x] Keep local source paths portable when publishing the SDK lock out of staging: [multiple-source fixture](../../tests/add.test.ts#L371) and [same-repository fixture](../../tests/add.test.ts#L513).
+- [x] Preserve unmanaged local skills: [shared skills fixture](../../tests/add.test.ts#L187) and [Claude directory fixture](../../tests/add.test.ts#L216). Migrating them is not implemented.
 
 ## Repository-local installation and provenance
 
@@ -12,9 +23,9 @@ As a user, I want to install skills from other repositories into my project, pin
 
 - **Given** an external repository contains a skill with `SKILL.md` and supporting files,
 - **When** I add that skill to my project,
-- **Then** the skill and its supporting files are installed into my project without requiring a global skill installation,
-- **And** Skillbox records the source repository, the skill's location within it, and an exact source revision,
-- **And** the fetched source revision is stored in a shared local cache on my machine.
+- [x] **Then** the skill and its supporting files are installed into my project without requiring a global skill installation: [local-source fixture](../../tests/add.test.ts#L57),
+- [ ] **And** Skillbox records the source repository, the skill's location within it, and an exact source revision. **Partial:** [the config and SDK lock fixture](../../tests/add.test.ts#L57) records local source/bundle selections and per-skill content hashes; explicit per-skill source paths and immutable revision pins are not implemented,
+- [ ] **And** the fetched source revision is stored in a shared local cache on my machine.
 
 ### Reproduce a pinned installation
 

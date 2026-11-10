@@ -1,39 +1,103 @@
-import { lstat, mkdir, mkdtemp, rename, rm, symlink } from "node:fs/promises";
-import { join, resolve } from "node:path";
-import { installSkills, resolveSource } from "skills";
-import { isMatching } from "ts-pattern";
+import {
+	cp,
+	mkdir,
+	mkdtemp,
+	readFile,
+	readdir,
+	readlink,
+	realpath,
+	rm,
+	symlink,
+	writeFile,
+} from "node:fs/promises";
+import { dirname, join, relative, resolve } from "node:path";
+import { installSkills, resolveSource, type SkillInfo, type SkillsConfig } from "skills";
 import { z } from "zod";
+import { bundleSchema, defaultConfigPath, readConfig, withBundles } from "./config.ts";
+import { lockPath, readLock, relocateLock } from "./lock.ts";
+import { localPath, readOptional, statOptional } from "./paths.ts";
+import { publish } from "./publish.ts";
 
 const inputSchema = z.object({
 	cwd: z.string().min(1),
 	source: z.string().min(1),
-	bundles: z
-		.array(
-			z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/, {
-				error: "Bundle names must be single directory names (letters, numbers, hyphens or underscores).",
-			}),
-		)
-		.min(1),
+	bundles: z.array(bundleSchema).min(1),
+	config: z.string().min(1).default(defaultConfigPath),
 });
 
+const sdkConfig = {
+	scope: "project",
+	mode: "copy",
+	lockfile: true,
+	telemetry: false,
+	duplicates: "error",
+	symlinks: "reject",
+	agents: { include: ["universal"], default: ["universal"] },
+} satisfies SkillsConfig;
+
 async function requireAbsent(cwd: string, path: string) {
-	try {
-		await lstat(join(cwd, path));
-	} catch (error) {
-		if (isMatching({ code: "ENOENT" }, error)) return;
-		throw error;
+	if (await statOptional(join(cwd, path))) {
+		throw new Error(
+			`Existing ${path}; migration is not implemented yet. No skills were changed.`,
+		);
 	}
-	throw new Error(`Existing ${path}; migration is not implemented yet. No skills were changed.`);
+}
+
+function inBundle(skill: SkillInfo, bundle: string) {
+	return [skill.path, ...(skill.duplicates ?? [])].some((path) => path?.startsWith(`${bundle}/`));
 }
 
 export async function add(input: z.input<typeof inputSchema>) {
-	const { cwd, source, bundles: requested } = inputSchema.parse(input);
-	const bundles = [...new Set(requested)];
-	await requireAbsent(cwd, ".agents/skills");
-	await requireAbsent(cwd, ".claude/skills");
+	const parsed = inputSchema.parse(input);
+	const configFile = resolve(parsed.cwd, parsed.config);
+	const workspace = dirname(dirname(configFile));
+	const cwd = await realpath(workspace);
+	const configPath = relative(workspace, configFile);
+	const source = localPath(cwd, await realpath(resolve(parsed.cwd, parsed.source)));
+	const config = await readConfig(cwd, configPath);
+	const lockText = await readOptional(join(cwd, lockPath));
+	const lock = lockText === undefined ? undefined : readLock(lockText);
+	if (!config) {
+		await requireAbsent(cwd, ".agents/skills");
+		await requireAbsent(cwd, ".claude/skills");
+		await requireAbsent(cwd, lockPath);
+	} else {
+		if (!lock) throw new Error(`Missing ${lockPath}; cannot add to a managed installation.`);
+		const tracked = lock.skills;
+		const directory = await statOptional(join(cwd, ".agents/skills"));
+		if (!directory?.isDirectory()) {
+			throw new Error(
+				"Managed .agents/skills must be a real directory. Restore it before adding skills.",
+			);
+		}
+		for (const name of await readdir(join(cwd, ".agents/skills"))) {
+			if (!Object.hasOwn(tracked, name)) {
+				throw new Error(
+					`Unmanaged skill: ${name}; migration is not implemented yet. No skills were changed.`,
+				);
+			}
+		}
+		const link = join(cwd, ".claude/skills");
+		if (await statOptional(link)) {
+			if (resolve(dirname(link), await readlink(link)) !== join(cwd, ".agents/skills")) {
+				throw new Error(
+					"Existing .claude/skills does not link to .agents/skills. No skills were changed.",
+				);
+			}
+		}
+	}
 
-	const handle = await resolveSource(join(resolve(cwd, source), "skillbox"), {
+	const current = config ?? { sources: [] };
+	const existing = current.sources.find((entry) => entry.source === source);
+	const bundles = [...new Set(parsed.bundles)].filter(
+		(bundle) => !existing?.bundles.includes(bundle),
+	);
+	if (bundles.length === 0) return [];
+	const next = withBundles(current, source, bundles);
+
+	const handle = await resolveSource(join(cwd, source, "skillbox"), {
 		cwd,
+		config: sdkConfig,
 		fullDepth: true,
 		onWarning: (warning) => {
 			throw warning;
@@ -41,25 +105,40 @@ export async function add(input: z.input<typeof inputSchema>) {
 	});
 	try {
 		const skills = handle.skills.filter((skill) =>
-			bundles.some((bundle) => skill.path?.startsWith(`${bundle}/`)),
+			bundles.some((bundle) => inBundle(skill, bundle)),
 		);
 		const missing = bundles.filter(
-			(bundle) => !skills.some((skill) => skill.path?.startsWith(`${bundle}/`)),
+			(bundle) => !skills.some((skill) => inBundle(skill, bundle)),
 		);
 		if (missing.length > 0)
 			throw new Error(`No skills found in bundles: ${missing.join(", ")}.`);
 
+		for (const skill of skills) {
+			if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(skill.name)) {
+				throw new Error(`Skill names must be lowercase kebab-case: ${skill.name}.`);
+			}
+			if (
+				(lock && Object.hasOwn(lock.skills, skill.name)) ||
+				(await statOptional(join(cwd, ".agents/skills", skill.name)))
+			) {
+				throw new Error(`Skill name collision: ${skill.name}. No skills were changed.`);
+			}
+		}
+
 		const staging = await mkdtemp(join(cwd, ".skillbox-add-"));
+		let retainStaging = false;
 		try {
+			if (lockText !== undefined) {
+				await mkdir(join(staging, ".agents"));
+				await cp(join(cwd, ".agents/skills"), join(staging, ".agents/skills"), {
+					recursive: true,
+				});
+				await writeFile(join(staging, lockPath), relocateLock(lockText, cwd, staging));
+			}
 			const result = await installSkills(handle, {
 				cwd: staging,
+				config: sdkConfig,
 				skills: skills.map((skill) => skill.name),
-				agents: ["universal"],
-				mode: "copy",
-				lockfile: false,
-				telemetry: false,
-				duplicates: "error",
-				symlinks: "reject",
 				onWarning: (warning) => {
 					throw warning;
 				},
@@ -73,20 +152,26 @@ export async function add(input: z.input<typeof inputSchema>) {
 				);
 			}
 
-			await mkdir(join(cwd, ".agents"), { recursive: true });
-			await mkdir(join(cwd, ".claude"), { recursive: true });
-			const installed = join(cwd, ".agents/skills");
-			const staged = join(staging, ".agents/skills");
-			await rename(staged, installed);
+			await mkdir(dirname(join(staging, configPath)), { recursive: true });
+			await writeFile(join(staging, configPath), `${JSON.stringify(next, null, 2)}\n`);
+			await writeFile(
+				join(staging, lockPath),
+				relocateLock(await readFile(join(staging, lockPath), "utf8"), staging, cwd),
+			);
+			await mkdir(join(staging, ".claude"));
+			await symlink("../.agents/skills", join(staging, ".claude/skills"));
 			try {
-				await symlink("../.agents/skills", join(cwd, ".claude/skills"));
-			} catch (error) {
-				await rename(installed, staged);
-				throw error;
+				await publish(staging, cwd, configPath);
+			} catch (cause) {
+				retainStaging = true;
+				throw new Error(
+					`Could not publish installation: ${cause instanceof Error ? cause.message : String(cause)} Recovery files retained at ${staging}.`,
+					{ cause },
+				);
 			}
 			return skills.map((skill) => skill.name).sort();
 		} finally {
-			await rm(staging, { recursive: true, force: true });
+			if (!retainStaging) await rm(staging, { recursive: true, force: true });
 		}
 	} finally {
 		await handle.dispose();

@@ -1,5 +1,15 @@
 import { afterEach, expect, test } from "bun:test";
-import { mkdir, mkdtemp, readFile, readdir, readlink, rm, writeFile } from "node:fs/promises";
+import {
+	cp,
+	mkdir,
+	mkdtemp,
+	readFile,
+	readdir,
+	readlink,
+	rm,
+	stat,
+	writeFile,
+} from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -16,11 +26,13 @@ afterEach(async () => {
 async function client() {
 	const directory = await mkdtemp("/tmp/skillbox-add-");
 	directories.push(directory);
-	return directory;
+	await cp(join(repository, "skillbox"), join(directory, "source/skillbox"), { recursive: true });
+	await mkdir(join(directory, "client"));
+	return join(directory, "client");
 }
 
-async function add(cwd: string, ...bundles: string[]) {
-	const child = Bun.spawn([process.execPath, cli, "add", repository, ...bundles], {
+async function run(cwd: string, ...args: string[]) {
+	const child = Bun.spawn([process.execPath, cli, ...args], {
 		cwd,
 		stdout: "pipe",
 		stderr: "pipe",
@@ -34,7 +46,15 @@ async function add(cwd: string, ...bundles: string[]) {
 	return { exitCode, stdout: stdout.split("\n"), stderr: stderr.split("\n") };
 }
 
-test("installs a repository bundle into a real temporary client", async () => {
+async function add(cwd: string, ...bundles: string[]) {
+	return run(cwd, "add", "../source", ...bundles);
+}
+
+async function json(cwd: string, path: string) {
+	return JSON.parse(await readFile(join(cwd, path), "utf8"));
+}
+
+test("installs a repository bundle and records config and SDK lock", async () => {
 	const cwd = await client();
 
 	expect(await add(cwd, "development")).toMatchInlineSnapshot(`
@@ -50,13 +70,40 @@ test("installs a repository bundle into a real temporary client", async () => {
 	    ],
 	  }
 	`);
-	expect(await readdir(cwd)).toMatchInlineSnapshot(`
+	expect((await readdir(cwd)).sort()).toMatchInlineSnapshot(`
 	  [
 	    ".agents",
 	    ".claude",
+	    "skillbox",
+	    "skills-lock.json",
 	  ]
 	`);
-	expect(await readdir(join(cwd, ".agents/skills"))).toMatchInlineSnapshot(`
+	expect(await json(cwd, "skillbox/config.json")).toMatchInlineSnapshot(`
+	  {
+	    "sources": [
+	      {
+	        "bundles": [
+	          "development",
+	        ],
+	        "source": "../source",
+	      },
+	    ],
+	  }
+	`);
+	expect(await json(cwd, "skills-lock.json")).toMatchInlineSnapshot(`
+	  {
+	    "skills": {
+	      "blackbox-testing": {
+	        "computedHash": "2fb21912486d30e1fa40c64f5a0d864abe6df3636e39f84cd2fc379a6c3d7bca",
+	        "installMode": "copy",
+	        "source": "../source/skillbox",
+	        "sourceType": "local",
+	      },
+	    },
+	    "version": 1,
+	  }
+	`);
+	expect((await readdir(join(cwd, ".agents/skills"))).sort()).toMatchInlineSnapshot(`
 	  [
 	    "blackbox-testing",
 	  ]
@@ -116,7 +163,7 @@ test("rejects an unknown bundle without creating agent directories", async () =>
 	    ],
 	  }
 	`);
-	expect(await readdir(cwd)).toMatchInlineSnapshot(`[]`);
+	expect((await readdir(cwd)).sort()).toMatchInlineSnapshot(`[]`);
 });
 
 test("rejects traversal in a bundle selector", async () => {
@@ -134,7 +181,7 @@ test("rejects traversal in a bundle selector", async () => {
 	    ],
 	  }
 	`);
-	expect(await readdir(cwd)).toMatchInlineSnapshot(`[]`);
+	expect((await readdir(cwd)).sort()).toMatchInlineSnapshot(`[]`);
 });
 
 test("preserves existing local skills", async () => {
@@ -159,7 +206,7 @@ test("preserves existing local skills", async () => {
 	  "Keep this local skill.
 	  "
 	`);
-	expect(await readdir(cwd)).toMatchInlineSnapshot(`
+	expect((await readdir(cwd)).sort()).toMatchInlineSnapshot(`
 	  [
 	    ".agents",
 	  ]
@@ -187,9 +234,395 @@ test("preserves an existing Claude skills directory", async () => {
 	  "Keep this Claude skill.
 	  "
 	`);
-	expect(await readdir(cwd)).toMatchInlineSnapshot(`
+	expect((await readdir(cwd)).sort()).toMatchInlineSnapshot(`
 	  [
 	    ".claude",
+	  ]
+	`);
+});
+
+test("repeated adds leave config, lock and installed files untouched", async () => {
+	const cwd = await client();
+	expect((await add(cwd, "development")).exitCode).toBe(0);
+	const paths = [
+		"skillbox/config.json",
+		"skills-lock.json",
+		".agents/skills/blackbox-testing/SKILL.md",
+	];
+	const before = await Promise.all(
+		paths.map(async (path) => ({
+			content: await readFile(join(cwd, path), "utf8"),
+			modified: (await stat(join(cwd, path))).mtimeMs,
+		})),
+	);
+
+	expect(await add(cwd, "development", "development")).toMatchInlineSnapshot(`
+	  {
+	    "exitCode": 0,
+	    "stderr": [
+	      "",
+	    ],
+	    "stdout": [
+	      "Already added bundles: development.",
+	      "",
+	    ],
+	  }
+	`);
+	for (const [index, path] of paths.entries()) {
+		expect(await readFile(join(cwd, path), "utf8")).toBe(before[index]!.content);
+		expect((await stat(join(cwd, path))).mtimeMs).toBe(before[index]!.modified);
+	}
+	expect(await json(cwd, "skillbox/config.json")).toMatchInlineSnapshot(`
+	  {
+	    "sources": [
+	      {
+	        "bundles": [
+	          "development",
+	        ],
+	        "source": "../source",
+	      },
+	    ],
+	  }
+	`);
+});
+
+test("adds a second bundle without refreshing an existing skill", async () => {
+	const cwd = await client();
+	expect((await add(cwd, "development")).exitCode).toBe(0);
+	const original = await readFile(join(cwd, ".agents/skills/blackbox-testing/SKILL.md"), "utf8");
+	const originalLock = await json(cwd, "skills-lock.json");
+	await writeFile(
+		join(cwd, "../source/skillbox/development/blackbox-testing/SKILL.md"),
+		`${original}\nUpstream changed after the initial install.\n`,
+	);
+	await mkdir(join(cwd, "../source/skillbox/backend/api-contracts"), { recursive: true });
+	await writeFile(
+		join(cwd, "../source/skillbox/backend/api-contracts/SKILL.md"),
+		`---
+name: api-contracts
+description: Use when defining an API contract.
+---
+
+# API contracts
+
+Define the request and response before implementation.
+`,
+	);
+
+	expect(await add(cwd, "backend")).toMatchInlineSnapshot(`
+	  {
+	    "exitCode": 0,
+	    "stderr": [
+	      "",
+	    ],
+	    "stdout": [
+	      "Added 1 skill from backend:",
+	      "  api-contracts",
+	      "",
+	    ],
+	  }
+	`);
+	expect(await json(cwd, "skillbox/config.json")).toMatchInlineSnapshot(`
+	  {
+	    "sources": [
+	      {
+	        "bundles": [
+	          "backend",
+	          "development",
+	        ],
+	        "source": "../source",
+	      },
+	    ],
+	  }
+	`);
+	expect(await json(cwd, "skills-lock.json")).toMatchInlineSnapshot(`
+	  {
+	    "skills": {
+	      "api-contracts": {
+	        "computedHash": "d19b9a4a3b8da66513a037196ec2b8fe6f7ad29fcae9067b83cdefe48d8de0e4",
+	        "installMode": "copy",
+	        "source": "../source/skillbox",
+	        "sourceType": "local",
+	      },
+	      "blackbox-testing": {
+	        "computedHash": "2fb21912486d30e1fa40c64f5a0d864abe6df3636e39f84cd2fc379a6c3d7bca",
+	        "installMode": "copy",
+	        "source": "../source/skillbox",
+	        "sourceType": "local",
+	      },
+	    },
+	    "version": 1,
+	  }
+	`);
+	expect((await readdir(join(cwd, ".agents/skills"))).sort()).toMatchInlineSnapshot(`
+	  [
+	    "api-contracts",
+	    "blackbox-testing",
+	  ]
+	`);
+	expect(await readFile(join(cwd, ".agents/skills/blackbox-testing/SKILL.md"), "utf8")).toBe(
+		original,
+	);
+	expect((await json(cwd, "skills-lock.json")).skills["blackbox-testing"]).toEqual(
+		originalLock.skills["blackbox-testing"],
+	);
+});
+
+test("adds a second source and keeps both SDK lock sources portable", async () => {
+	const cwd = await client();
+	expect((await add(cwd, "development")).exitCode).toBe(0);
+	await mkdir(join(cwd, "../other/skillbox/frontend/web-contracts"), { recursive: true });
+	await writeFile(
+		join(cwd, "../other/skillbox/frontend/web-contracts/SKILL.md"),
+		`---
+name: web-contracts
+description: Use when defining a web interface.
+---
+
+# Web contracts
+
+Define the interaction before implementation.
+`,
+	);
+
+	expect(await run(cwd, "add", "../other", "frontend")).toMatchInlineSnapshot(`
+	  {
+	    "exitCode": 0,
+	    "stderr": [
+	      "",
+	    ],
+	    "stdout": [
+	      "Added 1 skill from frontend:",
+	      "  web-contracts",
+	      "",
+	    ],
+	  }
+	`);
+	expect(await json(cwd, "skillbox/config.json")).toMatchInlineSnapshot(`
+	  {
+	    "sources": [
+	      {
+	        "bundles": [
+	          "development",
+	        ],
+	        "source": "../source",
+	      },
+	      {
+	        "bundles": [
+	          "frontend",
+	        ],
+	        "source": "../other",
+	      },
+	    ],
+	  }
+	`);
+	expect(await json(cwd, "skills-lock.json")).toMatchInlineSnapshot(`
+	  {
+	    "skills": {
+	      "blackbox-testing": {
+	        "computedHash": "2fb21912486d30e1fa40c64f5a0d864abe6df3636e39f84cd2fc379a6c3d7bca",
+	        "installMode": "copy",
+	        "source": "../source/skillbox",
+	        "sourceType": "local",
+	      },
+	      "web-contracts": {
+	        "computedHash": "d1c17eb93da4c06388aa7c5a52a371705043be81877c86ea42c33df365f96247",
+	        "installMode": "copy",
+	        "source": "../other/skillbox",
+	        "sourceType": "local",
+	      },
+	    },
+	    "version": 1,
+	  }
+	`);
+});
+
+test("uses config-relative workspace roots for frontend and backend", async () => {
+	const cwd = await client();
+	await mkdir(join(cwd, "frontend"));
+	await mkdir(join(cwd, "backend"));
+
+	for (const workspace of ["frontend", "backend"]) {
+		expect(
+			await run(
+				cwd,
+				"--config",
+				`${workspace}/skillbox/config.json`,
+				"add",
+				"../source",
+				"development",
+			),
+		).toMatchInlineSnapshot(`
+		  {
+		    "exitCode": 0,
+		    "stderr": [
+		      "",
+		    ],
+		    "stdout": [
+		      "Added 1 skill from development:",
+		      "  blackbox-testing",
+		      "",
+		    ],
+		  }
+		`);
+		expect((await readdir(join(cwd, workspace))).sort()).toMatchInlineSnapshot(`
+		  [
+		    ".agents",
+		    ".claude",
+		    "skillbox",
+		    "skills-lock.json",
+		  ]
+		`);
+		expect(await json(join(cwd, workspace), "skillbox/config.json")).toMatchInlineSnapshot(`
+		  {
+		    "sources": [
+		      {
+		        "bundles": [
+		          "development",
+		        ],
+		        "source": "../../source",
+		      },
+		    ],
+		  }
+		`);
+		expect(await json(join(cwd, workspace), "skills-lock.json")).toMatchInlineSnapshot(`
+		  {
+		    "skills": {
+		      "blackbox-testing": {
+		        "computedHash": "2fb21912486d30e1fa40c64f5a0d864abe6df3636e39f84cd2fc379a6c3d7bca",
+		        "installMode": "copy",
+		        "source": "../../source/skillbox",
+		        "sourceType": "local",
+		      },
+		    },
+		    "version": 1,
+		  }
+		`);
+		expect(await readlink(join(cwd, workspace, ".claude/skills"))).toMatchInlineSnapshot(
+			`"../.agents/skills"`,
+		);
+	}
+	expect((await readdir(cwd)).sort()).toMatchInlineSnapshot(`
+	  [
+	    "backend",
+	    "frontend",
+	  ]
+	`);
+});
+
+test("records portable SDK sources when the bundle lives in the client itself", async () => {
+	const cwd = await client();
+	await cp(join(cwd, "../source/skillbox"), join(cwd, "skillbox"), { recursive: true });
+
+	expect(await run(cwd, "add", ".", "development")).toMatchInlineSnapshot(`
+	  {
+	    "exitCode": 0,
+	    "stderr": [
+	      "",
+	    ],
+	    "stdout": [
+	      "Added 1 skill from development:",
+	      "  blackbox-testing",
+	      "",
+	    ],
+	  }
+	`);
+	expect(await json(cwd, "skillbox/config.json")).toMatchInlineSnapshot(`
+	  {
+	    "sources": [
+	      {
+	        "bundles": [
+	          "development",
+	        ],
+	        "source": ".",
+	      },
+	    ],
+	  }
+	`);
+	expect(await json(cwd, "skills-lock.json")).toMatchInlineSnapshot(`
+	  {
+	    "skills": {
+	      "blackbox-testing": {
+	        "computedHash": "2fb21912486d30e1fa40c64f5a0d864abe6df3636e39f84cd2fc379a6c3d7bca",
+	        "installMode": "copy",
+	        "source": "./skillbox",
+	        "sourceType": "local",
+	      },
+	    },
+	    "version": 1,
+	  }
+	`);
+	expect(
+		await readFile(join(cwd, "skillbox/development/blackbox-testing/SKILL.md"), "utf8"),
+	).toBe(await readFile(join(cwd, ".agents/skills/blackbox-testing/SKILL.md"), "utf8"));
+});
+
+test("accepts an absolute custom config path from another invocation directory", async () => {
+	const cwd = await client();
+	await mkdir(join(cwd, "frontend"));
+	await mkdir(join(cwd, "invocation"));
+	const config = join(cwd, "frontend/settings/local-skills.json");
+
+	expect(await run(cwd, "--config", config, "add", "../source", "development"))
+		.toMatchInlineSnapshot(`
+	  {
+	    "exitCode": 0,
+	    "stderr": [
+	      "",
+	    ],
+	    "stdout": [
+	      "Added 1 skill from development:",
+	      "  blackbox-testing",
+	      "",
+	    ],
+	  }
+	`);
+	expect(
+		await run(
+			join(cwd, "invocation"),
+			"--config",
+			config,
+			"add",
+			"../../source",
+			"development",
+		),
+	).toMatchInlineSnapshot(`
+	  {
+	    "exitCode": 0,
+	    "stderr": [
+	      "",
+	    ],
+	    "stdout": [
+	      "Already added bundles: development.",
+	      "",
+	    ],
+	  }
+	`);
+	expect(await json(cwd, "frontend/settings/local-skills.json")).toMatchInlineSnapshot(`
+	  {
+	    "sources": [
+	      {
+	        "bundles": [
+	          "development",
+	        ],
+	        "source": "../../source",
+	      },
+	    ],
+	  }
+	`);
+	expect((await readdir(join(cwd, "frontend"))).sort()).toMatchInlineSnapshot(`
+	  [
+	    ".agents",
+	    ".claude",
+	    "settings",
+	    "skills-lock.json",
+	  ]
+	`);
+	expect((await readdir(join(cwd, "invocation"))).sort()).toMatchInlineSnapshot(`[]`);
+	expect((await readdir(cwd)).sort()).toMatchInlineSnapshot(`
+	  [
+	    "frontend",
+	    "invocation",
 	  ]
 	`);
 });

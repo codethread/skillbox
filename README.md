@@ -2,7 +2,7 @@
 
 Repository-local skill bundles for agents.
 
-## Try the POC
+## Add local bundles
 
 From this checkout, install the included development bundle into a disposable client:
 
@@ -13,9 +13,38 @@ client=$(mktemp -d /tmp/skillbox-demo-XXXXXX)
 (cd "$client" && bun run "$source_repo/src/cli.ts" add "$source_repo" development)
 ```
 
-Bundles live under `skillbox/<bundle>/<skill>/SKILL.md`. The command copies each selected skill and its supporting files into the client's `.agents/skills/` and links `.claude/skills` to it. Existing skill paths are rejected without changing their contents.
+Bundles live under `skillbox/<bundle>/<skill>/SKILL.md`. The command copies each selected skill and its supporting files into the client's `.agents/skills/` and links `.claude/skills` to it. Unmanaged skill paths and name collisions are rejected without overwriting their contents.
 
-This is an initial-install POC for local sources. Repeated adds, remote sources, managed config, ignores, locks, migration, and patches are not implemented yet.
+Two files record the installation; commit both:
+
+- `skillbox/config.json` records source repositories and requested bundles. Source paths are relative to the workspace root.
+- `skills-lock.json` is Vercel's native project lock, written by the SDK. It records per-skill source information, content hashes, and copy mode. Local directory hashes are **not immutable revision pins**.
+
+For example, a config selecting a sibling source repository looks like:
+
+```json
+{
+	"sources": [
+		{
+			"source": "../my-skills",
+			"bundles": ["development"]
+		}
+	]
+}
+```
+
+Adding another source or bundle preserves existing installed skills and lock entries. Repeating an already-configured add performs no writes. The SDK config object stays in code; there is no second SDK config file.
+
+### Workspace config override
+
+```sh
+bun run src/cli.ts --config frontend/skillbox/config.json add ../my-skills development
+bun run src/cli.ts --config backend/skillbox/config.json add ../my-skills development
+```
+
+The workspace root is the parent of the config file's containing directory. In these examples, the existing `frontend/` and `backend/` directories each get their own `.agents/skills/`, `.claude/skills` link, config, and SDK lockfile. `--config` accepts relative or absolute paths. Source arguments are resolved from the invocation directory, then saved relative to the workspace root.
+
+Remote sources, exact revision pins, restoring from config (`sync`), automatic ignores, migration, patches, and multi-workspace orchestration are not implemented yet.
 
 Vercel's library API is not in the current npm release. Until it ships, `skills` is pinned to an upstream Git commit, `tsconfig.json` maps its public entry to source, and its unbundled runtime dependencies are installed directly.
 
