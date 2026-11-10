@@ -18,7 +18,7 @@ import { lockPath, readLock, relocateLock } from "./lock.ts";
 import { readOptional, statOptional } from "./paths.ts";
 import { publish } from "./publish.ts";
 import { ResponseError, responseError } from "./response.ts";
-import { resolveBundleSource, sdkConfig } from "./sdk.ts";
+import { resolveBundleSource, sdkConfig, sdkLockPath } from "./sdk.ts";
 
 const inputSchema = z.object({
 	cwd: z.string().min(1),
@@ -130,7 +130,7 @@ export async function add(input: z.input<typeof inputSchema>): Promise<AddResult
 					recursive: true,
 				});
 				await writeFile(
-					join(staging, lockPath),
+					join(staging, sdkLockPath),
 					relocateLock(lockText, workspace, staging),
 				);
 			}
@@ -164,7 +164,11 @@ export async function add(input: z.input<typeof inputSchema>): Promise<AddResult
 			await writeFile(join(staging, configPath), `${JSON.stringify(next, null, 2)}\n`);
 			await writeFile(
 				join(staging, lockPath),
-				relocateLock(await readFile(join(staging, lockPath), "utf8"), staging, workspace),
+				relocateLock(
+					await readFile(join(staging, sdkLockPath), "utf8"),
+					staging,
+					workspace,
+				),
 			);
 			await mkdir(join(staging, ".claude"));
 			await symlink("../.agents/skills", join(staging, ".claude/skills"));

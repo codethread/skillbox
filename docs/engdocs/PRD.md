@@ -10,24 +10,24 @@ As a user, I want to install skills from other repositories into my project, pin
 
 Release: [npm package](https://www.npmjs.com/package/@codethread/skillbox/v/0.1.0) and [MIT-licensed source tag](https://github.com/codethread/skillbox/tree/v0.1.0).
 
-These checks record implementation coverage, not new acceptance criteria or completion of every scenario below. The 15 persisted black-box tests run the public CLI in real disposable directories and use inline snapshots for generated payloads.
+These checks record implementation coverage, not new acceptance criteria or completion of every scenario below. The 16 persisted black-box tests run the public CLI in real disposable directories and use inline snapshots for generated payloads.
 
 Release smoke checks additionally verified tarball installation through npm, `"skills:sync": "skillbox sync"` in a consuming project's scripts, and the published `bunx @codethread/skillbox sync` in a directory without `package.json`. Those are manual release checks recorded in Botlake publish task `225-slab-send`, not additional automated fixtures.
 
-- [x] Record requested sources and bundles in `skillbox/config.json`, and use the SDK to write native `skills-lock.json`: [config and lock fixture](../../tests/add.test.ts#L90).
-- [x] Install Git sources without an npm package: [Git-source fixture](../../tests/add.test.ts#L676). A GitHub tree URL also implies its bundle, as exercised by this repository's [dogfood config](../../skillbox/config.json) and [SDK lock](../../skills-lock.json).
-- [x] Anchor outputs and lockfiles to the config-selected workspace through `--workspace <dir>` (with `skillbox/config.json` implied), rather than the invocation directory: [frontend/backend fixture](../../tests/add.test.ts#L483) and [absolute workspace fixture](../../tests/add.test.ts#L600).
-- [x] Make repeated adds write-free: [repeated-add fixture](../../tests/add.test.ts#L283). This does not verify sync idempotence.
+- [x] Record requested sources and bundles in `skillbox/config.json`, and keep SDK-generated lock entries in Skillbox's `skillbox/lock.json`: [config and lock fixture](../../tests/add.test.ts#L90).
+- [x] Install Git sources without an npm package: [Git-source fixture](../../tests/add.test.ts#L723). A GitHub tree URL also implies its bundle, as exercised by this repository's [dogfood config](../../skillbox/config.json) and [Skillbox lock](../../skillbox/lock.json).
+- [x] Anchor outputs and lockfiles to the config-selected workspace through `--workspace <dir>` (with `skillbox/config.json` implied), rather than the invocation directory: [frontend/backend fixture](../../tests/add.test.ts#L482) and [absolute workspace fixture](../../tests/add.test.ts#L598).
+- [x] Make repeated adds write-free: [repeated-add fixture](../../tests/add.test.ts#L282). This does not verify sync idempotence.
 - [x] Return concise JSON for add, unchanged outcomes, and actionable failures: [add response fixtures](../../tests/add.test.ts#L90) and [command-argument fixture](../../tests/cli.test.ts#L40).
 - [x] Restore missing generated skills without changing config/lock contents, then leave repeated sync write-free: [fresh-checkout sync fixture](../../tests/sync.test.ts#L26).
 - [x] Reject source drift instead of advancing lock hashes: [hash-mismatch fixture](../../tests/sync.test.ts#L80).
-- [x] Preserve existing skill contents and lock entries when adding [another bundle](../../tests/add.test.ts#L330) or [another source](../../tests/add.test.ts#L413).
-- [x] Keep local source paths portable when publishing the SDK lock out of staging: [multiple-source fixture](../../tests/add.test.ts#L413) and [same-repository fixture](../../tests/add.test.ts#L552).
-- [x] Preserve unmanaged local skills: [shared skills fixture](../../tests/add.test.ts#L224) and [Claude directory fixture](../../tests/add.test.ts#L254). Migrating them is not implemented.
+- [x] Preserve existing skill contents and lock entries when adding [another bundle](../../tests/add.test.ts#L329) or [another source](../../tests/add.test.ts#L412).
+- [x] Keep local source paths portable when publishing the SDK lock out of staging: [multiple-source fixture](../../tests/add.test.ts#L412) and [same-repository fixture](../../tests/add.test.ts#L550).
+- [x] Preserve unmanaged local skills: [shared skills fixture](../../tests/add.test.ts#L223) and [Claude directory fixture](../../tests/add.test.ts#L253). Migrating them is not implemented.
 
 ### First-slice limits
 
-- The native lock guards skill contents, not an immutable source archive. Sync resolves configured sources and verifies their SDK-generated hashes; it does not independently replay a commit recorded in the lock. If a moving source changes the selected contents, sync fails rather than advancing the hash or recovering an older revision.
+- The SDK-format lock guards skill contents, not an immutable source archive. Sync resolves configured sources and verifies their SDK-generated hashes; it does not independently replay a commit recorded in the lock. If a moving source changes the selected contents, sync fails rather than advancing the hash or recovering an older revision.
 - An unchanged sync avoids publishing or rewriting installed skills and tracking files, but still fetches sources and writes disposable staging files. Network/download avoidance and offline use are not implemented.
 - The prototype rebuilds differing contents within managed skill directories; it rejects extra unmanaged skill directories. Direct-edit handling and broader failure/transaction policy remain open, and direct-edit behavior has no dedicated fixture.
 
@@ -42,7 +42,15 @@ Current add/sync commands support workspace selection and default JSON success/e
 - [x] **And** relative directories are resolved from the invocation directory; absolute directories are supported,
 - [x] **And** omitting the option selects the current directory.
 
-Coverage: [nested workspaces](../../tests/add.test.ts#L483), [absolute workspace from another directory](../../tests/add.test.ts#L600), and [default-directory restore](../../tests/sync.test.ts#L26).
+Coverage: [nested workspaces](../../tests/add.test.ts#L482), [absolute workspace from another directory](../../tests/add.test.ts#L598), and [default-directory restore](../../tests/sync.test.ts#L26).
+
+### Keep lock ownership separate
+
+- **When** Skillbox manages a workspace installation,
+- [x] **Then** Skillbox stores its lockfile within that workspace's `skillbox/` directory,
+- [x] **And** it does not read or modify the root `skills-lock.json` used by `npx skills`.
+
+Coverage: [lock ownership fixture](../../tests/add.test.ts#L673) exercises add, repeated add, restoring sync, repeated sync, and missing managed locks with separate root locks in the workspace and invocation directory.
 
 ### Return explicit JSON outcomes
 
@@ -51,7 +59,7 @@ Coverage: [nested workspaces](../../tests/add.test.ts#L483), [absolute workspace
 - [ ] **And** failures include structured errors identifying the affected source, skill, or input where applicable,
 - [x] **And** failure information is never available solely through prose diagnostics or an exit code.
 
-Coverage: [add success](../../tests/add.test.ts#L90), [bundle/source context](../../tests/add.test.ts#L185), [invalid command arguments](../../tests/cli.test.ts#L40), and [skill hash mismatch](../../tests/sync.test.ts#L80). Structured context is **partial**: these exercised cases pass; broader filesystem/configuration/SDK failure classification is not fully verified.
+Coverage: [add success](../../tests/add.test.ts#L90), [bundle/source context](../../tests/add.test.ts#L184), [invalid command arguments](../../tests/cli.test.ts#L40), and [skill hash mismatch](../../tests/sync.test.ts#L80). Structured context is **partial**: these exercised cases pass; broader filesystem/configuration/SDK failure classification is not fully verified.
 
 ### Report confirmed mutation effects
 
@@ -59,7 +67,7 @@ Coverage: [add success](../../tests/add.test.ts#L90), [bundle/source context](..
 - [x] **Then** its JSON response reports confirmed effects, including unchanged or no-op outcomes, and identifiers needed for the next action,
 - [x] **And** it does not dump configuration or lockfile contents by default.
 
-Coverage: [add and its summary](../../tests/add.test.ts#L90), [add no-op](../../tests/add.test.ts#L283), and [sync restore/unchanged summaries](../../tests/sync.test.ts#L26). This does not verify a partially committed mutation.
+Coverage: [add and its summary](../../tests/add.test.ts#L90), [add no-op](../../tests/add.test.ts#L282), and [sync restore/unchanged summaries](../../tests/sync.test.ts#L26). This does not verify a partially committed mutation.
 
 ### Disclose detail on demand
 
@@ -90,7 +98,7 @@ This response contract does not define rollback or transaction boundaries, or au
 - **Given** an external repository contains a skill with `SKILL.md` and supporting files,
 - **When** I add that skill to my project,
 - [x] **Then** the skill and its supporting files are installed into my project without requiring a global skill installation: [local-source fixture](../../tests/add.test.ts#L90),
-- [ ] **And** Skillbox records the source repository, the skill's location within it, and an exact source revision. **Partial:** source/bundle selections and hashes are recorded, and [Git installs](../../tests/add.test.ts#L676) also record per-skill source paths and refs. The [dogfood lock](../../skills-lock.json) tracks `main`, not an immutable revision pin,
+- [ ] **And** Skillbox records the source repository, the skill's location within it, and an exact source revision. **Partial:** source/bundle selections and hashes are recorded, and [Git installs](../../tests/add.test.ts#L723) also record per-skill source paths and refs. The [dogfood lock](../../skillbox/lock.json) tracks `main`, not an immutable revision pin,
 - [ ] **And** the fetched source revision is stored in a shared local cache on my machine.
 
 ### Reproduce a pinned installation
@@ -278,7 +286,7 @@ These criteria describe intended behavior; search is not implemented.
 ## Open design decisions
 
 - Remaining command/flag design for explicit updates, info, migration, search retrieval, detailed disclosure, and patch regeneration. The first-slice add/sync syntax and optional `--workspace` are implemented.
-- Additional immutable-revision fields and replay semantics in config/native locks, cache and per-skill patch directory layouts, and exact TOML fields and patch format. The first-slice config and lock locations are already implemented.
+- Additional immutable-revision fields and replay semantics in config/Skillbox locks, cache and per-skill patch directory layouts, and exact TOML fields and patch format. The first-slice config and lock locations are already implemented.
 - Freshness checks, cache selection, and user-visible reporting when a new add uses cached data without verifying the latest upstream version.
 - Whether still-valid patches carry forward automatically during an update or all updates require explicit patch regeneration.
 - Failure boundaries: whether an unsuccessful update leaves the previous pin and installation untouched, and how failures affect other skills in the same operation.

@@ -6,6 +6,9 @@ import { bundleSchema } from "./config.ts";
 import { localPath } from "./paths.ts";
 import { ResponseError, responseError } from "./response.ts";
 
+// The SDK hardcodes this filename; use it only inside disposable staging directories.
+export const sdkLockPath = "skills-lock.json";
+
 const inputSchema = z.object({
 	source: z.string().min(1),
 	bundles: z.array(bundleSchema),

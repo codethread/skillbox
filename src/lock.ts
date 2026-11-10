@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { z } from "zod";
 import { localPath } from "./paths.ts";
 
-export const lockPath = "skills-lock.json";
+export const lockPath = "skillbox/lock.json";
 
 // Retain SDK-owned fields, including fields added by upstream.
 const lockSchema = z.looseObject({

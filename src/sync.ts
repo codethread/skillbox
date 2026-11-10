@@ -16,7 +16,7 @@ import { lockPath, readLock } from "./lock.ts";
 import { readOptional, statOptional } from "./paths.ts";
 import { publish } from "./publish.ts";
 import { ResponseError, responseError } from "./response.ts";
-import { resolveBundleSource, sdkConfig } from "./sdk.ts";
+import { resolveBundleSource, sdkConfig, sdkLockPath } from "./sdk.ts";
 
 export interface SyncInput {
 	cwd: string;
@@ -111,11 +111,11 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 			);
 		}
 
-		const generatedText = await readOptional(join(staging, lockPath));
+		const generatedText = await readOptional(join(staging, sdkLockPath));
 		if (generatedText === undefined) {
 			throw responseError(
 				"SDK_LOCK_NOT_GENERATED",
-				`The SDK did not generate ${lockPath}. No skills were changed.`,
+				"The SDK did not generate its staging lockfile. No skills were changed.",
 				{ input: lockPath },
 			);
 		}

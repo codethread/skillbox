@@ -109,7 +109,6 @@ test("installs a repository bundle and records config and SDK lock", async () =>
 	    ".agents",
 	    ".claude",
 	    "skillbox",
-	    "skills-lock.json",
 	  ]
 	`);
 	expect(await json(cwd, "skillbox/config.json")).toMatchInlineSnapshot(`
@@ -124,7 +123,7 @@ test("installs a repository bundle and records config and SDK lock", async () =>
 	    ],
 	  }
 	`);
-	expect(await json(cwd, "skills-lock.json")).toMatchInlineSnapshot(`
+	expect(await json(cwd, "skillbox/lock.json")).toMatchInlineSnapshot(`
 	  {
 	    "skills": {
 	      "blackbox-testing": {
@@ -285,7 +284,7 @@ test("repeated adds leave config, lock and installed files untouched", async () 
 	expectSuccess(await add(cwd, "development"));
 	const paths = [
 		"skillbox/config.json",
-		"skills-lock.json",
+		"skillbox/lock.json",
 		".agents/skills/blackbox-testing/SKILL.md",
 	];
 	const before = await Promise.all(
@@ -331,7 +330,7 @@ test("adds a second bundle without refreshing an existing skill", async () => {
 	const cwd = await client();
 	expectSuccess(await add(cwd, "development"));
 	const original = await readFile(join(cwd, ".agents/skills/blackbox-testing/SKILL.md"), "utf8");
-	const originalLock = await json(cwd, "skills-lock.json");
+	const originalLock = await json(cwd, "skillbox/lock.json");
 	await writeFile(
 		join(cwd, "../source/skillbox/development/blackbox-testing/SKILL.md"),
 		`${original}\nUpstream changed after the initial install.\n`,
@@ -377,7 +376,7 @@ Define the request and response before implementation.
 	    ],
 	  }
 	`);
-	expect(await json(cwd, "skills-lock.json")).toMatchInlineSnapshot(`
+	expect(await json(cwd, "skillbox/lock.json")).toMatchInlineSnapshot(`
 	  {
 	    "skills": {
 	      "api-contracts": {
@@ -405,7 +404,7 @@ Define the request and response before implementation.
 	expect(await readFile(join(cwd, ".agents/skills/blackbox-testing/SKILL.md"), "utf8")).toBe(
 		original,
 	);
-	expect((await json(cwd, "skills-lock.json")).skills["blackbox-testing"]).toEqual(
+	expect((await json(cwd, "skillbox/lock.json")).skills["blackbox-testing"]).toEqual(
 		originalLock.skills["blackbox-testing"],
 	);
 });
@@ -459,7 +458,7 @@ Define the interaction before implementation.
 	    ],
 	  }
 	`);
-	expect(await json(cwd, "skills-lock.json")).toMatchInlineSnapshot(`
+	expect(await json(cwd, "skillbox/lock.json")).toMatchInlineSnapshot(`
 	  {
 	    "skills": {
 	      "blackbox-testing": {
@@ -509,7 +508,6 @@ test("uses workspace-relative roots for frontend and backend", async () => {
 		    ".agents",
 		    ".claude",
 		    "skillbox",
-		    "skills-lock.json",
 		  ]
 		`);
 		expect(await json(join(cwd, workspace), "skillbox/config.json")).toMatchInlineSnapshot(`
@@ -524,7 +522,7 @@ test("uses workspace-relative roots for frontend and backend", async () => {
 		    ],
 		  }
 		`);
-		expect(await json(join(cwd, workspace), "skills-lock.json")).toMatchInlineSnapshot(`
+		expect(await json(join(cwd, workspace), "skillbox/lock.json")).toMatchInlineSnapshot(`
 		  {
 		    "skills": {
 		      "blackbox-testing": {
@@ -579,7 +577,7 @@ test("records portable SDK sources when the bundle lives in the client itself", 
 	    ],
 	  }
 	`);
-	expect(await json(cwd, "skills-lock.json")).toMatchInlineSnapshot(`
+	expect(await json(cwd, "skillbox/lock.json")).toMatchInlineSnapshot(`
 	  {
 	    "skills": {
 	      "blackbox-testing": {
@@ -661,7 +659,6 @@ test("accepts an absolute workspace directory from another invocation directory"
 	    ".agents",
 	    ".claude",
 	    "skillbox",
-	    "skills-lock.json",
 	  ]
 	`);
 	expect((await readdir(join(cwd, "invocation"))).sort()).toMatchInlineSnapshot(`[]`);
@@ -671,6 +668,56 @@ test("accepts an absolute workspace directory from another invocation directory"
 	    "invocation",
 	  ]
 	`);
+});
+
+test("keeps Skillbox lock ownership separate from root skills locks", async () => {
+	const cwd = await client();
+	const workspace = join(cwd, "frontend");
+	await mkdir(workspace);
+	const roots = [join(cwd, "skills-lock.json"), join(workspace, "skills-lock.json")];
+	const rootText = "Not a Skillbox lock; leave this npx skills file alone.\n";
+	for (const path of roots) await writeFile(path, rootText);
+	const modified = await Promise.all(roots.map(async (path) => (await stat(path)).mtimeMs));
+
+	const command = (...args: string[]) => run(cwd, "--workspace", "frontend", ...args);
+	expectSuccess(await command("add", "../source", "development"));
+	const initial = await json(workspace, "skillbox/lock.json");
+	expect(Object.keys(initial.skills)).toEqual(["blackbox-testing"]);
+
+	const sourceSkill = await readFile(
+		join(cwd, "../source/skillbox/development/blackbox-testing/SKILL.md"),
+		"utf8",
+	);
+	await mkdir(join(cwd, "../source/skillbox/backend/api-contracts"), { recursive: true });
+	await writeFile(
+		join(cwd, "../source/skillbox/backend/api-contracts/SKILL.md"),
+		sourceSkill.replace("name: blackbox-testing", "name: api-contracts"),
+	);
+	expectSuccess(await command("add", "../source", "backend"));
+	const lock = await readFile(join(workspace, "skillbox/lock.json"), "utf8");
+	expect(Object.keys(JSON.parse(lock).skills)).toEqual(["api-contracts", "blackbox-testing"]);
+	expect((await json(workspace, "skillbox/lock.json")).skills["blackbox-testing"]).toEqual(
+		initial.skills["blackbox-testing"],
+	);
+	expectSuccess(await command("add", "../source", "backend"));
+
+	await rm(join(workspace, ".agents"), { recursive: true });
+	await rm(join(workspace, ".claude"), { recursive: true });
+	expect(expectSuccess(await command("sync"))).toMatchObject({ data: { status: "synced" } });
+	expect(expectSuccess(await command("sync"))).toMatchObject({ data: { status: "unchanged" } });
+	expect(await readFile(join(workspace, "skillbox/lock.json"), "utf8")).toBe(lock);
+
+	await rm(join(workspace, "skillbox/lock.json"));
+	expect(expectFailure(await command("sync"))).toMatchObject({
+		errors: [{ code: "LOCK_NOT_FOUND", input: "skillbox/lock.json" }],
+	});
+	expect(expectFailure(await command("add", "../source", "backend"))).toMatchObject({
+		errors: [{ code: "LOCK_MISSING", input: "skillbox/lock.json" }],
+	});
+	for (const [index, path] of roots.entries()) {
+		expect(await readFile(path, "utf8")).toBe(rootText);
+		expect((await stat(path)).mtimeMs).toBe(modified[index]!);
+	}
 });
 
 test("installs a Git source through the SDK without an npm package", async () => {
@@ -730,7 +777,7 @@ test("installs a Git source through the SDK without an npm package", async () =>
 	    ],
 	  }
 	`);
-	const lock = await json(cwd, "skills-lock.json");
+	const lock = await json(cwd, "skillbox/lock.json");
 	expect(lock.skills["blackbox-testing"].source).toBe(source);
 	expect(lock.skills["blackbox-testing"].sourceUrl).toBe(source);
 	lock.skills["blackbox-testing"].source = "<git-source>";

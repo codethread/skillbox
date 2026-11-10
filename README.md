@@ -46,7 +46,9 @@ Bundles live under `skillbox/<bundle>/<skill>/SKILL.md`. The command copies each
 Two files record the installation; commit both:
 
 - `skillbox/config.json` records source repositories and requested bundles. Local source paths are relative to the workspace root; Git sources retain their source string.
-- `skills-lock.json` is Vercel's native project lock, written by the SDK. It records per-skill source information, content hashes, copy mode, and Git refs and skill paths where available. A branch such as `main`, or a content hash by itself, is **not an immutable revision pin**.
+- `skillbox/lock.json` is Skillbox's lockfile, retaining the SDK's native format. It records per-skill source information, content hashes, copy mode, and Git refs and skill paths where available. Local source paths remain relative to the workspace root. A branch such as `main`, or a content hash by itself, is **not an immutable revision pin**.
+
+Skillbox does not read or modify the root `skills-lock.json` used by `npx skills`. SDK lock generation happens only in disposable staging directories.
 
 For example, a config selecting a sibling source repository looks like:
 
@@ -70,7 +72,7 @@ bun run src/cli.ts --workspace frontend add ../my-skills development
 bun run src/cli.ts --workspace backend add ../my-skills development
 ```
 
-`--workspace` selects a workspace directory, defaulting to the current directory; `skillbox/config.json` is implied. In these examples, the existing `frontend/` and `backend/` directories each get their own `.agents/skills/`, `.claude/skills` link, config, and SDK lockfile. Relative and absolute directory paths are supported. Source arguments are resolved from the invocation directory, then saved relative to the workspace root.
+`--workspace` selects a workspace directory, defaulting to the current directory; `skillbox/config.json` is implied. In these examples, the existing `frontend/` and `backend/` directories each get their own `.agents/skills/`, `.claude/skills` link, config, and Skillbox lockfile. Relative and absolute directory paths are supported. Source arguments are resolved from the invocation directory, then saved relative to the workspace root.
 
 ## Sync
 
@@ -79,7 +81,7 @@ skillbox sync
 skillbox --workspace frontend sync
 ```
 
-Sync restores generated skills from the recorded config and verifies their content against the SDK lockfile before publishing. It does not advance the recorded hashes or refs. Repeating sync with matching installed contents reports an unchanged result.
+Sync restores generated skills from the recorded config and verifies their content against the Skillbox lockfile before publishing. It does not advance the recorded hashes or refs. Repeating sync with matching installed contents reports an unchanged result.
 
 Operational commands return JSON with explicit `success`, concise result data, and structured errors. Full skill contents and config/lockfile dumps are not included by default.
 

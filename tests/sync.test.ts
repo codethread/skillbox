@@ -31,7 +31,7 @@ test("restores a fresh checkout and leaves a repeated sync unchanged", async () 
 	expect(added.response.success).toBe(true);
 
 	const config = await readFile(join(cwd, "skillbox/config.json"), "utf8");
-	const lock = await readFile(join(cwd, "skills-lock.json"), "utf8");
+	const lock = await readFile(join(cwd, "skillbox/lock.json"), "utf8");
 	await rm(join(cwd, ".agents"), { recursive: true });
 	await rm(join(cwd, ".claude"), { recursive: true });
 
@@ -51,7 +51,7 @@ test("restores a fresh checkout and leaves a repeated sync unchanged", async () 
 	  }
 	`);
 	expect(await readFile(join(cwd, "skillbox/config.json"), "utf8")).toBe(config);
-	expect(await readFile(join(cwd, "skills-lock.json"), "utf8")).toBe(lock);
+	expect(await readFile(join(cwd, "skillbox/lock.json"), "utf8")).toBe(lock);
 	expect(await readlink(join(cwd, ".claude/skills"))).toBe("../.agents/skills");
 	expect(await readFile(join(cwd, ".agents/skills/blackbox-testing/SKILL.md"), "utf8")).toContain(
 		"# Black-box CLI tests",
@@ -87,7 +87,7 @@ test("rejects source content that no longer matches the native lock", async () =
 	const installedPath = join(cwd, ".agents/skills/blackbox-testing/SKILL.md");
 	const installed = await readFile(installedPath, "utf8");
 	const config = await readFile(join(cwd, "skillbox/config.json"), "utf8");
-	const lock = await readFile(join(cwd, "skills-lock.json"), "utf8");
+	const lock = await readFile(join(cwd, "skillbox/lock.json"), "utf8");
 	await writeFile(
 		join(cwd, "../source/skillbox/development/blackbox-testing/SKILL.md"),
 		`${installed}\nChanged upstream.\n`,
@@ -103,7 +103,7 @@ test("rejects source content that no longer matches the native lock", async () =
 	    "errors": [
 	      {
 	        "code": "LOCK_HASH_MISMATCH",
-	        "message": "Content hash mismatch for blackbox-testing; skills-lock.json was not changed.",
+	        "message": "Content hash mismatch for blackbox-testing; skillbox/lock.json was not changed.",
 	        "skill": "blackbox-testing",
 	      },
 	    ],
@@ -112,7 +112,7 @@ test("rejects source content that no longer matches the native lock", async () =
 	`);
 	expect(await readFile(installedPath, "utf8")).toBe(installed);
 	expect(await readFile(join(cwd, "skillbox/config.json"), "utf8")).toBe(config);
-	expect(await readFile(join(cwd, "skills-lock.json"), "utf8")).toBe(lock);
+	expect(await readFile(join(cwd, "skillbox/lock.json"), "utf8")).toBe(lock);
 });
 
 async function client(): Promise<string> {
@@ -156,7 +156,7 @@ async function modificationTimes(cwd: string) {
 		".agents/skills/blackbox-testing/SKILL.md",
 		".claude/skills",
 		"skillbox/config.json",
-		"skills-lock.json",
+		"skillbox/lock.json",
 	];
 	return Promise.all(
 		paths.map(async (path) => {
