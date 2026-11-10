@@ -2,6 +2,8 @@
 
 Status: `@codethread/skillbox@0.1.1` is published under MIT. The first slice delivers add, basic hash-checked sync, optional `--workspace`, and default JSON outcomes. Checked outcomes have fixture coverage; partial coverage is called out explicitly. Immutable Git revision capture/replay, shared/offline cache, explicit updates, migration, info/search, patches, and the remaining response-disclosure/failure contracts are not complete.
 
+Current source builds additionally expose offline CLI-bundled configuration and authoring guidance through `skillbox skills list/get/file`, with bounded discovery and on-demand response schemas. This is distinct from searching installed workspace skills; it does not implement patching or updates.
+
 ## User goal
 
 As a user, I want to install skills from other repositories into my project, pin their versions, and reproduce or update them with minimal effort. I want to customize upstream skills while retaining both my concrete changes and the intent behind them.

@@ -3,12 +3,22 @@ import { realpath } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Command, CommanderError } from "commander";
 import { add } from "./add.ts";
+import {
+	bundledSkillSchema,
+	getBundledSkill,
+	getBundledSkillFile,
+	listBundledSkills,
+} from "./bundled-skills.ts";
 import { failureResponse, responseError, successResponse } from "./response.ts";
 import { sync } from "./sync.ts";
 
 const program = new Command()
 	.name("skillbox")
 	.description("Install skill bundles into your repository.")
+	.addHelpText(
+		"after",
+		"\nAgent guidance: skills list → skills get <name> → skills file <name> <path>.",
+	)
 	.option("--workspace <dir>", "workspace directory for skills, config, and lockfiles", ".")
 	.configureOutput({ writeErr: () => {} })
 	.exitOverride();
@@ -39,6 +49,52 @@ program
 		const cwd = process.cwd();
 		const result = await sync({ cwd, workspace: await selectedWorkspace(cwd) });
 		writeJson(successResponse(result));
+	});
+
+const skills = program
+	.command("skills")
+	.description("Read bundled agent guidance; offline and independent of --workspace.")
+	.addHelpText(
+		"after",
+		"\nList metadata, get selected instructions, then load referenced files on demand.\nAll results are JSON with success/data/errors; failures exit nonzero.\nThese commands read CLI-bundled guidance, not installed workspace skills.",
+	);
+
+skills
+	.command("list")
+	.description("List names and descriptions as JSON, without instruction bodies or resources.")
+	.option("--limit <count>", "page size (1–100; default: 20)")
+	.option("--offset <count>", "zero-based offset (default: 0)")
+	.addHelpText(
+		"after",
+		"\nContinue at data.nextOffset; null means exhausted. data.total is the full count.",
+	)
+	.action((options: { limit?: string; offset?: string }) => {
+		writeJson(successResponse(listBundledSkills(options)));
+	});
+
+skills
+	.command("get")
+	.description("Return one skill's Markdown body in JSON data.body, without YAML frontmatter.")
+	.argument("<name>", "bundled skill name from skills list")
+	.action((name: string) => {
+		writeJson(successResponse(getBundledSkill(name)));
+	});
+
+skills
+	.command("file")
+	.description("Return one supporting resource in JSON data.content, without other files.")
+	.argument("<name>", "bundled skill name from skills list")
+	.argument("<path>", "exact relative resource path from the selected skill's instructions")
+	.action((name: string, path: string) => {
+		writeJson(successResponse(getBundledSkillFile(name, path)));
+	});
+
+skills
+	.command("schema")
+	.description("Return an on-demand JSON Schema for a skills command's success/error response.")
+	.argument("<command>", "list, get, or file")
+	.action((command: string) => {
+		writeJson(successResponse(bundledSkillSchema(command)));
 	});
 
 try {

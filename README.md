@@ -87,4 +87,16 @@ Operational commands return JSON with explicit `success`, concise result data, a
 
 Exact revision pin creation, shared caching, automatic ignore setup in consuming projects, migration, patches, and multi-workspace orchestration are not implemented yet.
 
-Run `bunx @codethread/skillbox add --help` for command options.
+## Agent guidance
+
+The CLI bundles offline instructions for project configuration and bundle authoring. Discover metadata first, then load only the instructions or supporting resource needed:
+
+```sh
+skillbox skills list
+skillbox skills get <name>
+skillbox skills file <name> <path>
+```
+
+These commands return JSON in the same `success`/`data`/`errors` envelope. `get` returns Markdown in `data.body` without frontmatter; `file` returns a selected resource in `data.content`. This reads CLI-bundled guidance, not skills installed in a workspace. `skills list --limit <count> --offset <count>` supports paging; `data.nextOffset: null` means exhausted. Use `skills schema <list|get|file>` for response schemas.
+
+Run `skillbox --help` or `skillbox <command> --help` for command options.
