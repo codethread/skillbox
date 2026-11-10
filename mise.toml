@@ -12,5 +12,5 @@ description = "Format repository files"
 run = "bun run fmt"
 
 [tasks.check]
-description = "Check repository formatting"
-run = "bun run fmt:check"
+description = "Check formatting, lint, types, and black-box tests"
+run = "bun run check"

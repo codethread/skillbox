@@ -1,8 +1,25 @@
 # Skillbox
 
-Repository scaffolding for shared agent instructions and skills. No application is implemented yet.
+Repository-local skill bundles for agents.
 
-A skillbox is one source for all skills, avoid global skills. Instead import other skillboxes or patch over a popular one.
+## Try the POC
+
+From this checkout, install the included development bundle into a disposable client:
+
+```sh
+bun install --frozen-lockfile
+source_repo="$PWD"
+client=$(mktemp -d /tmp/skillbox-demo-XXXXXX)
+(cd "$client" && bun run "$source_repo/src/cli.ts" add "$source_repo" development)
+```
+
+Bundles live under `skillbox/<bundle>/<skill>/SKILL.md`. The command copies each selected skill and its supporting files into the client's `.agents/skills/` and links `.claude/skills` to it. Existing skill paths are rejected without changing their contents.
+
+This is an initial-install POC for local sources. Repeated adds, remote sources, managed config, ignores, locks, migration, and patches are not implemented yet.
+
+Vercel's library API is not in the current npm release. Until it ships, `skills` is pinned to an upstream Git commit, `tsconfig.json` maps its public entry to source, and its unbundled runtime dependencies are installed directly.
+
+Run `bun run skillbox add --help` for usage, `bun test` for the real-filesystem black-box tests, or `mise run check` for all checks.
 
 ## Setup
 

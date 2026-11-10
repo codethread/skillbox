@@ -1,0 +1,35 @@
+#!/usr/bin/env bun
+import { Command } from "commander";
+import { match, P } from "ts-pattern";
+import { z } from "zod";
+import { add } from "./add.ts";
+
+const program = new Command()
+	.name("skillbox")
+	.description("Install repository-local skill bundles.")
+	.showHelpAfterError();
+
+program
+	.command("add")
+	.description("Copy bundles from a local repository (initial-install POC).")
+	.argument("<source>", "local repository directory containing skillbox/<bundle>/<skill>")
+	.argument("<bundles...>", "bundle directory names to install")
+	.action(async (source: string, bundles: string[]) => {
+		const skills = await add({ cwd: process.cwd(), source, bundles });
+		console.log(
+			`Added ${skills.length} skill${skills.length === 1 ? "" : "s"} from ${[...new Set(bundles)].join(", ")}:\n${skills.map((name) => `  ${name}`).join("\n")}`,
+		);
+	});
+
+try {
+	await program.parseAsync();
+} catch (error) {
+	const message = match(error)
+		.with(P.instanceOf(z.ZodError), (error) =>
+			error.issues.map((issue) => issue.message).join("; "),
+		)
+		.with(P.instanceOf(Error), (error) => error.message)
+		.otherwise((error) => String(error));
+	console.error(`error: ${message}`);
+	process.exitCode = 1;
+}

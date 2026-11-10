@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "Preserve",
+		"moduleResolution": "Bundler",
+		"strict": true,
+		"noEmit": true,
+		"allowImportingTsExtensions": true,
+		"skipLibCheck": true,
+		"types": ["bun"],
+		"paths": {
+			// The pinned upstream Git package has the public API source, but no dist yet.
+			"skills": ["./node_modules/skills/src/index.ts"]
+		}
+	},
+	"include": ["src/**/*.ts", "tests/**/*.ts"]
+}
