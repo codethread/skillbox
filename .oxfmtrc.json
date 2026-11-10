@@ -1,0 +1,7 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"tabWidth": 4,
+	"useTabs": true,
+	"proseWrap": "never",
+	"ignorePatterns": [".botlake/world.db*"]
+}

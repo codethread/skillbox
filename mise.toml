@@ -1,0 +1,16 @@
+[tools]
+bun = "1.4.2"
+node = "24.21.0"
+
+[tasks.bootstrap]
+description = "Install repository and Botlake dependencies and activate Git hooks"
+alias = "default"
+run = ["bun install --frozen-lockfile", "bun install --cwd .botlake --frozen-lockfile"]
+
+[tasks.fmt]
+description = "Format repository files"
+run = "bun run fmt"
+
+[tasks.check]
+description = "Check repository formatting"
+run = "bun run fmt:check"

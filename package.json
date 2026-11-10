@@ -1,0 +1,19 @@
+{
+	"name": "skillbox",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"fmt": "oxfmt --disable-nested-config",
+		"fmt:check": "oxfmt --disable-nested-config --check",
+		"prepare": "husky"
+	},
+	"devDependencies": {
+		"husky": "9.1.7",
+		"lint-staged": "17.6.0",
+		"oxfmt": "0.78.0"
+	},
+	"lint-staged": {
+		"*": "oxfmt --no-error-on-unmatched-pattern"
+	},
+	"packageManager": "bun@1.4.2"
+}
