@@ -104,7 +104,11 @@ skillbox sync
 skillbox --workspace frontend sync
 ```
 
-Sync restores generated skills from the recorded config and verifies their content against the Skillbox lockfile before publishing. It does not advance the recorded hashes or refs. Repeating sync with matching installed contents reports an unchanged result.
+Edit `skillbox/config.json` to add or remove sources/bundles, then run sync. Both tracking files must already exist; use `add` for the first installation. Sync installs newly selected skills, removes deselected managed skills and their lock entries, and preserves the config's formatting. Local paths in the config resolve from the selected workspace root. Use `"sources": []` to remove all managed skills.
+
+Retained skills must still match their locked content hashes; sync does not update those hashes or refs. New skills receive SDK-generated lock entries. Unmanaged skill paths and name collisions are rejected before publishing. Installed managed files are generated output and can be replaced or removed by sync.
+
+The JSON result reports `installed`, `unchanged`, and `removed` skill counts. Repeating sync with matching installed contents and lock entries reports an unchanged result without rewriting them.
 
 Operational commands return JSON with explicit `success`, concise result data, and structured errors. Full skill contents and config/lockfile dumps are not included by default.
 

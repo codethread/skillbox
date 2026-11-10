@@ -55,7 +55,7 @@ Examples:
 
 program
 	.command("sync")
-	.description("Restore configured skills without advancing their recorded versions.")
+	.description("Reconcile configured skills while preserving retained content hashes.")
 	.action(async () => {
 		const cwd = process.cwd();
 		const result = await sync({ cwd, workspace: await selectedWorkspace(cwd) });

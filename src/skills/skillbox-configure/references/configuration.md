@@ -40,7 +40,7 @@ A config selecting a local source looks like:
 }
 ```
 
-`skillbox/config.json` accepts only `sources`, whose entries contain a nonempty `source` and a nonempty `bundles` array. Saved local paths are relative to the workspace root. Git sources retain their source string. Prefer `add` to keep config, lock, and installed contents aligned; editing only the config can make sync fail.
+`skillbox/config.json` accepts only `sources`, whose entries contain a nonempty `source` and a nonempty `bundles` array. Local paths resolve from the selected workspace root. Git sources retain their source string. Use `add` for the first installation. Once both tracking files exist, direct source/bundle edits can be applied with `sync`: newly selected skills receive lock entries, and deselected managed skills and their entries are removed. An empty `sources` array removes all managed skills. Config formatting and retained lock entries are preserved; retained skill contents must still match their saved hashes. Sync reports `installed`, `unchanged`, and `removed` skill counts and refuses to overwrite unmanaged skills.
 
 `skillbox/lock.json` uses the upstream SDK's format and records per-skill provenance and hashes. A moving Git ref or content hash is not an immutable revision pin. Ordinary sync resolves the configured sources again; it can fail if upstream moved rather than restoring an archived revision. Do not delete or regenerate the lock merely to silence drift errors without approval for changed contents.
 
@@ -53,7 +53,7 @@ Skillbox does not read or modify the root `skills-lock.json` used by `npx skills
 | `WORKSPACE_NOT_FOUND` / `SOURCE_NOT_FOUND` | Correct the supplied path. Create the intended workspace separately if needed. |
 | `BUNDLE_REQUIRED` / `BUNDLE_NOT_FOUND` | Check source layout and explicit bundle names; use `add --help`. |
 | `CONFIG_NOT_FOUND` / `LOCK_NOT_FOUND` | Restore tracked files from version control, or use `add` for a genuinely new installation. |
-| `LOCK_SKILL_MISMATCH` / `LOCK_HASH_MISMATCH` | Compare config, lock, and source changes. Restore the matching source/tracking files; an update policy needs user agreement. |
+| `LOCK_HASH_MISMATCH` | A retained skill's contents changed. Restore the matching source/tracking files; config edits do not authorize updating existing hashes. |
 | `MIGRATION_REQUIRED` | Read `skillbox skills get skillbox-migrate` for a backed-up manual first-install cutover. |
 | `SKILL_NAME_COLLISION` / `UNMANAGED_SKILL` | Preserve existing contents and resolve naming/ownership deliberately before retrying. |
 | `CLAUDE_SKILLS_LINK_INVALID` | Inspect and preserve the existing Claude skills directory or link before resolving the conflict. |
