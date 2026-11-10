@@ -1,6 +1,6 @@
 {
 	"name": "@codethread/skillbox",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Repository-local agent skill bundles with config and lockfile tracking",
 	"homepage": "https://github.com/codethread/skillbox#readme",
 	"bugs": {

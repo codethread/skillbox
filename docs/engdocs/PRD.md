@@ -1,6 +1,6 @@
 # Skillbox acceptance criteria
 
-Status: `@codethread/skillbox@0.1.0` is published under MIT. The first slice delivers add, basic hash-checked sync, optional `--workspace`, and default JSON outcomes. Checked outcomes have fixture coverage; partial coverage is called out explicitly. Immutable Git revision capture/replay, shared/offline cache, explicit updates, migration, info/search, patches, and the remaining response-disclosure/failure contracts are not complete.
+Status: `@codethread/skillbox@0.1.1` is published under MIT. The first slice delivers add, basic hash-checked sync, optional `--workspace`, and default JSON outcomes. Checked outcomes have fixture coverage; partial coverage is called out explicitly. Immutable Git revision capture/replay, shared/offline cache, explicit updates, migration, info/search, patches, and the remaining response-disclosure/failure contracts are not complete.
 
 ## User goal
 
