@@ -11,7 +11,7 @@ import {
 	writeFile,
 } from "node:fs/promises";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const repository = fileURLToPath(new URL("..", import.meta.url));
 const cli = fileURLToPath(new URL("../src/cli.ts", import.meta.url));
@@ -26,7 +26,11 @@ afterEach(async () => {
 async function client() {
 	const directory = await mkdtemp("/tmp/skillbox-add-");
 	directories.push(directory);
-	await cp(join(repository, "skillbox"), join(directory, "source/skillbox"), { recursive: true });
+	await cp(
+		join(repository, "skillbox/development"),
+		join(directory, "source/skillbox/development"),
+		{ recursive: true },
+	);
 	await mkdir(join(directory, "client"));
 	return join(directory, "client");
 }
@@ -617,4 +621,82 @@ test("accepts an absolute config directory from another invocation directory", a
 	    "invocation",
 	  ]
 	`);
+});
+
+test("installs a Git source through the SDK without an npm package", async () => {
+	const cwd = await client();
+	const repository = join(cwd, "../source");
+	for (const command of [
+		["git", "init", "--quiet", "--initial-branch=main"],
+		["git", "add", "skillbox"],
+		[
+			"git",
+			"-c",
+			"user.name=Skillbox Test",
+			"-c",
+			"user.email=skillbox@example.test",
+			"-c",
+			"commit.gpgsign=false",
+			"commit",
+			"--quiet",
+			"-m",
+			"Bundle fixture",
+		],
+	]) {
+		const result = Bun.spawnSync(command, { cwd: repository, stdout: "pipe", stderr: "pipe" });
+		expect(result.exitCode).toBe(0);
+	}
+	const source = pathToFileURL(repository).href;
+
+	expect(await run(cwd, "add", source, "development")).toMatchInlineSnapshot(`
+	  {
+	    "exitCode": 0,
+	    "stderr": [
+	      "",
+	    ],
+	    "stdout": [
+	      "Added 1 skill from development:",
+	      "  blackbox-testing",
+	      "",
+	    ],
+	  }
+	`);
+	const config = await json(cwd, "skillbox/config.json");
+	expect(config.sources[0].source).toBe(source);
+	config.sources[0].source = "<git-source>";
+	expect(config).toMatchInlineSnapshot(`
+	  {
+	    "sources": [
+	      {
+	        "bundles": [
+	          "development",
+	        ],
+	        "source": "<git-source>",
+	      },
+	    ],
+	  }
+	`);
+	const lock = await json(cwd, "skills-lock.json");
+	expect(lock.skills["blackbox-testing"].source).toBe(source);
+	expect(lock.skills["blackbox-testing"].sourceUrl).toBe(source);
+	lock.skills["blackbox-testing"].source = "<git-source>";
+	lock.skills["blackbox-testing"].sourceUrl = "<git-source>";
+	expect(lock).toMatchInlineSnapshot(`
+	  {
+	    "skills": {
+	      "blackbox-testing": {
+	        "computedHash": "2fb21912486d30e1fa40c64f5a0d864abe6df3636e39f84cd2fc379a6c3d7bca",
+	        "installMode": "copy",
+	        "skillPath": "skillbox/development/blackbox-testing/SKILL.md",
+	        "source": "<git-source>",
+	        "sourceType": "git",
+	        "sourceUrl": "<git-source>",
+	      },
+	    },
+	    "version": 1,
+	  }
+	`);
+	expect(await readFile(join(cwd, ".agents/skills/blackbox-testing/SKILL.md"), "utf8")).toBe(
+		await readFile(join(repository, "skillbox/development/blackbox-testing/SKILL.md"), "utf8"),
+	);
 });

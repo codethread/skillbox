@@ -7,6 +7,7 @@
 	"type": "module",
 	"scripts": {
 		"skillbox": "bun run src/cli.ts",
+		"build": "bun build src/cli.ts --compile --outfile dist/skillbox",
 		"test": "bun test",
 		"lint": "oxlint src tests",
 		"typecheck": "tsc --noEmit",

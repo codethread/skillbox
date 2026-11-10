@@ -2,23 +2,26 @@
 
 Repository-local skill bundles for agents.
 
-## Add local bundles
+## Build and add bundles
 
-From this checkout, install the included development bundle into a disposable client:
+Build a standalone CLI, then add a GitHub bundle to your project—no npm package is needed:
 
 ```sh
 bun install --frozen-lockfile
-source_repo="$PWD"
-client=$(mktemp -d /tmp/skillbox-demo-XXXXXX)
-(cd "$client" && bun run "$source_repo/src/cli.ts" add "$source_repo" development)
+bun run build
+./dist/skillbox --config ../my-project add https://github.com/codethread/agents/tree/main/skillbox/dev
 ```
+
+A tree URL pointing to `skillbox/<bundle>` implies the bundle name. Repository URLs and GitHub shorthand accept explicit bundle names, for example `skillbox add owner/repo frontend backend`. The SDK handles fetching and discovery.
+
+Local repositories also use explicit bundle names: `skillbox add ../my-skills development`.
 
 Bundles live under `skillbox/<bundle>/<skill>/SKILL.md`. The command copies each selected skill and its supporting files into the client's `.agents/skills/` and links `.claude/skills` to it. Unmanaged skill paths and name collisions are rejected without overwriting their contents.
 
 Two files record the installation; commit both:
 
-- `skillbox/config.json` records source repositories and requested bundles. Source paths are relative to the workspace root.
-- `skills-lock.json` is Vercel's native project lock, written by the SDK. It records per-skill source information, content hashes, and copy mode. Local directory hashes are **not immutable revision pins**.
+- `skillbox/config.json` records source repositories and requested bundles. Local source paths are relative to the workspace root; Git sources retain their source string.
+- `skills-lock.json` is Vercel's native project lock, written by the SDK. It records per-skill source information, content hashes, copy mode, and Git refs and skill paths where available. A branch such as `main`, or a content hash by itself, is **not an immutable revision pin**.
 
 For example, a config selecting a sibling source repository looks like:
 
@@ -44,11 +47,9 @@ bun run src/cli.ts --config backend add ../my-skills development
 
 `--config` selects a workspace directory, defaulting to the current directory; `skillbox/config.json` is implied. In these examples, the existing `frontend/` and `backend/` directories each get their own `.agents/skills/`, `.claude/skills` link, config, and SDK lockfile. Relative and absolute directory paths are supported. Source arguments are resolved from the invocation directory, then saved relative to the workspace root.
 
-Remote sources, exact revision pins, restoring from config (`sync`), automatic ignores, migration, patches, and multi-workspace orchestration are not implemented yet.
+Exact revision pins, restoring from config (`sync`), automatic ignore setup in consuming projects, migration, patches, and multi-workspace orchestration are not implemented yet.
 
-Vercel's library API is not in the current npm release. Until it ships, `skills` is pinned to an upstream Git commit, `tsconfig.json` maps its public entry to source, and its unbundled runtime dependencies are installed directly.
-
-Run `bun run skillbox add --help` for usage, `bun test` for the real-filesystem black-box tests, or `mise run check` for all checks.
+Run `./dist/skillbox add --help` for command options.
 
 ## Setup
 

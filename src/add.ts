@@ -10,7 +10,7 @@ import {
 	symlink,
 	writeFile,
 } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 import { installSkills, resolveSource, type SkillInfo, type SkillsConfig } from "skills";
 import { z } from "zod";
 import { bundleSchema, configPath, readConfig, withBundles } from "./config.ts";
@@ -21,7 +21,7 @@ import { publish } from "./publish.ts";
 const inputSchema = z.object({
 	cwd: z.string().min(1),
 	source: z.string().min(1),
-	bundles: z.array(bundleSchema).min(1),
+	bundles: z.array(bundleSchema).default([]),
 	config: z.string().min(1).default("."),
 });
 
@@ -43,14 +43,18 @@ async function requireAbsent(cwd: string, path: string) {
 	}
 }
 
-function inBundle(skill: SkillInfo, bundle: string) {
-	return [skill.path, ...(skill.duplicates ?? [])].some((path) => path?.startsWith(`${bundle}/`));
+function inBundle(skill: SkillInfo, bundle: string, local: boolean) {
+	const prefix = `${local ? "" : "skillbox/"}${bundle}/`;
+	return [skill.path, ...(skill.duplicates ?? [])].some((path) => path?.startsWith(prefix));
 }
 
 export async function add(input: z.input<typeof inputSchema>) {
 	const parsed = inputSchema.parse(input);
 	const cwd = await realpath(resolve(parsed.cwd, parsed.config));
-	const source = localPath(cwd, await realpath(resolve(parsed.cwd, parsed.source)));
+	const local = isAbsolute(parsed.source) || parsed.source.startsWith(".");
+	const source = local
+		? localPath(cwd, await realpath(resolve(parsed.cwd, parsed.source)))
+		: parsed.source;
 	const config = await readConfig(cwd);
 	const lockText = await readOptional(join(cwd, lockPath));
 	const lock = lockText === undefined ? undefined : readLock(lockText);
@@ -84,15 +88,7 @@ export async function add(input: z.input<typeof inputSchema>) {
 		}
 	}
 
-	const current = config ?? { sources: [] };
-	const existing = current.sources.find((entry) => entry.source === source);
-	const bundles = [...new Set(parsed.bundles)].filter(
-		(bundle) => !existing?.bundles.includes(bundle),
-	);
-	if (bundles.length === 0) return [];
-	const next = withBundles(current, source, bundles);
-
-	const handle = await resolveSource(join(cwd, source, "skillbox"), {
+	const handle = await resolveSource(local ? join(cwd, source, "skillbox") : source, {
 		cwd,
 		config: sdkConfig,
 		fullDepth: true,
@@ -101,11 +97,30 @@ export async function add(input: z.input<typeof inputSchema>) {
 		},
 	});
 	try {
+		const inferred = /^skillbox\/([^/]+)\/?$/.exec(handle.source.subpath ?? "")?.[1];
+		const requested = [
+			...new Set(
+				parsed.bundles.length > 0
+					? parsed.bundles
+					: inferred
+						? [bundleSchema.parse(inferred)]
+						: [],
+			),
+		];
+		if (requested.length === 0) {
+			throw new Error("Specify bundle names, or use a URL pointing to skillbox/<bundle>.");
+		}
+		const current = config ?? { sources: [] };
+		const existing = current.sources.find((entry) => entry.source === source);
+		const bundles = requested.filter((bundle) => !existing?.bundles.includes(bundle));
+		if (bundles.length === 0) return { skills: [], bundles: requested };
+		const next = withBundles(current, source, bundles);
+
 		const skills = handle.skills.filter((skill) =>
-			bundles.some((bundle) => inBundle(skill, bundle)),
+			bundles.some((bundle) => inBundle(skill, bundle, local)),
 		);
 		const missing = bundles.filter(
-			(bundle) => !skills.some((skill) => inBundle(skill, bundle)),
+			(bundle) => !skills.some((skill) => inBundle(skill, bundle, local)),
 		);
 		if (missing.length > 0)
 			throw new Error(`No skills found in bundles: ${missing.join(", ")}.`);
@@ -166,7 +181,7 @@ export async function add(input: z.input<typeof inputSchema>) {
 					{ cause },
 				);
 			}
-			return skills.map((skill) => skill.name).sort();
+			return { skills: skills.map((skill) => skill.name).sort(), bundles };
 		} finally {
 			if (!retainStaging) await rm(staging, { recursive: true, force: true });
 		}

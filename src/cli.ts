@@ -6,28 +6,29 @@ import { add } from "./add.ts";
 
 const program = new Command()
 	.name("skillbox")
-	.description("Install repository-local skill bundles.")
+	.description("Install skill bundles into your repository.")
 	.option("--config <dir>", "workspace directory containing skillbox/config.json", ".")
 	.showHelpAfterError();
 
 program
 	.command("add")
-	.description("Add local repository bundles to the config and SDK project lock.")
-	.argument("<source>", "local repository directory containing skillbox/<bundle>/<skill>")
-	.argument("<bundles...>", "bundle directory names to install")
+	.description("Add repository bundles to the config and SDK project lock.")
+	.argument("<source>", "local repository, GitHub shorthand, or Git/tree URL")
+	.argument("[bundles...]", "bundle names; implied by a skillbox/<bundle> tree URL")
 	.action(async (source: string, bundles: string[]) => {
-		const skills = await add({
+		const result = await add({
 			cwd: process.cwd(),
 			source,
 			bundles,
 			config: program.opts<{ config: string }>().config,
 		});
+		const { skills } = result;
 		if (skills.length === 0) {
-			console.log(`Already added bundles: ${[...new Set(bundles)].join(", ")}.`);
+			console.log(`Already added bundles: ${result.bundles.join(", ")}.`);
 			return;
 		}
 		console.log(
-			`Added ${skills.length} skill${skills.length === 1 ? "" : "s"} from ${[...new Set(bundles)].join(", ")}:\n${skills.map((name) => `  ${name}`).join("\n")}`,
+			`Added ${skills.length} skill${skills.length === 1 ? "" : "s"} from ${result.bundles.join(", ")}:\n${skills.map((name) => `  ${name}`).join("\n")}`,
 		);
 	});
 
