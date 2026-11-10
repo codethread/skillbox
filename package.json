@@ -1,42 +1,65 @@
 {
-	"name": "skillbox",
-	"private": true,
-	"bin": {
-		"skillbox": "./src/cli.ts"
+	"name": "@codethread/skillbox",
+	"version": "0.1.0",
+	"description": "Repository-local agent skill bundles with config and lockfile tracking",
+	"homepage": "https://github.com/codethread/skillbox#readme",
+	"bugs": {
+		"url": "https://github.com/codethread/skillbox/issues"
 	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/codethread/skillbox.git"
+	},
+	"bin": {
+		"skillbox": "./bin/skillbox.mjs"
+	},
+	"files": [
+		"bin/skillbox.mjs",
+		"dist/cli.mjs",
+		"dist/THIRD-PARTY-NOTICES.txt"
+	],
 	"type": "module",
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/"
+	},
 	"scripts": {
 		"skillbox": "bun run src/cli.ts",
-		"build": "bun build src/cli.ts --compile --outfile dist/skillbox",
+		"build": "bun run build:npm && bun run build:binary",
 		"test": "bun test",
-		"lint": "oxlint src tests",
+		"lint": "oxlint src tests scripts bin",
 		"typecheck": "tsc --noEmit",
 		"check": "bun run fmt:check && bun run lint && bun run typecheck && bun run test",
 		"fmt": "oxfmt --disable-nested-config",
 		"fmt:check": "oxfmt --disable-nested-config --check",
-		"prepare": "husky"
-	},
-	"dependencies": {
-		"@clack/prompts": "^1.2.0",
-		"@vercel/detect-agent": "^1.2.1",
-		"commander": "^15.1.0",
-		"picocolors": "^1.1.1",
-		"simple-git": "^3.36.0",
-		"skills": "github:vercel-labs/skills#4a351bc302b856b58fa13a055e764d3a384b741d",
-		"ts-pattern": "^5.9.2",
-		"xdg-basedir": "^5.1.0",
-		"zod": "^4.6.7"
+		"setup:hooks": "husky",
+		"build:npm": "bun run scripts/build-npm.ts",
+		"build:binary": "bun build src/cli.ts --compile --outfile dist/skillbox",
+		"prepack": "bun run build:npm"
 	},
 	"devDependencies": {
+		"@clack/prompts": "^1.2.0",
 		"@types/bun": "^1.4.4",
+		"@vercel/detect-agent": "^1.2.1",
+		"commander": "^15.1.0",
 		"husky": "9.1.7",
 		"lint-staged": "17.6.0",
 		"oxfmt": "0.78.0",
 		"oxlint": "^1.93.0",
-		"typescript": "^7.0.2"
+		"picocolors": "^1.1.1",
+		"simple-git": "^3.36.0",
+		"skills": "github:vercel-labs/skills#4a351bc302b856b58fa13a055e764d3a384b741d",
+		"ts-pattern": "^5.9.2",
+		"typescript": "^7.0.2",
+		"xdg-basedir": "^5.1.0",
+		"zod": "^4.6.7"
 	},
 	"lint-staged": {
 		"*": "oxfmt --no-error-on-unmatched-pattern"
+	},
+	"engines": {
+		"node": ">=22.20.0"
 	},
 	"packageManager": "bun@1.4.2"
 }

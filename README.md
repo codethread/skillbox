@@ -2,9 +2,34 @@
 
 Repository-local skill bundles for agents.
 
-## Build and add bundles
+## Install
 
-Build a standalone CLI, then add a GitHub bundle to your project—no npm package is needed:
+Requires Node.js 22.20+ and Git. Install the CLI in your project:
+
+```sh
+bun add --dev @codethread/skillbox
+# or: npm add --save-dev @codethread/skillbox
+```
+
+The package ships a prebuilt CLI; no postinstall build is required. npm and Bun expose the `skillbox` executable to package scripts:
+
+```json
+{
+	"scripts": {
+		"skills:sync": "skillbox sync"
+	}
+}
+```
+
+## Add bundles
+
+```sh
+bunx @codethread/skillbox add https://github.com/codethread/agents/tree/main/skillbox/dev
+```
+
+### Build from source
+
+Build a standalone CLI, then add a GitHub bundle to your project—source skills do not need an npm package:
 
 ```sh
 bun install --frozen-lockfile
@@ -60,25 +85,4 @@ Operational commands return JSON with explicit `success`, concise result data, a
 
 Exact revision pin creation, shared caching, automatic ignore setup in consuming projects, migration, patches, and multi-workspace orchestration are not implemented yet.
 
-Run `./dist/skillbox add --help` for command options.
-
-## Setup
-
-Install [mise](https://mise.jdx.dev/getting-started.html). Prepare the shared private `ct-config` archive through the Botlake checkout’s install task. This lake installs public Botlake packages from npm and private configuration from that packed tarball, using its committed lockfile.
-
-Then run from the repository root:
-
-```sh
-mise trust
-mise run
-```
-
-### Botlake
-
-Install the Botlake CLI separately and ensure its supervisor is running before starting the repository lake:
-
-```sh
-botlake lake start
-botlake lake info
-bl help
-```
+Run `bunx @codethread/skillbox add --help` for command options.

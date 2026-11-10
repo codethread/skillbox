@@ -5,7 +5,11 @@ node = "24.21.0"
 [tasks.bootstrap]
 description = "Install repository and Botlake dependencies and activate Git hooks"
 alias = "default"
-run = ["bun install --frozen-lockfile", "bun install --cwd .botlake --frozen-lockfile"]
+run = [
+	"bun install --frozen-lockfile",
+	"bun install --cwd .botlake --frozen-lockfile",
+	"bun run setup:hooks",
+]
 
 [tasks.fmt]
 description = "Format repository files"

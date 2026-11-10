@@ -1,1 +1,2 @@
 - [Skillbox acceptance criteria](PRD.md)
+- [Maintainer setup](setup.md)
