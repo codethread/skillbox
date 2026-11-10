@@ -6,10 +6,13 @@
 # Run from the consuming project; ../team-skills is a sibling repository.
 skillbox add ../team-skills development
 
-# GitHub shorthand with explicit bundle selections.
+# Prefer a repository URL or GitHub shorthand with explicit bundle selections.
 skillbox add owner/repo frontend backend
 
-# The tree URL selects a single bundle.
+# Reuse that exact source string to extend the same config entry.
+skillbox add owner/repo testing
+
+# A tree URL is also supported and selects a single bundle.
 skillbox add https://github.com/owner/repo/tree/main/skillbox/development
 
 # Restore a separate existing workspace.
@@ -17,6 +20,10 @@ skillbox --workspace frontend sync
 ```
 
 Use the source repository root for local paths, not its `skillbox/` directory. Bundle names are single directory names containing letters, numbers, hyphens, or underscores, starting with a letter or number.
+
+Git sources are grouped by exact source string, not repository identity. Tree URLs ending in `skillbox/frontend` and `skillbox/backend` create separate entries even for the same repository and ref; mixing a repository URL with GitHub shorthand does too. Prefer one repository-level source string plus explicit bundles when grouping is desired. Preserve the intended Git ref: sources at different refs are not interchangeable.
+
+To consolidate existing tree-URL entries, first verify that they select the same repository and ref. With user approval, replace them in the config with one repository-level source selecting that ref and the union of their bundles. Preserve the lockfile, run `skillbox sync`, and require successful hash verification before committing. Do not re-add already-installed skills under a new source string; this can raise `SKILL_NAME_COLLISION`. This is a deliberate config-only regrouping, not a general repair or update procedure.
 
 ## Tracking files
 

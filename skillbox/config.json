@@ -1,8 +1,8 @@
 {
 	"sources": [
 		{
-			"source": "https://github.com/codethread/agents/tree/main/skillbox/dev",
-			"bundles": ["dev"]
+			"source": "https://github.com/codethread/agents",
+			"bundles": ["coding", "dev"]
 		}
 	]
 }

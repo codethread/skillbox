@@ -1,12 +1,52 @@
 {
 	"version": 1,
 	"skills": {
+		"declutter": {
+			"source": "codethread/agents",
+			"sourceType": "github",
+			"computedHash": "a2f10372267712c3e807afb94cf7079c22c1fcb0e502e35842a7ee98dc13b1b4",
+			"ref": "main",
+			"skillPath": "skillbox/coding/declutter/SKILL.md",
+			"installMode": "copy"
+		},
 		"docs-styleguide": {
 			"source": "codethread/agents",
 			"sourceType": "github",
 			"computedHash": "e2db75d6394726c3d99a734ecb14455f9d354ba183e549b48f46bfc864945f70",
 			"ref": "main",
 			"skillPath": "skillbox/dev/docs-styleguide/SKILL.md",
+			"installMode": "copy"
+		},
+		"git-commit": {
+			"source": "codethread/agents",
+			"sourceType": "github",
+			"computedHash": "1672f34e333aef02a631ac52edb1967967f80d3eff61e63f462cd5a3b81d380f",
+			"ref": "main",
+			"skillPath": "skillbox/coding/git-commit/SKILL.md",
+			"installMode": "copy"
+		},
+		"git-worktree-cleanup": {
+			"source": "codethread/agents",
+			"sourceType": "github",
+			"computedHash": "95a041caebcc478bcc4b8eea4f8bef85bdb054c4fd5ec1bd7c86f69aa7eaf757",
+			"ref": "main",
+			"skillPath": "skillbox/coding/git-worktree-cleanup/SKILL.md",
+			"installMode": "copy"
+		},
+		"purge": {
+			"source": "codethread/agents",
+			"sourceType": "github",
+			"computedHash": "7d89e2771e866dd7e863df41338e1e39be39e35e05704d23d26f140cd31925af",
+			"ref": "main",
+			"skillPath": "skillbox/coding/purge/SKILL.md",
+			"installMode": "copy"
+		},
+		"robustness": {
+			"source": "codethread/agents",
+			"sourceType": "github",
+			"computedHash": "0fa8f1a6c27bf1eb696ba0668b185672a40781c2cc6b7778df7e748da4ada694",
+			"ref": "main",
+			"skillPath": "skillbox/coding/robustness/SKILL.md",
 			"installMode": "copy"
 		},
 		"typescript": {

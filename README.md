@@ -24,7 +24,7 @@ The package ships a prebuilt CLI; no postinstall build is required. npm and Bun 
 ## Add bundles
 
 ```sh
-bunx @codethread/skillbox add https://github.com/codethread/agents/tree/main/skillbox/dev
+bunx @codethread/skillbox add https://github.com/codethread/agents dev coding
 ```
 
 ### Build from source
@@ -34,10 +34,24 @@ Build a standalone CLI, then add a GitHub bundle to your project—source skills
 ```sh
 bun install --frozen-lockfile
 bun run build
-./dist/skillbox --workspace ../my-project add https://github.com/codethread/agents/tree/main/skillbox/dev
+./dist/skillbox --workspace ../my-project add https://github.com/codethread/agents dev coding
 ```
 
-A tree URL pointing to `skillbox/<bundle>` implies the bundle name. Repository URLs and GitHub shorthand accept explicit bundle names, for example `skillbox add owner/repo frontend backend`. The SDK handles fetching and discovery.
+Prefer a repository URL or GitHub shorthand with explicit bundle names. Reuse the exact same source string when adding more bundles to keep them in one config entry:
+
+```sh
+skillbox add owner/repo frontend
+skillbox add owner/repo backend
+# One source entry with bundles: ["backend", "frontend"].
+```
+
+A tree URL pointing to `skillbox/<bundle>` is also supported and implies the bundle name:
+
+```sh
+skillbox add https://github.com/codethread/agents/tree/main/skillbox/dev
+```
+
+Git source strings are retained, not canonicalized: tree URLs for `dev` and `coding` create separate entries even when they refer to the same repository and ref. A repository URL and its GitHub shorthand also remain separate if mixed. Keep the intended Git ref when choosing a source; different refs are not interchangeable. The SDK handles fetching and discovery.
 
 Local repositories also use explicit bundle names: `skillbox add ../my-skills development`.
 
@@ -72,7 +86,7 @@ For example, a config selecting a sibling source repository looks like:
 }
 ```
 
-Adding another source or bundle preserves existing installed skills and lock entries. Repeating an already-configured add performs no writes. The SDK config object stays in code; there is no second SDK config file.
+Adding another source or bundle preserves existing installed skills and lock entries. Repeating an add with the same source string and already-configured bundles performs no writes. The SDK config object stays in code; there is no second SDK config file.
 
 ### Workspaces
 

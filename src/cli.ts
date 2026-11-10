@@ -28,6 +28,17 @@ program
 	.description("Add repository bundles to the config and SDK project lock.")
 	.argument("<source>", "local repository, GitHub shorthand, or Git/tree URL")
 	.argument("[bundles...]", "bundle names; implied by a skillbox/<bundle> tree URL")
+	.addHelpText(
+		"after",
+		`
+Prefer a repository URL or GitHub shorthand with explicit bundle names.
+Bundles merge into one config entry only when the source strings match exactly.
+Tree URLs are retained as supplied; different bundle URLs create separate entries.
+
+Examples:
+  skillbox add owner/repo frontend backend
+  skillbox add owner/repo testing`,
+	)
 	.action(async (source: string, bundles: string[]) => {
 		const cwd = process.cwd();
 		const workspace = await selectedWorkspace(cwd);
