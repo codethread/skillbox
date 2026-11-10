@@ -1,14 +1,17 @@
 #!/usr/bin/env bun
-import { Command } from "commander";
-import { match, P } from "ts-pattern";
-import { z } from "zod";
+import { realpath } from "node:fs/promises";
+import { resolve } from "node:path";
+import { Command, CommanderError } from "commander";
 import { add } from "./add.ts";
+import { failureResponse, responseError, successResponse } from "./response.ts";
+import { sync } from "./sync.ts";
 
 const program = new Command()
 	.name("skillbox")
 	.description("Install skill bundles into your repository.")
-	.option("--config <dir>", "workspace directory containing skillbox/config.json", ".")
-	.showHelpAfterError();
+	.option("--workspace <dir>", "workspace directory for skills, config, and lockfiles", ".")
+	.configureOutput({ writeErr: () => {} })
+	.exitOverride();
 
 program
 	.command("add")
@@ -16,31 +19,53 @@ program
 	.argument("<source>", "local repository, GitHub shorthand, or Git/tree URL")
 	.argument("[bundles...]", "bundle names; implied by a skillbox/<bundle> tree URL")
 	.action(async (source: string, bundles: string[]) => {
-		const result = await add({
-			cwd: process.cwd(),
-			source,
-			bundles,
-			config: program.opts<{ config: string }>().config,
-		});
-		const { skills } = result;
-		if (skills.length === 0) {
-			console.log(`Already added bundles: ${result.bundles.join(", ")}.`);
-			return;
-		}
-		console.log(
-			`Added ${skills.length} skill${skills.length === 1 ? "" : "s"} from ${result.bundles.join(", ")}:\n${skills.map((name) => `  ${name}`).join("\n")}`,
+		const cwd = process.cwd();
+		const workspace = await selectedWorkspace(cwd);
+		const result = await add({ cwd, source, bundles, workspace });
+		writeJson(
+			successResponse({
+				status: result.status,
+				source: result.source,
+				bundles: result.bundles,
+				installed: result.installed,
+			}),
 		);
+	});
+
+program
+	.command("sync")
+	.description("Restore configured skills without advancing their recorded versions.")
+	.action(async () => {
+		const cwd = process.cwd();
+		const result = await sync({ cwd, workspace: await selectedWorkspace(cwd) });
+		writeJson(successResponse(result));
 	});
 
 try {
 	await program.parseAsync();
 } catch (error) {
-	const message = match(error)
-		.with(P.instanceOf(z.ZodError), (error) =>
-			error.issues.map((issue) => issue.message).join("; "),
-		)
-		.with(P.instanceOf(Error), (error) => error.message)
-		.otherwise((error) => String(error));
-	console.error(`error: ${message}`);
-	process.exitCode = 1;
+	if (error instanceof CommanderError && error.exitCode === 0) {
+		// Commander has already written requested help to stdout.
+	} else {
+		writeJson(failureResponse(error));
+		process.exitCode = error instanceof CommanderError ? error.exitCode : 1;
+	}
+}
+
+async function selectedWorkspace(cwd: string): Promise<string> {
+	const input = program.opts<{ workspace: string }>().workspace;
+	try {
+		return await realpath(resolve(cwd, input));
+	} catch (cause) {
+		throw responseError(
+			"WORKSPACE_NOT_FOUND",
+			`Workspace does not exist: ${input}`,
+			{ input },
+			cause,
+		);
+	}
+}
+
+function writeJson(value: unknown): void {
+	process.stdout.write(`${JSON.stringify(value)}\n`);
 }

@@ -35,7 +35,19 @@ async function client() {
 	return join(directory, "client");
 }
 
-async function run(cwd: string, ...args: string[]) {
+interface CommandResult {
+	exitCode: number;
+	stdout: string;
+	stderr: string;
+}
+
+interface CliResponse {
+	success: boolean;
+	data: unknown;
+	errors: unknown[];
+}
+
+async function run(cwd: string, ...args: string[]): Promise<CommandResult> {
 	const child = Bun.spawn([process.execPath, cli, ...args], {
 		cwd,
 		stdout: "pipe",
@@ -47,7 +59,24 @@ async function run(cwd: string, ...args: string[]) {
 		new Response(child.stdout).text(),
 		new Response(child.stderr).text(),
 	]);
-	return { exitCode, stdout: stdout.split("\n"), stderr: stderr.split("\n") };
+	return { exitCode, stdout, stderr };
+}
+
+function expectSuccess(result: CommandResult): CliResponse {
+	expect(result.exitCode).toBe(0);
+	expect(result.stderr).toBe("");
+	const response = JSON.parse(result.stdout) as CliResponse;
+	expect(response.success).toBe(true);
+	expect(response.errors).toEqual([]);
+	return response;
+}
+
+function expectFailure(result: CommandResult): CliResponse {
+	expect(result.exitCode).not.toBe(0);
+	expect(result.stderr).toBe("");
+	const response = JSON.parse(result.stdout) as CliResponse;
+	expect(response.success).toBe(false);
+	return response;
 }
 
 async function add(cwd: string, ...bundles: string[]) {
@@ -61,17 +90,18 @@ async function json(cwd: string, path: string) {
 test("installs a repository bundle and records config and SDK lock", async () => {
 	const cwd = await client();
 
-	expect(await add(cwd, "development")).toMatchInlineSnapshot(`
+	expect(expectSuccess(await add(cwd, "development"))).toMatchInlineSnapshot(`
 	  {
-	    "exitCode": 0,
-	    "stderr": [
-	      "",
-	    ],
-	    "stdout": [
-	      "Added 1 skill from development:",
-	      "  blackbox-testing",
-	      "",
-	    ],
+	    "data": {
+	      "bundles": [
+	        "development",
+	      ],
+	      "installed": 1,
+	      "source": "../source",
+	      "status": "added",
+	    },
+	    "errors": [],
+	    "success": true,
 	  }
 	`);
 	expect((await readdir(cwd)).sort()).toMatchInlineSnapshot(`
@@ -155,16 +185,18 @@ test("installs a repository bundle and records config and SDK lock", async () =>
 test("rejects an unknown bundle without creating agent directories", async () => {
 	const cwd = await client();
 
-	expect(await add(cwd, "missing")).toMatchInlineSnapshot(`
+	expect(expectFailure(await add(cwd, "missing"))).toMatchInlineSnapshot(`
 	  {
-	    "exitCode": 1,
-	    "stderr": [
-	      "error: No skills found in bundles: missing.",
-	      "",
+	    "data": null,
+	    "errors": [
+	      {
+	        "code": "BUNDLE_NOT_FOUND",
+	        "input": "missing",
+	        "message": "No skills found in bundle: missing.",
+	        "source": "../source",
+	      },
 	    ],
-	    "stdout": [
-	      "",
-	    ],
+	    "success": false,
 	  }
 	`);
 	expect((await readdir(cwd)).sort()).toMatchInlineSnapshot(`[]`);
@@ -173,16 +205,17 @@ test("rejects an unknown bundle without creating agent directories", async () =>
 test("rejects traversal in a bundle selector", async () => {
 	const cwd = await client();
 
-	expect(await add(cwd, "../development")).toMatchInlineSnapshot(`
+	expect(expectFailure(await add(cwd, "../development"))).toMatchInlineSnapshot(`
 	  {
-	    "exitCode": 1,
-	    "stderr": [
-	      "error: Bundle names must be single directory names (letters, numbers, hyphens or underscores).",
-	      "",
+	    "data": null,
+	    "errors": [
+	      {
+	        "code": "INVALID_INPUT",
+	        "input": "bundles.0",
+	        "message": "Bundle names must be single directory names (letters, numbers, hyphens or underscores).",
+	      },
 	    ],
-	    "stdout": [
-	      "",
-	    ],
+	    "success": false,
 	  }
 	`);
 	expect((await readdir(cwd)).sort()).toMatchInlineSnapshot(`[]`);
@@ -194,16 +227,17 @@ test("preserves existing local skills", async () => {
 	await mkdir(join(cwd, ".agents/skills/local"), { recursive: true });
 	await writeFile(local, "Keep this local skill.\n");
 
-	expect(await add(cwd, "development")).toMatchInlineSnapshot(`
+	expect(expectFailure(await add(cwd, "development"))).toMatchInlineSnapshot(`
 	  {
-	    "exitCode": 1,
-	    "stderr": [
-	      "error: Existing .agents/skills; migration is not implemented yet. No skills were changed.",
-	      "",
+	    "data": null,
+	    "errors": [
+	      {
+	        "code": "MIGRATION_REQUIRED",
+	        "input": ".agents/skills",
+	        "message": "Existing .agents/skills; migration is not implemented yet. No skills were changed.",
+	      },
 	    ],
-	    "stdout": [
-	      "",
-	    ],
+	    "success": false,
 	  }
 	`);
 	expect(await readFile(local, "utf8")).toMatchInlineSnapshot(`
@@ -222,16 +256,17 @@ test("preserves an existing Claude skills directory", async () => {
 	await mkdir(join(cwd, ".claude/skills"), { recursive: true });
 	await writeFile(join(cwd, ".claude/skills/local.md"), "Keep this Claude skill.\n");
 
-	expect(await add(cwd, "development")).toMatchInlineSnapshot(`
+	expect(expectFailure(await add(cwd, "development"))).toMatchInlineSnapshot(`
 	  {
-	    "exitCode": 1,
-	    "stderr": [
-	      "error: Existing .claude/skills; migration is not implemented yet. No skills were changed.",
-	      "",
+	    "data": null,
+	    "errors": [
+	      {
+	        "code": "MIGRATION_REQUIRED",
+	        "input": ".claude/skills",
+	        "message": "Existing .claude/skills; migration is not implemented yet. No skills were changed.",
+	      },
 	    ],
-	    "stdout": [
-	      "",
-	    ],
+	    "success": false,
 	  }
 	`);
 	expect(await readFile(join(cwd, ".claude/skills/local.md"), "utf8")).toMatchInlineSnapshot(`
@@ -247,7 +282,7 @@ test("preserves an existing Claude skills directory", async () => {
 
 test("repeated adds leave config, lock and installed files untouched", async () => {
 	const cwd = await client();
-	expect((await add(cwd, "development")).exitCode).toBe(0);
+	expectSuccess(await add(cwd, "development"));
 	const paths = [
 		"skillbox/config.json",
 		"skills-lock.json",
@@ -260,16 +295,18 @@ test("repeated adds leave config, lock and installed files untouched", async () 
 		})),
 	);
 
-	expect(await add(cwd, "development", "development")).toMatchInlineSnapshot(`
+	expect(expectSuccess(await add(cwd, "development", "development"))).toMatchInlineSnapshot(`
 	  {
-	    "exitCode": 0,
-	    "stderr": [
-	      "",
-	    ],
-	    "stdout": [
-	      "Already added bundles: development.",
-	      "",
-	    ],
+	    "data": {
+	      "bundles": [
+	        "development",
+	      ],
+	      "installed": 0,
+	      "source": "../source",
+	      "status": "unchanged",
+	    },
+	    "errors": [],
+	    "success": true,
 	  }
 	`);
 	for (const [index, path] of paths.entries()) {
@@ -292,7 +329,7 @@ test("repeated adds leave config, lock and installed files untouched", async () 
 
 test("adds a second bundle without refreshing an existing skill", async () => {
 	const cwd = await client();
-	expect((await add(cwd, "development")).exitCode).toBe(0);
+	expectSuccess(await add(cwd, "development"));
 	const original = await readFile(join(cwd, ".agents/skills/blackbox-testing/SKILL.md"), "utf8");
 	const originalLock = await json(cwd, "skills-lock.json");
 	await writeFile(
@@ -313,17 +350,18 @@ Define the request and response before implementation.
 `,
 	);
 
-	expect(await add(cwd, "backend")).toMatchInlineSnapshot(`
+	expect(expectSuccess(await add(cwd, "backend"))).toMatchInlineSnapshot(`
 	  {
-	    "exitCode": 0,
-	    "stderr": [
-	      "",
-	    ],
-	    "stdout": [
-	      "Added 1 skill from backend:",
-	      "  api-contracts",
-	      "",
-	    ],
+	    "data": {
+	      "bundles": [
+	        "backend",
+	      ],
+	      "installed": 1,
+	      "source": "../source",
+	      "status": "added",
+	    },
+	    "errors": [],
+	    "success": true,
 	  }
 	`);
 	expect(await json(cwd, "skillbox/config.json")).toMatchInlineSnapshot(`
@@ -374,7 +412,7 @@ Define the request and response before implementation.
 
 test("adds a second source and keeps both SDK lock sources portable", async () => {
 	const cwd = await client();
-	expect((await add(cwd, "development")).exitCode).toBe(0);
+	expectSuccess(await add(cwd, "development"));
 	await mkdir(join(cwd, "../other/skillbox/frontend/web-contracts"), { recursive: true });
 	await writeFile(
 		join(cwd, "../other/skillbox/frontend/web-contracts/SKILL.md"),
@@ -389,17 +427,18 @@ Define the interaction before implementation.
 `,
 	);
 
-	expect(await run(cwd, "add", "../other", "frontend")).toMatchInlineSnapshot(`
+	expect(expectSuccess(await run(cwd, "add", "../other", "frontend"))).toMatchInlineSnapshot(`
 	  {
-	    "exitCode": 0,
-	    "stderr": [
-	      "",
-	    ],
-	    "stdout": [
-	      "Added 1 skill from frontend:",
-	      "  web-contracts",
-	      "",
-	    ],
+	    "data": {
+	      "bundles": [
+	        "frontend",
+	      ],
+	      "installed": 1,
+	      "source": "../other",
+	      "status": "added",
+	    },
+	    "errors": [],
+	    "success": true,
 	  }
 	`);
 	expect(await json(cwd, "skillbox/config.json")).toMatchInlineSnapshot(`
@@ -441,24 +480,28 @@ Define the interaction before implementation.
 	`);
 });
 
-test("uses config-relative workspace roots for frontend and backend", async () => {
+test("uses workspace-relative roots for frontend and backend", async () => {
 	const cwd = await client();
 	await mkdir(join(cwd, "frontend"));
 	await mkdir(join(cwd, "backend"));
 
 	for (const workspace of ["frontend", "backend"]) {
-		expect(await run(cwd, "--config", workspace, "add", "../source", "development"))
-			.toMatchInlineSnapshot(`
+		expect(
+			expectSuccess(
+				await run(cwd, "--workspace", workspace, "add", "../source", "development"),
+			),
+		).toMatchInlineSnapshot(`
 		  {
-		    "exitCode": 0,
-		    "stderr": [
-		      "",
-		    ],
-		    "stdout": [
-		      "Added 1 skill from development:",
-		      "  blackbox-testing",
-		      "",
-		    ],
+		    "data": {
+		      "bundles": [
+		        "development",
+		      ],
+		      "installed": 1,
+		      "source": "../source",
+		      "status": "added",
+		    },
+		    "errors": [],
+		    "success": true,
 		  }
 		`);
 		expect((await readdir(join(cwd, workspace))).sort()).toMatchInlineSnapshot(`
@@ -510,17 +553,18 @@ test("records portable SDK sources when the bundle lives in the client itself", 
 	const cwd = await client();
 	await cp(join(cwd, "../source/skillbox"), join(cwd, "skillbox"), { recursive: true });
 
-	expect(await run(cwd, "add", ".", "development")).toMatchInlineSnapshot(`
+	expect(expectSuccess(await run(cwd, "add", ".", "development"))).toMatchInlineSnapshot(`
 	  {
-	    "exitCode": 0,
-	    "stderr": [
-	      "",
-	    ],
-	    "stdout": [
-	      "Added 1 skill from development:",
-	      "  blackbox-testing",
-	      "",
-	    ],
+	    "data": {
+	      "bundles": [
+	        "development",
+	      ],
+	      "installed": 1,
+	      "source": ".",
+	      "status": "added",
+	    },
+	    "errors": [],
+	    "success": true,
 	  }
 	`);
 	expect(await json(cwd, "skillbox/config.json")).toMatchInlineSnapshot(`
@@ -553,45 +597,51 @@ test("records portable SDK sources when the bundle lives in the client itself", 
 	).toBe(await readFile(join(cwd, ".agents/skills/blackbox-testing/SKILL.md"), "utf8"));
 });
 
-test("accepts an absolute config directory from another invocation directory", async () => {
+test("accepts an absolute workspace directory from another invocation directory", async () => {
 	const cwd = await client();
 	await mkdir(join(cwd, "frontend"));
 	await mkdir(join(cwd, "invocation"));
-	const config = join(cwd, "frontend");
+	const workspace = join(cwd, "frontend");
 
-	expect(await run(cwd, "--config", config, "add", "../source", "development"))
-		.toMatchInlineSnapshot(`
+	expect(
+		expectSuccess(await run(cwd, "--workspace", workspace, "add", "../source", "development")),
+	).toMatchInlineSnapshot(`
 	  {
-	    "exitCode": 0,
-	    "stderr": [
-	      "",
-	    ],
-	    "stdout": [
-	      "Added 1 skill from development:",
-	      "  blackbox-testing",
-	      "",
-	    ],
+	    "data": {
+	      "bundles": [
+	        "development",
+	      ],
+	      "installed": 1,
+	      "source": "../source",
+	      "status": "added",
+	    },
+	    "errors": [],
+	    "success": true,
 	  }
 	`);
 	expect(
-		await run(
-			join(cwd, "invocation"),
-			"--config",
-			config,
-			"add",
-			"../../source",
-			"development",
+		expectSuccess(
+			await run(
+				join(cwd, "invocation"),
+				"--workspace",
+				workspace,
+				"add",
+				"../../source",
+				"development",
+			),
 		),
 	).toMatchInlineSnapshot(`
 	  {
-	    "exitCode": 0,
-	    "stderr": [
-	      "",
-	    ],
-	    "stdout": [
-	      "Already added bundles: development.",
-	      "",
-	    ],
+	    "data": {
+	      "bundles": [
+	        "development",
+	      ],
+	      "installed": 0,
+	      "source": "../../source",
+	      "status": "unchanged",
+	    },
+	    "errors": [],
+	    "success": true,
 	  }
 	`);
 	expect(await json(cwd, "frontend/skillbox/config.json")).toMatchInlineSnapshot(`
@@ -648,17 +698,21 @@ test("installs a Git source through the SDK without an npm package", async () =>
 	}
 	const source = pathToFileURL(repository).href;
 
-	expect(await run(cwd, "add", source, "development")).toMatchInlineSnapshot(`
+	const response = expectSuccess(await run(cwd, "add", source, "development"));
+	expect(response).toMatchObject({ data: { source } });
+	(response.data as { source: string }).source = "<git-source>";
+	expect(response).toMatchInlineSnapshot(`
 	  {
-	    "exitCode": 0,
-	    "stderr": [
-	      "",
-	    ],
-	    "stdout": [
-	      "Added 1 skill from development:",
-	      "  blackbox-testing",
-	      "",
-	    ],
+	    "data": {
+	      "bundles": [
+	        "development",
+	      ],
+	      "installed": 1,
+	      "source": "<git-source>",
+	      "status": "added",
+	    },
+	    "errors": [],
+	    "success": true,
 	  }
 	`);
 	const config = await json(cwd, "skillbox/config.json");

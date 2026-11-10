@@ -10,144 +10,131 @@ import {
 	symlink,
 	writeFile,
 } from "node:fs/promises";
-import { dirname, isAbsolute, join, resolve } from "node:path";
-import { installSkills, resolveSource, type SkillInfo, type SkillsConfig } from "skills";
+import { dirname, join, resolve } from "node:path";
+import { installSkills, type SkillInfo } from "skills";
 import { z } from "zod";
-import { bundleSchema, configPath, readConfig, withBundles } from "./config.ts";
+import { configPath, readConfig, withBundles } from "./config.ts";
 import { lockPath, readLock, relocateLock } from "./lock.ts";
-import { localPath, readOptional, statOptional } from "./paths.ts";
+import { readOptional, statOptional } from "./paths.ts";
 import { publish } from "./publish.ts";
+import { ResponseError, responseError } from "./response.ts";
+import { resolveBundleSource, sdkConfig } from "./sdk.ts";
 
 const inputSchema = z.object({
 	cwd: z.string().min(1),
 	source: z.string().min(1),
-	bundles: z.array(bundleSchema).default([]),
-	config: z.string().min(1).default("."),
+	bundles: z.array(z.string()).default([]),
+	workspace: z.string().min(1).default("."),
 });
 
-const sdkConfig = {
-	scope: "project",
-	mode: "copy",
-	lockfile: true,
-	telemetry: false,
-	duplicates: "error",
-	symlinks: "reject",
-	agents: { include: ["universal"], default: ["universal"] },
-} satisfies SkillsConfig;
-
-async function requireAbsent(cwd: string, path: string) {
-	if (await statOptional(join(cwd, path))) {
-		throw new Error(
-			`Existing ${path}; migration is not implemented yet. No skills were changed.`,
-		);
-	}
+export interface AddResult {
+	status: "added" | "unchanged";
+	source: string;
+	bundles: string[];
+	installed: number;
 }
 
-function inBundle(skill: SkillInfo, bundle: string, local: boolean) {
-	const prefix = `${local ? "" : "skillbox/"}${bundle}/`;
-	return [skill.path, ...(skill.duplicates ?? [])].some((path) => path?.startsWith(prefix));
-}
-
-export async function add(input: z.input<typeof inputSchema>) {
+export async function add(input: z.input<typeof inputSchema>): Promise<AddResult> {
 	const parsed = inputSchema.parse(input);
-	const cwd = await realpath(resolve(parsed.cwd, parsed.config));
-	const local = isAbsolute(parsed.source) || parsed.source.startsWith(".");
-	const source = local
-		? localPath(cwd, await realpath(resolve(parsed.cwd, parsed.source)))
-		: parsed.source;
-	const config = await readConfig(cwd);
-	const lockText = await readOptional(join(cwd, lockPath));
+	const workspace = await resolveWorkspace(parsed.cwd, parsed.workspace);
+	const config = await readConfig(workspace);
+	const lockText = await readOptional(join(workspace, lockPath));
 	const lock = lockText === undefined ? undefined : readLock(lockText);
 	if (!config) {
-		await requireAbsent(cwd, ".agents/skills");
-		await requireAbsent(cwd, ".claude/skills");
-		await requireAbsent(cwd, lockPath);
+		await requireAbsent(workspace, ".agents/skills");
+		await requireAbsent(workspace, ".claude/skills");
+		await requireAbsent(workspace, lockPath);
 	} else {
-		if (!lock) throw new Error(`Missing ${lockPath}; cannot add to a managed installation.`);
-		const tracked = lock.skills;
-		const directory = await statOptional(join(cwd, ".agents/skills"));
-		if (!directory?.isDirectory()) {
-			throw new Error(
-				"Managed .agents/skills must be a real directory. Restore it before adding skills.",
+		if (!lock) {
+			throw responseError(
+				"LOCK_MISSING",
+				`Missing ${lockPath}; cannot add to a managed installation.`,
+				{ input: lockPath },
 			);
 		}
-		for (const name of await readdir(join(cwd, ".agents/skills"))) {
+		const tracked = lock.skills;
+		const directory = await statOptional(join(workspace, ".agents/skills"));
+		if (!directory?.isDirectory()) {
+			throw responseError(
+				"MANAGED_SKILLS_MISSING",
+				"Managed .agents/skills must be a real directory. Run skillbox sync to restore it before adding skills.",
+				{ input: ".agents/skills" },
+			);
+		}
+		for (const name of await readdir(join(workspace, ".agents/skills"))) {
 			if (!Object.hasOwn(tracked, name)) {
-				throw new Error(
+				throw responseError(
+					"UNMANAGED_SKILL",
 					`Unmanaged skill: ${name}; migration is not implemented yet. No skills were changed.`,
+					{ skill: name },
 				);
 			}
 		}
-		const link = join(cwd, ".claude/skills");
+		const link = join(workspace, ".claude/skills");
 		if (await statOptional(link)) {
-			if (resolve(dirname(link), await readlink(link)) !== join(cwd, ".agents/skills")) {
-				throw new Error(
+			if (
+				resolve(dirname(link), await readlink(link)) !== join(workspace, ".agents/skills")
+			) {
+				throw responseError(
+					"CLAUDE_SKILLS_LINK_INVALID",
 					"Existing .claude/skills does not link to .agents/skills. No skills were changed.",
+					{ input: ".claude/skills" },
 				);
 			}
 		}
 	}
 
-	const handle = await resolveSource(local ? join(cwd, source, "skillbox") : source, {
-		cwd,
-		config: sdkConfig,
-		fullDepth: true,
-		onWarning: (warning) => {
-			throw warning;
-		},
+	const resolved = await resolveBundleSource({
+		source: parsed.source,
+		bundles: parsed.bundles,
+		cwd: parsed.cwd,
+		workspace,
 	});
 	try {
-		const inferred = /^skillbox\/([^/]+)\/?$/.exec(handle.source.subpath ?? "")?.[1];
-		const requested = [
-			...new Set(
-				parsed.bundles.length > 0
-					? parsed.bundles
-					: inferred
-						? [bundleSchema.parse(inferred)]
-						: [],
-			),
-		];
-		if (requested.length === 0) {
-			throw new Error("Specify bundle names, or use a URL pointing to skillbox/<bundle>.");
-		}
 		const current = config ?? { sources: [] };
-		const existing = current.sources.find((entry) => entry.source === source);
-		const bundles = requested.filter((bundle) => !existing?.bundles.includes(bundle));
-		if (bundles.length === 0) return { skills: [], bundles: requested };
-		const next = withBundles(current, source, bundles);
-
-		const skills = handle.skills.filter((skill) =>
+		const existing = current.sources.find((entry) => entry.source === resolved.source);
+		const bundles = resolved.bundles.filter((bundle) => !existing?.bundles.includes(bundle));
+		if (bundles.length === 0) {
+			return {
+				status: "unchanged",
+				source: parsed.source,
+				bundles: resolved.bundles,
+				installed: 0,
+			};
+		}
+		const next = withBundles(current, resolved.source, bundles);
+		const local = resolved.handle.source.type === "local";
+		const skills = resolved.skills.filter((skill) =>
 			bundles.some((bundle) => inBundle(skill, bundle, local)),
 		);
-		const missing = bundles.filter(
-			(bundle) => !skills.some((skill) => inBundle(skill, bundle, local)),
-		);
-		if (missing.length > 0)
-			throw new Error(`No skills found in bundles: ${missing.join(", ")}.`);
 
 		for (const skill of skills) {
-			if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(skill.name)) {
-				throw new Error(`Skill names must be lowercase kebab-case: ${skill.name}.`);
-			}
 			if (
 				(lock && Object.hasOwn(lock.skills, skill.name)) ||
-				(await statOptional(join(cwd, ".agents/skills", skill.name)))
+				(await statOptional(join(workspace, ".agents/skills", skill.name)))
 			) {
-				throw new Error(`Skill name collision: ${skill.name}. No skills were changed.`);
+				throw responseError(
+					"SKILL_NAME_COLLISION",
+					`Skill name collision: ${skill.name}. No skills were changed.`,
+					{ source: parsed.source, skill: skill.name },
+				);
 			}
 		}
 
-		const staging = await mkdtemp(join(cwd, ".skillbox-add-"));
+		const staging = await mkdtemp(join(workspace, ".skillbox-add-"));
 		let retainStaging = false;
 		try {
 			if (lockText !== undefined) {
 				await mkdir(join(staging, ".agents"));
-				await cp(join(cwd, ".agents/skills"), join(staging, ".agents/skills"), {
+				await cp(join(workspace, ".agents/skills"), join(staging, ".agents/skills"), {
 					recursive: true,
 				});
-				await writeFile(join(staging, lockPath), relocateLock(lockText, cwd, staging));
+				await writeFile(
+					join(staging, lockPath),
+					relocateLock(lockText, workspace, staging),
+				);
 			}
-			const result = await installSkills(handle, {
+			const result = await installSkills(resolved.handle, {
 				cwd: staging,
 				config: sdkConfig,
 				skills: skills.map((skill) => skill.name),
@@ -156,11 +143,20 @@ export async function add(input: z.input<typeof inputSchema>) {
 				},
 			});
 			if (result.failed.length > 0) {
-				throw new Error(result.failed.map((failure) => failure.message).join("\n"));
+				throw new ResponseError(
+					result.failed.map((failure) => ({
+						code: failure.code,
+						message: failure.message,
+						source: parsed.source,
+						skill: failure.skill,
+					})),
+				);
 			}
 			if (result.skipped.length > 0 || result.installed.length !== skills.length) {
-				throw new Error(
+				throw responseError(
+					"INSTALL_INCOMPLETE",
 					"The library did not install every selected skill. No skills were changed.",
+					{ source: parsed.source },
 				);
 			}
 
@@ -168,24 +164,63 @@ export async function add(input: z.input<typeof inputSchema>) {
 			await writeFile(join(staging, configPath), `${JSON.stringify(next, null, 2)}\n`);
 			await writeFile(
 				join(staging, lockPath),
-				relocateLock(await readFile(join(staging, lockPath), "utf8"), staging, cwd),
+				relocateLock(await readFile(join(staging, lockPath), "utf8"), staging, workspace),
 			);
 			await mkdir(join(staging, ".claude"));
 			await symlink("../.agents/skills", join(staging, ".claude/skills"));
 			try {
-				await publish(staging, cwd);
+				await publish(staging, workspace);
 			} catch (cause) {
 				retainStaging = true;
-				throw new Error(
-					`Could not publish installation: ${cause instanceof Error ? cause.message : String(cause)} Recovery files retained at ${staging}.`,
-					{ cause },
+				throw responseError(
+					"PUBLISH_FAILED",
+					`Could not publish installation: ${errorMessage(cause)} Recovery files retained at ${staging}.`,
+					{ source: parsed.source },
+					cause,
 				);
 			}
-			return { skills: skills.map((skill) => skill.name).sort(), bundles };
+			return {
+				status: "added",
+				source: parsed.source,
+				bundles: resolved.bundles,
+				installed: skills.length,
+			};
 		} finally {
 			if (!retainStaging) await rm(staging, { recursive: true, force: true });
 		}
 	} finally {
-		await handle.dispose();
+		await resolved.handle.dispose();
 	}
+}
+
+async function resolveWorkspace(cwd: string, input: string): Promise<string> {
+	try {
+		return await realpath(resolve(cwd, input));
+	} catch (cause) {
+		throw responseError(
+			"WORKSPACE_NOT_FOUND",
+			`Workspace does not exist: ${input}`,
+			{ input },
+			cause,
+		);
+	}
+}
+
+async function requireAbsent(workspace: string, path: string): Promise<void> {
+	if (await statOptional(join(workspace, path))) {
+		throw responseError(
+			"MIGRATION_REQUIRED",
+			`Existing ${path}; migration is not implemented yet. No skills were changed.`,
+			{ input: path },
+		);
+	}
+}
+
+function inBundle(skill: SkillInfo, bundle: string, local: boolean): boolean {
+	const prefix = `${local ? "" : "skillbox/"}${bundle}/`;
+	return [skill.path, ...(skill.duplicates ?? [])].some((path) => path?.startsWith(prefix));
+}
+
+function errorMessage(error: unknown): string {
+	return error instanceof Error ? error.message : String(error);
 }

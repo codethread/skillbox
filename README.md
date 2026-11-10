@@ -9,7 +9,7 @@ Build a standalone CLI, then add a GitHub bundle to your project—no npm packag
 ```sh
 bun install --frozen-lockfile
 bun run build
-./dist/skillbox --config ../my-project add https://github.com/codethread/agents/tree/main/skillbox/dev
+./dist/skillbox --workspace ../my-project add https://github.com/codethread/agents/tree/main/skillbox/dev
 ```
 
 A tree URL pointing to `skillbox/<bundle>` implies the bundle name. Repository URLs and GitHub shorthand accept explicit bundle names, for example `skillbox add owner/repo frontend backend`. The SDK handles fetching and discovery.
@@ -38,16 +38,27 @@ For example, a config selecting a sibling source repository looks like:
 
 Adding another source or bundle preserves existing installed skills and lock entries. Repeating an already-configured add performs no writes. The SDK config object stays in code; there is no second SDK config file.
 
-### Workspace config override
+### Workspaces
 
 ```sh
-bun run src/cli.ts --config frontend add ../my-skills development
-bun run src/cli.ts --config backend add ../my-skills development
+bun run src/cli.ts --workspace frontend add ../my-skills development
+bun run src/cli.ts --workspace backend add ../my-skills development
 ```
 
-`--config` selects a workspace directory, defaulting to the current directory; `skillbox/config.json` is implied. In these examples, the existing `frontend/` and `backend/` directories each get their own `.agents/skills/`, `.claude/skills` link, config, and SDK lockfile. Relative and absolute directory paths are supported. Source arguments are resolved from the invocation directory, then saved relative to the workspace root.
+`--workspace` selects a workspace directory, defaulting to the current directory; `skillbox/config.json` is implied. In these examples, the existing `frontend/` and `backend/` directories each get their own `.agents/skills/`, `.claude/skills` link, config, and SDK lockfile. Relative and absolute directory paths are supported. Source arguments are resolved from the invocation directory, then saved relative to the workspace root.
 
-Exact revision pins, restoring from config (`sync`), automatic ignore setup in consuming projects, migration, patches, and multi-workspace orchestration are not implemented yet.
+## Sync
+
+```sh
+skillbox sync
+skillbox --workspace frontend sync
+```
+
+Sync restores generated skills from the recorded config and verifies their content against the SDK lockfile before publishing. It does not advance the recorded hashes or refs. Repeating sync with matching installed contents reports an unchanged result.
+
+Operational commands return JSON with explicit `success`, concise result data, and structured errors. Full skill contents and config/lockfile dumps are not included by default.
+
+Exact revision pin creation, shared caching, automatic ignore setup in consuming projects, migration, patches, and multi-workspace orchestration are not implemented yet.
 
 Run `./dist/skillbox add --help` for command options.
 
