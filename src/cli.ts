@@ -2,6 +2,7 @@
 import { realpath } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Command, CommanderError } from "commander";
+import { version } from "../package.json";
 import { add } from "./commands/add.ts";
 import {
 	bundledSkillSchema,
@@ -14,6 +15,7 @@ import { sync } from "./commands/sync.ts";
 
 const program = new Command()
 	.name("skillbox")
+	.version(version, "-v, --version")
 	.description("Install skill bundles into your repository.")
 	.addHelpText(
 		"after",
@@ -112,7 +114,7 @@ try {
 	await program.parseAsync();
 } catch (error) {
 	if (error instanceof CommanderError && error.exitCode === 0) {
-		// Commander has already written requested help to stdout.
+		// Commander has already written requested help or version to stdout.
 	} else {
 		writeJson(failureResponse(error));
 		process.exitCode = error instanceof CommanderError ? error.exitCode : 1;
