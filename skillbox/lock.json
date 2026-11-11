@@ -50,7 +50,7 @@
 		"release": {
 			"source": "./skillbox",
 			"sourceType": "local",
-			"computedHash": "d7f95cfa037b1abc3a4425dec91d4896d9cdbcd956efd736c2b3f8cf7f0f09f6",
+			"computedHash": "683e0aea6b4a86bb5e7ff5bdc788a2d035b0cea16db62edff36d6976b8a7aee0",
 			"installMode": "copy"
 		},
 		"robustness": {

@@ -1,0 +1,76 @@
+[
+	{
+		"version": "0.2.0",
+		"changes": [
+			{
+				"commit": "61035fa",
+				"summary": "Reconcile direct config edits during sync.",
+				"body": "Sync installs newly selected skills, removes deselected managed skills and lock entries, and preserves retained content hashes. Results report installed, unchanged and removed counts.",
+				"breaking": [],
+				"adoption": [
+					{
+						"requirement": "optional",
+						"text": "Edit skillbox/config.json and run sync. Both tracking files must already exist; use add for the first installation. Managed installed files are generated output and can be replaced or removed."
+					}
+				]
+			},
+			{
+				"commit": "4e04ef8",
+				"summary": "Bundle offline configuration and authoring guidance.",
+				"body": "Discover guidance with skills list, load instructions with skills get, retrieve supporting resources with skills file, and request response schemas with skills schema.",
+				"breaking": [],
+				"adoption": []
+			},
+			{
+				"commit": "2782196",
+				"summary": "Bundle manual skill migration guidance.",
+				"body": "Migration guidance is manual; this does not add an automated migration command.",
+				"breaking": [],
+				"adoption": []
+			},
+			{
+				"commit": "781bb91",
+				"summary": "Expose the installed version with -v and --version.",
+				"body": "",
+				"breaking": [],
+				"adoption": []
+			},
+			{
+				"commit": "2a91eb0",
+				"summary": "Clarify source grouping, local bundles and npm execution options.",
+				"body": "Reuse the exact source string to merge bundle selections. Ignore generated .agents/skills/ and the .claude/skills symlink in consuming projects.",
+				"breaking": [],
+				"adoption": []
+			}
+		]
+	},
+	{
+		"version": "0.1.1",
+		"changes": [
+			{
+				"commit": "c4f592d",
+				"summary": "Keep lock ownership within Skillbox.",
+				"body": "Store the SDK-format lock at skillbox/lock.json, preserve existing entries and workspace-relative source paths, and leave the root skills-lock.json owned by npx skills untouched.",
+				"breaking": ["Skillbox no longer reads its lock from the root skills-lock.json."],
+				"adoption": [
+					{
+						"requirement": "required",
+						"text": "If Skillbox 0.1.0 created your root skills-lock.json, move it to skillbox/lock.json before upgrading. Do not move an unrelated npx skills lock; migration is not automatic."
+					}
+				]
+			}
+		]
+	},
+	{
+		"version": "0.1.0",
+		"changes": [
+			{
+				"commit": "977cfa9",
+				"summary": "Publish the repository-local skill bundle CLI under MIT.",
+				"body": "Install local or Git-hosted bundles with add, record source selections and SDK lock entries, and restore matching skill contents with sync. Includes workspace selection, JSON outcomes, a prebuilt npm CLI and a standalone binary. Lock hashes check content; immutable revision replay, shared caching, updates and patches are not implemented.",
+				"breaking": [],
+				"adoption": []
+			}
+		]
+	}
+]

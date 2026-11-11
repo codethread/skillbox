@@ -17,7 +17,8 @@
 	"files": [
 		"bin/skillbox.mjs",
 		"dist/cli.mjs",
-		"dist/THIRD-PARTY-NOTICES.txt"
+		"dist/THIRD-PARTY-NOTICES.txt",
+		"CHANGELOG.md"
 	],
 	"type": "module",
 	"publishConfig": {
@@ -27,6 +28,7 @@
 	"scripts": {
 		"skillbox": "bun run src/cli.ts",
 		"build": "bun run build:npm && bun run build:binary",
+		"changelog:generate": "bun run scripts/generate-changelog.ts && oxfmt CHANGELOG.md",
 		"test": "bun test",
 		"lint": "oxlint src tests scripts bin skillbox",
 		"typecheck": "tsc --noEmit",
@@ -40,6 +42,7 @@
 	},
 	"devDependencies": {
 		"@clack/prompts": "^1.2.0",
+		"@codethread/cli-changelog": "0.1.0",
 		"@types/bun": "^1.4.4",
 		"@vercel/detect-agent": "^1.2.1",
 		"commander": "^15.1.0",

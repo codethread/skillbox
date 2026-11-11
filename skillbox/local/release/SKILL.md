@@ -12,7 +12,7 @@ Run commands from the repository root with Bun, Node.js, npm, Git, and (for GitH
 ## Prepare and freeze
 
 1. Inspect the worktree, recent commits, previous release tag, and release task notes. Agree on the next version and release notes. Do not include unrelated edits. Check `npm whoami --registry https://registry.npmjs.org` has publish access to `@codethread`; confirm GitHub authentication if creating a release.
-2. Edit the root `package.json` version directly, then run `bun install` to refresh `bun.lock`. Do not use a version command that creates a commit or tag before verification. The CLI imports the package version; do not maintain a second version string. Validate the frozen lock and run checks/build:
+2. Add the release's user-facing changes, commit references, breaking notes and adoption steps to `src/changelog.json`, then run `bun run changelog:generate`. Commit the generated `CHANGELOG.md`; it ships in the npm archive alongside the offline `changelog` command. Edit the root `package.json` version directly, then run `bun install` to refresh `bun.lock`. Do not use a version command that creates a commit or tag before verification. The CLI imports the package version; do not maintain a second version string. Validate the frozen lock and run checks/build:
 
     ```sh
     bun install --frozen-lockfile

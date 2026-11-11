@@ -8,6 +8,10 @@ const result = await Bun.build({
 	outdir: join(root, "dist"),
 	naming: "cli.mjs",
 	target: "node",
+	// cli-changelog accepts only stable X.Y.Z versions. Replace its Bun-only
+	// comparator in the Node bundle; source and standalone builds use Bun's API.
+	banner: skillboxCompareReleaseVersions.toString(),
+	define: { "Bun.semver.order": "skillboxCompareReleaseVersions" },
 	metafile: true,
 });
 if (!result.success) throw new AggregateError(result.logs, "CLI build failed.");
@@ -46,3 +50,13 @@ for (const directory of [...packages].sort()) {
 	for (const file of files) notices.push(await readFile(file, "utf8"));
 }
 await Bun.write(join(root, "dist/THIRD-PARTY-NOTICES.txt"), notices.join("\n"));
+
+function skillboxCompareReleaseVersions(left: string, right: string): number {
+	const a = left.split(".").map(Number);
+	const b = right.split(".").map(Number);
+	for (let index = 0; index < 3; index++) {
+		const difference = a[index]! - b[index]!;
+		if (difference !== 0) return difference;
+	}
+	return 0;
+}

@@ -51,6 +51,7 @@ const entries = run(["tar", "-tzf", archive], root).trim().split("\n").sort();
 assert.deepEqual(
 	entries,
 	[
+		"package/CHANGELOG.md",
 		"package/LICENSE",
 		"package/README.md",
 		"package/bin/skillbox.mjs",
@@ -58,7 +59,7 @@ assert.deepEqual(
 		"package/dist/cli.mjs",
 		"package/package.json",
 	].sort(),
-	"Archive must contain only the public CLI, metadata, README and licenses",
+	"Archive must contain only the public CLI, metadata, README, changelog and licenses",
 );
 console.log(JSON.stringify({ specifier, archive, integrity }));
 
@@ -188,6 +189,23 @@ async function smokeInstall(directory: string, target: string): Promise<void> {
 		assert.equal(run(["node", cli, flag], consumer), `${manifest.version}\n`);
 	}
 	assert.ok(run(["node", cli, "--help"], consumer).includes("-v, --version"));
+	const changelog = z
+		.object({
+			installedVersion: z.literal(manifest.version),
+			releases: z.array(z.object({ version: z.string() })).min(1),
+		})
+		.parse(response(["node", cli, "--workspace", "/nonexistent", "changelog"], consumer));
+	assert.equal(changelog.releases[0]!.version, manifest.version);
+	assert.ok(
+		run(["node", cli, "changelog", "--release", "0.1.1", "--text"], consumer).includes(
+			"Adoption (required)",
+		),
+	);
+	assert.ok(
+		(
+			await readFile(join(consumer, "node_modules/@codethread/skillbox/CHANGELOG.md"), "utf8")
+		).includes(`## ${manifest.version}`),
+	);
 	const guidance = response(["node", cli, "skills", "list"], consumer);
 	assert.ok(
 		z

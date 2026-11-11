@@ -2,6 +2,14 @@
 import { realpath } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Command, CommanderError } from "commander";
+import {
+	changelogHistorySchema,
+	changelogQuerySchema,
+	changelogSchema,
+	queryChangelog,
+	renderChangelog,
+} from "@codethread/cli-changelog";
+import recordedHistory from "./changelog.json";
 import { version } from "../package.json";
 import { add } from "./commands/add.ts";
 import {
@@ -62,6 +70,30 @@ program
 		const cwd = process.cwd();
 		const result = await sync({ cwd, workspace: await selectedWorkspace(cwd) });
 		writeJson(successResponse(result));
+	});
+
+program
+	.command("changelog")
+	.description("Read recorded release history offline; defaults to the latest installed release.")
+	.option("--since <version>", "releases newer than this version (exclusive)")
+	.option("--release <version>", "one exact recorded release")
+	.option("--limit <count>", "page size in changes (1–100; default: 20)")
+	.option("--offset <count>", "zero-based change offset (default: 0)")
+	.option("--text", "render a human-readable page instead of JSON")
+	.option("--schema", "return the JSON Schema for data without querying history")
+	.action((options: { text?: boolean; schema?: boolean }) => {
+		const query = changelogQuerySchema.parse(options);
+		if (options.schema) {
+			writeJson(successResponse(changelogSchema()));
+			return;
+		}
+		const page = queryChangelog(
+			{ tool: "skillbox", version },
+			changelogHistorySchema.parse(recordedHistory),
+			query,
+		);
+		if (options.text) process.stdout.write(renderChangelog(page));
+		else writeJson(successResponse(page));
 	});
 
 const skills = program

@@ -114,6 +114,18 @@ Operational commands return JSON with explicit `success`, concise result data, a
 
 Exact revision pin creation, shared caching, automatic ignore setup in consuming projects, migration, patches, and multi-workspace orchestration are not implemented yet.
 
+## Changelog
+
+Read [the changelog](CHANGELOG.md), or query the history bundled in the installed CLI without a workspace, Git checkout, or network:
+
+```sh
+skillbox changelog
+skillbox changelog --since 0.1.1
+skillbox changelog --release 0.1.1 --text
+```
+
+The default JSON response uses the `success`/`data`/`errors` envelope. History starts at 0.1.0; the default selects the newest recorded release at or below the installed version. `--since` is exclusive and cannot be combined with `--release`. Pages contain up to 20 changes by default; use `--limit` (1–100) and continue with `--offset` at `data.nextOffset` when present. `--schema` returns the JSON Schema for `data`; `--text` opts into human-readable output. Breaking changes and adoption steps are recorded explicitly.
+
 ## Agent guidance
 
 The CLI bundles offline instructions for project configuration and bundle authoring. Discover metadata first, then load only the instructions or supporting resource needed:
