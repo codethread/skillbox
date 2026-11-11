@@ -7,6 +7,8 @@ description: Author or extend a Skillbox source bundle with SKILL.md instruction
 
 Extend skills in an owned source repository, not in a client's generated installation. Skillbox currently has no patch or update command for customizing third-party skills while retaining upstream intent.
 
+Use `local` as the bundle name for repository-specific maintainer skills (for example, `skillbox/local/release/SKILL.md`), rather than implying they are intended for public reuse. Select that bundle from source `"."` in the repository's own config. This is a naming convention, not access control; files in a public repository remain public.
+
 1. Inspect the source repository's existing `skillbox/<bundle>/` layout and conventions. Create each skill at `skillbox/<bundle>/<skill-name>/SKILL.md`; keep its supporting resources inside that skill directory. Use lowercase kebab-case for the skill name and match the directory name to the frontmatter name. Selected bundles/sources must not install duplicate skill names.
 2. Give `SKILL.md` YAML frontmatter with `name` and `description`. The description tells an agent when to load the skill. Write an actionable body with observable completion criteria. Keep branch-specific examples or detailed reference material in supporting files and link to them relative to `SKILL.md`.
 3. For a complete starter with a supporting resource, load:

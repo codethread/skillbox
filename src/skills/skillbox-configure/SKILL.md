@@ -9,6 +9,30 @@ Use `skillbox --help` and the selected command's `--help` for current syntax. Al
 
 For existing unmanaged skills or `MIGRATION_REQUIRED` during first add, use `skillbox skills get skillbox-migrate` before changing installation paths.
 
+## Choose how to run Skillbox
+
+Skillbox is published on npm as `@codethread/skillbox` and requires Node.js 22.20+ and Git. In an npm-backed project, prefer a project-local dev dependency with the project's package manager:
+
+```sh
+npm install --save-dev @codethread/skillbox
+# or:
+bun add --dev @codethread/skillbox
+# or:
+pnpm add --save-dev @codethread/skillbox
+```
+
+Use `skillbox` in package scripts (for example, `"skills:sync": "skillbox sync"`); the package manager exposes the local executable there. Commit the package manifest and package-manager lockfile.
+
+For a project without an npm package manifest, such as Rust or Go, run the npm-published CLI on demand instead:
+
+```sh
+npx --yes @codethread/skillbox sync
+# or:
+bunx @codethread/skillbox sync
+```
+
+These runners do not require adding a project dependency or permanently installing a global executable. In the commands below, substitute the chosen runner for `skillbox` when using it outside package scripts.
+
 ## Choose the operation
 
 ```text
