@@ -4,6 +4,14 @@
 
 Recorded history starts at 0.1.0. Earlier development history is not included.
 
+## 0.2.1
+
+- Bundle recorded changelog history using @codethread/cli-changelog@0.1.0. ([b2f54ee](https://github.com/codethread/skillbox/commit/b2f54ee))
+
+    Read release history offline with skillbox changelog. Select releases with --since or --release, page changes with --limit and --offset, request --schema, or opt into --text. The npm package includes CHANGELOG.md generated from the same history. Both the Node npm CLI and standalone binary are supported.
+
+    **Adoption (optional):** Run skillbox changelog --since 0.2.0 to read changes since your previous version. No tracking-file migration is required from 0.2.0.
+
 ## 0.2.0
 
 - Reconcile direct config edits during sync. ([61035fa](https://github.com/codethread/skillbox/commit/61035fa))

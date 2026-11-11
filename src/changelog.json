@@ -1,5 +1,22 @@
 [
 	{
+		"version": "0.2.1",
+		"changes": [
+			{
+				"commit": "b2f54ee",
+				"summary": "Bundle recorded changelog history using @codethread/cli-changelog@0.1.0.",
+				"body": "Read release history offline with skillbox changelog. Select releases with --since or --release, page changes with --limit and --offset, request --schema, or opt into --text. The npm package includes CHANGELOG.md generated from the same history. Both the Node npm CLI and standalone binary are supported.",
+				"breaking": [],
+				"adoption": [
+					{
+						"requirement": "optional",
+						"text": "Run skillbox changelog --since 0.2.0 to read changes since your previous version. No tracking-file migration is required from 0.2.0."
+					}
+				]
+			}
+		]
+	},
+	{
 		"version": "0.2.0",
 		"changes": [
 			{
