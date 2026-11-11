@@ -1,11 +1,11 @@
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
-import { responseError } from "./response.ts";
-import configure from "./skills/skillbox-configure/SKILL.md" with { type: "text" };
-import configuration from "./skills/skillbox-configure/references/configuration.md" with { type: "text" };
-import author from "./skills/skillbox-author/SKILL.md" with { type: "text" };
-import example from "./skills/skillbox-author/references/example.md" with { type: "text" };
-import migrate from "./skills/skillbox-migrate/SKILL.md" with { type: "text" };
+import { responseError } from "../response.ts";
+import configure from "./skillbox-configure/SKILL.md" with { type: "text" };
+import configuration from "./skillbox-configure/references/configuration.md" with { type: "text" };
+import author from "./skillbox-author/SKILL.md" with { type: "text" };
+import example from "./skillbox-author/references/example.md" with { type: "text" };
+import migrate from "./skillbox-migrate/SKILL.md" with { type: "text" };
 
 const metadataSchema = z.object({ name: z.string(), description: z.string() });
 const listInputSchema = z.object({

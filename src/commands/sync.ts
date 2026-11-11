@@ -11,12 +11,12 @@ import {
 } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { installSkills } from "skills";
-import { configPath, readConfig } from "./config.ts";
-import { lockPath, readLock, relocateLock } from "./lock.ts";
-import { readOptional, statOptional } from "./paths.ts";
-import { publish } from "./publish.ts";
-import { ResponseError, responseError } from "./response.ts";
-import { resolveBundleSource, sdkConfig, sdkLockPath } from "./sdk.ts";
+import { configPath, readConfig } from "../workspace/config.ts";
+import { lockPath, readLock, relocateLock } from "../workspace/lock.ts";
+import { readOptional, statOptional } from "../workspace/paths.ts";
+import { publish } from "../workspace/publish.ts";
+import { ResponseError, responseError } from "../response.ts";
+import { resolveBundleSource, sdkConfig, sdkLockPath } from "../workspace/sdk.ts";
 
 export interface SyncInput {
 	cwd: string;

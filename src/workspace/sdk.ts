@@ -4,7 +4,7 @@ import { resolveSource, type SkillInfo, type SkillsConfig, type SkillSource } fr
 import { z } from "zod";
 import { bundleSchema } from "./config.ts";
 import { localPath } from "./paths.ts";
-import { ResponseError, responseError } from "./response.ts";
+import { ResponseError, responseError } from "../response.ts";
 
 // The SDK hardcodes this filename; use it only inside disposable staging directories.
 export const sdkLockPath = "skills-lock.json";

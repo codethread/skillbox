@@ -13,12 +13,12 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { installSkills, type SkillInfo } from "skills";
 import { z } from "zod";
-import { configPath, readConfig, withBundles } from "./config.ts";
-import { lockPath, readLock, relocateLock } from "./lock.ts";
-import { readOptional, statOptional } from "./paths.ts";
-import { publish } from "./publish.ts";
-import { ResponseError, responseError } from "./response.ts";
-import { resolveBundleSource, sdkConfig, sdkLockPath } from "./sdk.ts";
+import { configPath, readConfig, withBundles } from "../workspace/config.ts";
+import { lockPath, readLock, relocateLock } from "../workspace/lock.ts";
+import { readOptional, statOptional } from "../workspace/paths.ts";
+import { publish } from "../workspace/publish.ts";
+import { ResponseError, responseError } from "../response.ts";
+import { resolveBundleSource, sdkConfig, sdkLockPath } from "../workspace/sdk.ts";
 
 const inputSchema = z.object({
 	cwd: z.string().min(1),

@@ -2,15 +2,15 @@
 import { realpath } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Command, CommanderError } from "commander";
-import { add } from "./add.ts";
+import { add } from "./commands/add.ts";
 import {
 	bundledSkillSchema,
 	getBundledSkill,
 	getBundledSkillFile,
 	listBundledSkills,
-} from "./bundled-skills.ts";
+} from "./skills/catalog.ts";
 import { failureResponse, responseError, successResponse } from "./response.ts";
-import { sync } from "./sync.ts";
+import { sync } from "./commands/sync.ts";
 
 const program = new Command()
 	.name("skillbox")
