@@ -28,7 +28,7 @@
 		"skillbox": "bun run src/cli.ts",
 		"build": "bun run build:npm && bun run build:binary",
 		"test": "bun test",
-		"lint": "oxlint src tests scripts bin",
+		"lint": "oxlint src tests scripts bin skillbox",
 		"typecheck": "tsc --noEmit",
 		"check": "bun run fmt:check && bun run lint && bun run typecheck && bun run test",
 		"fmt": "oxfmt --disable-nested-config",

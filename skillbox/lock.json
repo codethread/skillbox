@@ -1,20 +1,19 @@
 {
 	"version": 1,
 	"skills": {
+		"codebase-design": {
+			"source": "codethread/agents",
+			"sourceType": "github",
+			"computedHash": "b9b9081b45c2623311f0bd8681f69e927f2f9b69ad0397ad1531ee72b1c2b30c",
+			"skillPath": "skillbox/coding/codebase-design/SKILL.md",
+			"installMode": "copy"
+		},
 		"declutter": {
 			"source": "codethread/agents",
 			"sourceType": "github",
 			"computedHash": "a2f10372267712c3e807afb94cf7079c22c1fcb0e502e35842a7ee98dc13b1b4",
 			"ref": "main",
 			"skillPath": "skillbox/coding/declutter/SKILL.md",
-			"installMode": "copy"
-		},
-		"docs-styleguide": {
-			"source": "codethread/agents",
-			"sourceType": "github",
-			"computedHash": "e2db75d6394726c3d99a734ecb14455f9d354ba183e549b48f46bfc864945f70",
-			"ref": "main",
-			"skillPath": "skillbox/dev/docs-styleguide/SKILL.md",
 			"installMode": "copy"
 		},
 		"git-commit": {
@@ -33,12 +32,25 @@
 			"skillPath": "skillbox/coding/git-worktree-cleanup/SKILL.md",
 			"installMode": "copy"
 		},
+		"io-dependency-seams": {
+			"source": "codethread/agents",
+			"sourceType": "github",
+			"computedHash": "e3e27aa7f1502b6243898cda6fa6d323e41d89c69245c60f48aa53c172355a9e",
+			"skillPath": "skillbox/coding/io-dependency-seams/SKILL.md",
+			"installMode": "copy"
+		},
 		"purge": {
 			"source": "codethread/agents",
 			"sourceType": "github",
 			"computedHash": "7d89e2771e866dd7e863df41338e1e39be39e35e05704d23d26f140cd31925af",
 			"ref": "main",
 			"skillPath": "skillbox/coding/purge/SKILL.md",
+			"installMode": "copy"
+		},
+		"release": {
+			"source": "./skillbox",
+			"sourceType": "local",
+			"computedHash": "d7f95cfa037b1abc3a4425dec91d4896d9cdbcd956efd736c2b3f8cf7f0f09f6",
 			"installMode": "copy"
 		},
 		"robustness": {

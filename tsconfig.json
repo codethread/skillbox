@@ -13,5 +13,5 @@
 			"skills": ["./node_modules/skills/src/index.ts"]
 		}
 	},
-	"include": ["src/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts"]
+	"include": ["src/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts", "skillbox/**/*.ts"]
 }

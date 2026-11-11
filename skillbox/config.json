@@ -3,6 +3,10 @@
 		{
 			"source": "https://github.com/codethread/agents",
 			"bundles": ["coding", "dev"]
+		},
+		{
+			"source": ".",
+			"bundles": ["local"]
 		}
 	]
 }
