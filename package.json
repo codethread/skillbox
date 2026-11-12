@@ -42,7 +42,7 @@
 	},
 	"devDependencies": {
 		"@clack/prompts": "^1.2.0",
-		"@codethread/cli-changelog": "0.1.0",
+		"@codethread/cli-changelog": "0.1.1",
 		"@types/bun": "^1.4.4",
 		"@vercel/detect-agent": "^1.2.1",
 		"commander": "^15.1.0",

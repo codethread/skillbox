@@ -6,7 +6,7 @@
       "name": "@codethread/skillbox",
       "devDependencies": {
         "@clack/prompts": "^1.2.0",
-        "@codethread/cli-changelog": "0.1.0",
+        "@codethread/cli-changelog": "0.1.1",
         "@types/bun": "^1.4.4",
         "@vercel/detect-agent": "^1.2.1",
         "commander": "^15.1.0",
@@ -30,7 +30,7 @@
 
     "@clack/prompts": ["@clack/prompts@1.9.0", "", { "dependencies": { "@clack/core": "1.6.0", "fast-string-width": "^3.0.2", "fast-wrap-ansi": "^0.2.0", "sisteransi": "^2.0.0" } }, "sha512-tEj8X2No2A1c9NDnZECxiiJ8TP3vmFlN9tLlLeSaMqVW4tUmVG2R4qpv/eP4zymWxnymYLkLcIYVV0VcWj3RCQ=="],
 
-    "@codethread/cli-changelog": ["@codethread/cli-changelog@0.1.0", "", { "peerDependencies": { "zod": "^4.6.5" } }, "sha512-ShBXDMENaJmJj/cuZnzGs/FnAzLlugzOt4SGT/rQa9pe/II759R5KfooJ2rFqIlBaMP/Nm16BmJtiaNkruhBgg=="],
+    "@codethread/cli-changelog": ["@codethread/cli-changelog@0.1.1", "", { "peerDependencies": { "zod": "^4.6.5" }, "bin": { "cli-changelog": "src/cli.ts" } }, "sha512-PDJO+jcSHf50IiRR3RYe9RCKB7sSeVDx9u9fwOadhnJeDoTFwVzYW/KPDSm4FSdc4Ha94vAhIK+CUhmWO+WDOg=="],
 
     "@isaacs/fs-minipass": ["@isaacs/fs-minipass@4.0.1", "", { "dependencies": { "minipass": "^7.0.4" } }, "sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w=="],
 
