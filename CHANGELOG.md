@@ -4,6 +4,12 @@
 
 Recorded history starts at 0.1.0. Earlier development history is not included.
 
+## 0.2.2
+
+- Update the bundled cli-changelog dependency to 0.1.1. ([d0c5869](https://github.com/codethread/skillbox/commit/d0c5869))
+
+    Bundles @codethread/cli-changelog@0.1.1 in the npm CLI and standalone executable.
+
 ## 0.2.1
 
 - Bundle recorded changelog history using @codethread/cli-changelog@0.1.0. ([b2f54ee](https://github.com/codethread/skillbox/commit/b2f54ee))

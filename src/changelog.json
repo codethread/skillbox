@@ -1,5 +1,17 @@
 [
 	{
+		"version": "0.2.2",
+		"changes": [
+			{
+				"commit": "d0c5869",
+				"summary": "Update the bundled cli-changelog dependency to 0.1.1.",
+				"body": "Bundles @codethread/cli-changelog@0.1.1 in the npm CLI and standalone executable.",
+				"breaking": [],
+				"adoption": []
+			}
+		]
+	},
+	{
 		"version": "0.2.1",
 		"changes": [
 			{
