@@ -11,7 +11,6 @@ import workAgents from "./src/work-agents.ts";
 
 export const lake = createLake({
 	name: "skillbox",
-	minimumCore: "0.3.3",
 	extensions: [
 		batteriesExtension,
 		identityExtension,
