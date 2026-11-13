@@ -4,6 +4,7 @@
 		"module": "Preserve",
 		"moduleResolution": "Bundler",
 		"strict": true,
+		"exactOptionalPropertyTypes": true,
 		"noEmit": true,
 		"allowImportingTsExtensions": true,
 		"skipLibCheck": true,
@@ -13,5 +14,11 @@
 			"skills": ["./node_modules/skills/src/index.ts"]
 		}
 	},
-	"include": ["src/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts", "skillbox/**/*.ts"]
+	"include": [
+		"src/**/*.ts",
+		"tests/**/*.ts",
+		"scripts/**/*.ts",
+		"skillbox/**/*.ts",
+		".botlake/**/*.ts"
+	]
 }

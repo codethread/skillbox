@@ -29,7 +29,7 @@ bunx @codethread/skillbox add https://github.com/codethread/agents dev coding
 
 ### Build from source
 
-Build a standalone CLI, then add a GitHub bundle to your project—source skills do not need an npm package:
+Build a standalone CLI, then add a GitHub bundle to your project—source skills do not need an npm package. For repository development, `mise run` installs the pinned tools, root Bun workspace (including Botlake), and Git hooks:
 
 ```sh
 bun install --frozen-lockfile

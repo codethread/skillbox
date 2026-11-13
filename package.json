@@ -14,6 +14,9 @@
 	"bin": {
 		"skillbox": "./bin/skillbox.mjs"
 	},
+	"workspaces": [
+		".botlake"
+	],
 	"files": [
 		"bin/skillbox.mjs",
 		"dist/cli.mjs",
@@ -28,11 +31,12 @@
 	"scripts": {
 		"skillbox": "bun run src/cli.ts",
 		"build": "bun run build:npm && bun run build:binary",
-		"changelog:generate": "bun run scripts/generate-changelog.ts && oxfmt CHANGELOG.md",
+		"changelog:generate": "bun run scripts/generate-changelog.ts --write",
+		"changelog:check": "bun run scripts/generate-changelog.ts --check",
 		"test": "bun test",
-		"lint": "oxlint src tests scripts bin skillbox",
-		"typecheck": "tsc --noEmit",
-		"check": "bun run fmt:check && bun run lint && bun run typecheck && bun run test",
+		"lint": "oxlint src tests scripts bin skillbox .botlake",
+		"typecheck": "tsc --noEmit -p tsconfig.app.json && bun run --filter skillbox-lake typecheck",
+		"check": "bun run fmt:check && bun run lint && bun run typecheck && bun run test && bun run changelog:check",
 		"fmt": "oxfmt --disable-nested-config",
 		"fmt:check": "oxfmt --disable-nested-config --check",
 		"setup:hooks": "husky",
@@ -42,7 +46,7 @@
 	},
 	"devDependencies": {
 		"@clack/prompts": "^1.2.0",
-		"@codethread/cli-changelog": "0.1.1",
+		"@codethread/cli-changelog": "github:codethread/cli-changelog#c457e0a28686ce6349ce0956b1375635d53148d8",
 		"@types/bun": "^1.4.4",
 		"@vercel/detect-agent": "^1.2.1",
 		"commander": "^15.1.0",
@@ -58,6 +62,9 @@
 		"xdg-basedir": "^5.1.0",
 		"yaml": "^2.9.1",
 		"zod": "^4.6.7"
+	},
+	"overrides": {
+		"@botlake/core": "0.2.1"
 	},
 	"lint-staged": {
 		"*": "oxfmt --no-error-on-unmatched-pattern"

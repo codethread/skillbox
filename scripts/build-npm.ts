@@ -1,8 +1,10 @@
 import { readFile, readdir } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { createRequire } from "node:module";
+import { dirname, join, resolve } from "node:path";
 import { z } from "zod";
 
 const root = resolve(import.meta.dirname, "..");
+const nodeRequire = createRequire(import.meta.url);
 const result = await Bun.build({
 	entrypoints: [join(root, "src/cli.ts")],
 	outdir: join(root, "dist"),
@@ -43,7 +45,10 @@ for (const directory of [...packages].sort()) {
 	// These git-js packages omit the license file from their npm tarballs.
 	// Their sibling package ships the same repository's MIT license.
 	if (metadata.name === "simple-git" || metadata.name === "@simple-git/argv-parser") {
-		files.push(join(root, "node_modules/@simple-git/args-pathspec/LICENSE"));
+		const siblingModule = nodeRequire.resolve("@simple-git/args-pathspec", {
+			paths: [directory],
+		});
+		files.push(join(dirname(dirname(siblingModule)), "LICENSE"));
 	}
 	if (files.length === 0) throw new Error(`No license notice found for ${metadata.name}.`);
 	notices.push(`\n${"=".repeat(72)}\n${metadata.name}@${metadata.version}\n`);

@@ -3,6 +3,7 @@
 - Bun typescript project using oxfmt and oxlint.
 - Write unit tests to help shape and validate, delete once finished.
 - Write blackbox tests to verify the system as a user would.
+- Run `mise run` from the repository root to install pinned tools, workspace dependencies, and Git hooks. `mise run check` covers the full workspace; `bun run --filter skillbox-lake check` targets the lake package.
 
 ## Features
 
@@ -31,6 +32,6 @@ read-only work, or implementation of AC's does not require this check.
 ## Doc guidance
 
 - best docs are no docs, build on good DDD with well structured modules and folders.
-- Keep maintainer docs in `docs/engdocs/`, indexed by [docs/engdocs/index.md](docs/engdocs/index.md). The rest of `docs/` is user-facing, indexed by [docs/index.md](docs/index.md).
+- Keep maintainer docs in `docs/engdocs/`, indexed by [docs/engdocs/index.md](docs/engdocs/index.md). User-facing usage belongs in [README.md](README.md).
 - Extension-specific user guidance belongs in that extension's `README.md`.
-- Keep indexes to links; only the user index needs a brief introduction to Botlake and extension authoring.
+- Keep indexes to links.

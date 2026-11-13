@@ -2,14 +2,14 @@
 bun = "1.4.2"
 node = "24.21.0"
 
+# Repository bootstrap must not install unrelated global tools.
+[settings]
+enable_tools = ["bun", "node"]
+
 [tasks.bootstrap]
 description = "Install repository and Botlake dependencies and activate Git hooks"
 alias = "default"
-run = [
-	"bun install --frozen-lockfile",
-	"bun install --cwd .botlake --frozen-lockfile",
-	"bun run setup:hooks",
-]
+run = ["bun install --frozen-lockfile", "bun run setup:hooks"]
 
 [tasks.install]
 description = "Build and install the compiled binary to ~/.local/bin"

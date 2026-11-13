@@ -1,0 +1,8 @@
+{
+	// The source-only `skills` dependency does not currently pass exact optional checking.
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"exactOptionalPropertyTypes": false
+	},
+	"include": ["src/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts", "skillbox/**/*.ts"]
+}
