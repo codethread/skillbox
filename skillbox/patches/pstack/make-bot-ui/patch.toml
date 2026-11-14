@@ -1,8 +1,12 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Preserve the page-click-to-agent-action objective, server-side credentials, harmless end-to-end proof, and optional Tailscale access. Replace unavailable Cursor Grok Bot routines, secret-request cards, and wake payloads with the project's existing agent integration; retain user-only invocation without introducing a viewer-first workflow or new command framework."
+intent = "Build a server-side page whose controls dispatch configured Botlake agent runs, with credentials kept off the client and optional Tailscale access. Require a harmless end-to-end action proof and keep invocation restricted to the user rather than inventing a viewer workflow or command layer."
 
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

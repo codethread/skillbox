@@ -1,8 +1,12 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Replace Cursor model and cloud Task fields with task-suited parallel agents and isolated writable outputs; preserve branch selection, self-contained briefs, measurement evidence, and race rules."
+intent = "Create a Botlake task for each independent worker lane, dispatch task-suited agents in parallel, and record findings and integration status without treating task state as proof. Preserve isolated writable outputs, self-contained briefs, declared race rules, branch selection, and measured evidence."
 
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

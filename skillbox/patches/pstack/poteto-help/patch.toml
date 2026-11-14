@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Keep the help router, prompt-first handoff, skill map, and engineering advice. Carry the upstream guide inside the skill because consumers install skills and supporting files, not the plugin root. Route setup through existing agent configuration and installation/authoring through Skillbox's on-demand guidance; replace unavailable Cursor modes, hosted agents, loop, and bot UI claims, and link carried guide pages without a second runtime manual. Route personal preferences to owned source or consumer patches of adapted bundles and distinguish shared maintainer changes without requiring a producer checkout."
+intent = "Route user questions to the canonical bundled guide, relevant skills, and prompt-first next actions. Keep setup tied to Botlake configuration and Skillbox guidance, preserve engineering and verification advice, and direct customization to owned sources or consumer patches without adding a second operations manual."
 
 [files."./references/prompting.md"]
 intent = "Replace the Cursor /loop handoff with the Autonomous run playbook while preserving checkable finish conditions, isolation, decision logging, and the escape hatch in away prompts."
@@ -10,43 +10,82 @@ intent = "Replace the Cursor /loop handoff with the Autonomous run playbook whil
 intent = "Remove the Cursor /loop command from the away recipe; keep the same goal, proof predicate, worktree, decision log, permissions, and dead-end exit."
 
 [files."./references/upstream/ATTRIBUTION.md"]
-intent = "Record the carried guide's repository, pinned commit and subtree identities, MIT license, and adaptation scope so copied documentation remains traceable outside the upstream tree. Align the source URL with the recorded pinned revision. Keep the origin usable for comparing copied pages with their upstream originals during updates; clean replay of added copies cannot detect changes to those originals."
+intent = "Remove the obsolete duplicate attribution path because the canonical legal record now lives at `references/licenses/ATTRIBUTION.md`. Preserve the same pinned source provenance and license information only in that canonical location."
 
 [files."./references/upstream/LICENSE"]
-intent = "Carry the upstream MIT license unchanged with the copied guide pages to preserve their attribution and redistribution terms."
+intent = "Remove the obsolete duplicate license path because the canonical MIT license now lives at `references/licenses/LICENSE`. Keep the legal text unchanged in the canonical location and avoid two copies that can drift."
 
 [files."./references/upstream/guide/01-setup.md"]
-intent = "Carry the setup walkthrough using Skillbox installation guidance and the existing configured roster. Preserve budget choice, verification offers, cost advice, and the first-task prompt without Cursor model-rule files, parent-model aliases, or Custom Mode activation."
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/01-setup.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
 
 [files."./references/upstream/guide/02-poteto-mode.md"]
-intent = "Carry the task-routing guide and repair links for the installed tree. Replace Custom Mode persistence and hosted-VM instructions with explicit task invocation and worktree/app-instance isolation, without claiming worktrees isolate machine resources."
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/02-poteto-mode.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
 
 [files."./references/upstream/guide/03-understand.md"]
-intent = "Carry the investigation guide with installed-tree links and evidence-tool discovery rather than an MCP-only assumption; preserve its code/history/recent-context workflows and evidence standards."
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/03-understand.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
 
 [files."./references/upstream/guide/04-design.md"]
-intent = "Carry the design guide with installed-tree links and panels drawn from existing configured agents instead of a separate setup-generated mapping. Preserve prototypes, independent judging, coverage versus competition, and design-before-plan guidance."
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/04-design.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
 
 [files."./references/upstream/guide/05-build-and-clean.md"]
-intent = "Carry the build/cleanup guide with installed-tree links and the carried Comment Sicko brief. Describe its comment-only editing scope consistently with the executable workflow. Request the original code-cleanup outcome without the external Cursor /deslop plugin, retaining independent review and prose cleanup."
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/05-build-and-clean.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
 
 [files."./references/upstream/guide/06-verify-and-ship.md"]
-intent = "Carry the verification/shipping guide with installed-tree links and project-owned verification skill sources rather than .cursor/skills. Keep the behavior-proof, feature map, formal verification, benchmarking, and shipping requirements. Align maintenance scope with the required patch/tracking artifacts while excluding unrelated skill or product edits."
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/06-verify-and-ship.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
 
 [files."./references/upstream/guide/07-overnight.md"]
-intent = "Carry the overnight guide's finish condition, trust prerequisites, audit trail, and program-coordination workflows. Replace Cursor /loop and cloud Projects with active-run semantics, isolated worktrees, and durable context; distinguish configured scheduling from active waiting and link the unsupported upstream automation pack as background rather than runnable setup."
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/07-overnight.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
 
 [files."./references/upstream/guide/08-principles.md"]
-intent = "Carry the upstream principles guide with links relocated into the installed skill tree, preserving its engineering vocabulary and descriptions unchanged."
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/08-principles.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
 
 [files."./references/upstream/guide/09-make-it-yours.md"]
-intent = "Carry the customization guide with installed-tree links. Use available session history, project skill sources, and on-demand authoring guidance instead of Cursor transcripts/create-skill paths; align bot UI guidance with server-side configured-agent actions while preserving personal-mode, reflection, correction, and blind-eval workflows. Distinguish owned local skills, optional overlays, consumer patches of adapted bundles, and shared maintainer changes. Native imports use owned source or an owner handoff; never require personal preferences to alter the producer's pack."
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/09-make-it-yours.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
 
 [files."./references/upstream/guide/10-recipes-and-pitfalls.md"]
-intent = "Carry the recipes and pitfalls with installed-tree links. Replace /loop, cloud-agent, and Cursor model-alias assumptions with checkable active runs, worktree isolation, and available configured agents while preserving the original prompt recipes and engineering cautions."
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/10-recipes-and-pitfalls.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
 
 [files."./references/upstream/guide/README.md"]
-intent = "Carry the guide index with installed-tree links, describing configured agent choices and coordination rather than Cursor installation, Projects, or a parallel role table; retain the guide's learning path and help entry point."
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/README.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
+
+[files."./references/guide/01-setup.md"]
+intent = "Teach installation through the project's Skillbox configuration, selection of supported Botlake agents and reasoning budgets, validation, cost choices, optional verification setup, and a first task. Do not create a parallel roster or hardcode unsupported models."
+
+[files."./references/guide/02-poteto-mode.md"]
+intent = "Explain how `/poteto-mode` routes a goal into a playbook, Botlake context group, delegated lane tasks, and evidence. Preserve prompt guidance, autonomy limits, worktree and app isolation, and the distinction between task tracking and proof of execution."
+
+[files."./references/guide/03-understand.md"]
+intent = "Guide users through `/how`, `/why`, `/teach`, and `/recall` for code behavior, rationale, and recent context. Require available evidence sources, citations, bounded searches, and explicit gaps when evidence cannot be accessed."
+
+[files."./references/guide/04-design.md"]
+intent = "Guide design through independent architecture proposals, arena competition, adversarial review, swarm coverage, and prototypes before planning. Preserve model diversity, isolated candidates, independent judging, and the distinction between coverage and competing designs."
+
+[files."./references/guide/05-build-and-clean.md"]
+intent = "Show how to prompt build playbooks from observed symptoms and clean a diff with independent comment and prose review. Preserve reproduction-first debugging, behavior checks, Comment Sicko's comment-only scope, and no unverified cleanup claims."
+
+[files."./references/guide/06-verify-and-ship.md"]
+intent = "Require proof against the real user-facing artifact before shipping. Cover finish conditions, benchmark scrutiny, project-owned verification skills and feature maps, formal verification, independent review, CI, and safe PR landing without broadening maintenance scope."
+
+[files."./references/guide/07-overnight.md"]
+intent = "Define safe unattended work through a checkable exit condition, isolated writers, Botlake task and context records, decision trails, bounded active waits, and morning audit. Do not imply that task status, timeouts, or a stopped coordinator schedules or proves progress."
+
+[files."./references/guide/08-principles.md"]
+intent = "Teach users to steer work by naming the stack's principles while agents read and apply the full leaf skills. Preserve each principle's engineering meaning, trigger, and requirement to report the decision it changed."
+
+[files."./references/guide/09-make-it-yours.md"]
+intent = "Guide personal modes, reflection, project corrections, skill authoring, bot UI actions, and blind evaluation. Keep preferences in owned sources or consumer patches, route shared changes to the owner, and require evidence and approval before edits."
+
+[files."./references/guide/10-recipes-and-pitfalls.md"]
+intent = "Provide copyable prompts and cautions for understanding, design, implementation, verification, unattended runs, and parallel work. Keep Botlake operations direct, finish conditions checkable, writers isolated, and agent selection grounded in the configured catalog."
+
+[files."./references/guide/README.md"]
+intent = "Index the canonical pstack guide in learning order and direct users from setup through routing, understanding, design, build, verification, unattended work, principles, customization, and recipes. Keep links local and make `/poteto-help` the entry point for questions."
+
+[files."./references/licenses/ATTRIBUTION.md"]
+intent = "Record the canonical guide's derivation, copyright holder, pinned source revision, and MIT license. Keep attribution and the license link intact so redistribution remains traceable and compliant."
+
+[files."./references/licenses/LICENSE"]
+intent = "Carry the canonical guide's MIT license text and copyright notice unchanged. This file must preserve the legal terms required for copying, modification, and redistribution."
 
 [[patches]]
 target = "./SKILL.md"
@@ -131,3 +170,115 @@ patch = "changes/0020-captured.patch"
 [[patches]]
 target = "./references/upstream/guide/09-make-it-yours.md"
 patch = "changes/0021-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0022-captured.patch"
+
+[[patches]]
+target = "./references/guide/01-setup.md"
+patch = "changes/0023-captured.patch"
+
+[[patches]]
+target = "./references/guide/02-poteto-mode.md"
+patch = "changes/0024-captured.patch"
+
+[[patches]]
+target = "./references/guide/03-understand.md"
+patch = "changes/0025-captured.patch"
+
+[[patches]]
+target = "./references/guide/04-design.md"
+patch = "changes/0026-captured.patch"
+
+[[patches]]
+target = "./references/guide/05-build-and-clean.md"
+patch = "changes/0027-captured.patch"
+
+[[patches]]
+target = "./references/guide/06-verify-and-ship.md"
+patch = "changes/0028-captured.patch"
+
+[[patches]]
+target = "./references/guide/07-overnight.md"
+patch = "changes/0029-captured.patch"
+
+[[patches]]
+target = "./references/guide/08-principles.md"
+patch = "changes/0030-captured.patch"
+
+[[patches]]
+target = "./references/guide/09-make-it-yours.md"
+patch = "changes/0031-captured.patch"
+
+[[patches]]
+target = "./references/guide/10-recipes-and-pitfalls.md"
+patch = "changes/0032-captured.patch"
+
+[[patches]]
+target = "./references/guide/README.md"
+patch = "changes/0033-captured.patch"
+
+[[patches]]
+target = "./references/licenses/ATTRIBUTION.md"
+patch = "changes/0034-captured.patch"
+
+[[patches]]
+target = "./references/licenses/LICENSE"
+patch = "changes/0035-captured.patch"
+
+[[patches]]
+target = "./references/upstream/ATTRIBUTION.md"
+patch = "changes/0036-captured.patch"
+
+[[patches]]
+target = "./references/upstream/LICENSE"
+patch = "changes/0037-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/01-setup.md"
+patch = "changes/0038-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/02-poteto-mode.md"
+patch = "changes/0039-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/03-understand.md"
+patch = "changes/0040-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/04-design.md"
+patch = "changes/0041-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/05-build-and-clean.md"
+patch = "changes/0042-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/06-verify-and-ship.md"
+patch = "changes/0043-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/07-overnight.md"
+patch = "changes/0044-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/08-principles.md"
+patch = "changes/0045-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/09-make-it-yours.md"
+patch = "changes/0046-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/10-recipes-and-pitfalls.md"
+patch = "changes/0047-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/README.md"
+patch = "changes/0048-captured.patch"
+
+[[patches]]
+target = "./references/licenses/ATTRIBUTION.md"
+patch = "changes/0049-captured.patch"

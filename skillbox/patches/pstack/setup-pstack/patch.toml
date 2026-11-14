@@ -1,8 +1,12 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Preserve setup's role review, reasoning budgets, confirmation, validation, and optional verification offers using the existing configured agent catalog. Replace Cursor model slugs and always-applied rule creation with current-task choices and explicitly requested, scope-confirmed local configuration overrides; do not create a parallel PSTACK roster or mutate the shared CT preset."
+intent = "Configure pstack roles from Botlake's supported agent catalog and reasoning budgets, validate every choice, and confirm before persistence. Use the project's supported local overrides, explain their scope, preserve optional verification offers, and never create a parallel roster or mutate a shared preset implicitly."
 
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

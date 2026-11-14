@@ -29,11 +29,11 @@ read-only work, or implementation of AC's does not require this check.
 5. delete tests
 6. align and prune docs
 
-## Shared skill adaptations
+## Shared workflow bundle
 
-Skillbox is the tool; this repository also produces the shared CT-Botlake PSTACK adaptation. Write distributed skills for consuming projects, not only this checkout. Route edits to the owner's local skill source, a consumer-owned patch of an imported adapted bundle, or the shared maintainer as appropriate. Do not require consumers to own the producer's patches or use Skillbox checkout paths. Personal modes and local overlays are optional; retain PSTACK's verification creators and maintainers.
+Skillbox is the tool; this repository also publishes the shared PSTACK workflow bundle for CT-configured Botlake agents. Write distributed skills for consuming projects, not only this checkout. Route edits to the owner's local skill source, a consumer-owned patch of an imported adapted bundle, or the shared maintainer as appropriate. Do not require consumers to own the producer's patches or use Skillbox checkout paths. Personal modes and local overlays are optional; retain PSTACK's verification creators and maintainers.
 
-Keep adaptation-specific rationale in each changed file's patch intent, not a separate adaptation guide or local policy skill.
+Keep each changed file's rationale in its patch intent, not a separate guide or local policy skill.
 
 ## Doc guidance
 

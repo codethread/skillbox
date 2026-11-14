@@ -1,0 +1,47 @@
+diff --git a/SKILL.md b/SKILL.md
+index 2ddcdf4fd3b7f3c8447ed8fffba26d8fd323419c..022a6ebf3533ade582a2ff7976f157fba97091ca 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -5,26 +5,26 @@ description: Configure which agents pstack uses per role and at what reasoning b
+ 
+ # Setup pstack
+ 
+-Choose agents and a reasoning budget for pstack's roles using the configured catalog. Persistent changes belong in the existing agent configuration, not a separate pstack role file.
++Choose agents and reasoning budgets for pstack's roles from Botlake's agent catalog. Put persistent choices in the project's Botlake agent configuration.
+ 
+ ## Steps
+ 
+ ### 1. Detect available agents
+ 
+-Read the configured agent catalog, including each agent's purpose, model, and reasoning effort. That is the dependable source. Never propose a model or effort you have not confirmed is supported.
++Read Botlake's agent catalog for each agent's purpose, model, and supported reasoning effort. Never propose a model or effort you have not confirmed.
+ 
+ ### 2. Load current state
+ 
+-Read the project's existing agent configuration and instructions. They supply the current choices. For a CT-configured lake, use its roster rather than recreating pstack's Cursor model defaults. Before proposing a persistent change, read the selected configuration's documentation for its supported override mechanism.
++Read the project's Botlake agent configuration and instructions for current role assignments. Follow Botlake's configuration guidance for supported overrides before proposing a persistent change.
+ 
+ ### 3. Budget, map, and confirm
+ 
+ **(a) Ask for a budget.** Offer these four options, and show how they relate to the current configuration:
+ 
+-- `unlimited — max reasoning`
+-- `large — xhigh reasoning`
+-- `medium — high reasoning`
+-- `small — medium reasoning`
++- `unlimited (max reasoning)`
++- `large (xhigh reasoning)`
++- `medium (high reasoning)`
++- `small (medium reasoning)`
+ 
+ **(b) Apply it.** Treat these as target reasoning budgets, not model-name suffixes. Keep the user's existing choices where they fit. Use the highest supported effort at or below the target; mark a role as needing a choice when the available agents cannot meet it. Never change an agent's purpose merely to force the budget.
+ 
+@@ -48,7 +48,7 @@ Every chosen agent must be available, and each effort must be supported by its p
+ 
+ ### 5. Apply the choices
+ 
+-Use the confirmed choices for the current task. When the user wants them persisted, use the existing project configuration's supported local overrides. Explain their scope before applying them: changing a shared roster entry affects other workflows too, not just pstack. Keep its prompts and shared extension bindings intact; leave the shared CT preset unchanged. Task-specific choices, such as a larger panel for one design, belong in that task's prompt.
++Use the confirmed choices for the current task. When the user wants them persisted, use the existing project configuration's supported local overrides. Explain their scope before applying them: changing a shared roster entry affects other workflows too, not just pstack. Preserve existing prompts and shared extension bindings. Make persistent changes only through supported local overrides. Put task-specific choices, such as a larger panel for one design, in that task's prompt.
+ 
+ ### 6. Confirm
+ 

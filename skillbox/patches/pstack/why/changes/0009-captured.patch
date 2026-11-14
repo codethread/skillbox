@@ -1,0 +1,13 @@
+diff --git a/references/sources/linear.md b/references/sources/linear.md
+index 899c643c078f322afe6ae0ef78a007f8ffd356c1..ed685fa1830a1e006a672571600d34ba47e69a69 100644
+--- a/references/sources/linear.md
++++ b/references/sources/linear.md
+@@ -14,7 +14,7 @@ Linear is where the product/business context often lives: the "we're doing this
+ 
+ ## How to search it
+ 
+-Use the Linear MCP.
++If Linear access is available, use its issue-search and retrieval operations. The operation names below are examples. Check the available instructions for exact names and fields.
+ 
+ 1. **Start with linked tickets.** If the seed commits or PRs reference ticket IDs (e.g., `ENG-1234`, `[BUG-567]`), fetch those first with `get_issue`. Read the full issue including comments.
+ 2. **List related issues by keyword.** Use `list_issues` with text search for the feature name, key symbol, or business term. Try multiple phrasings.

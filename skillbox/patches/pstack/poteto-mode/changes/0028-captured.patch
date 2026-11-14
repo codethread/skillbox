@@ -1,0 +1,18 @@
+diff --git a/SKILL.md b/SKILL.md
+index dbb8fbc47c4658f25c0651d64b49f308d828f055..a6a46a715ddc22bcbf13a0ebf4bff034186604ee 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -91,9 +91,11 @@ Read the leaf skill in full for any principle you apply. Each entry names when i
+ 
+ ## Subagents
+ 
+-**Give every subagent inside a playbook step the [poteto delegate brief](references/poteto-agent.md)** (code-writing delegates, ad-hoc helpers). The chat that receives `/poteto-mode` runs the playbook. Never delegate the playbook itself. Routed workflow skills (`how`, `why`, `interrogate`, `reflect`, `swarm`) set their own roles for diverse-model review. Respect what the skill prescribes.
++The agent that receives `/poteto-mode` owns the playbook, its Botlake context group, and every delegated run. Track each independently delegated lane as a Botlake task under that group, with its findings and integration status. Short-lived helpers need no separate task unless they own an independent lane. Assignment or closure alone does not prove execution or verification.
+ 
+-**Match the agent to the job.** Use the configured agent catalog. The hardest changes (cross-cutting design, gnarly concurrency, subtle algorithms) need strong judgment; trivial mechanical edits need less. Preserve the distinct roles and model diversity a routed skill calls for. Give file pointers rather than inlined context.
++**Give every subagent inside a playbook step the [poteto delegate brief](references/poteto-agent.md)** (code-writing delegates, ad-hoc helpers). Never delegate the playbook itself. Routed workflow skills (`how`, `why`, `interrogate`, `reflect`, `swarm`) set their own roles for diverse-model review. Respect what the skill prescribes.
++
++**Match the agent to the job.** Select from Botlake's agent catalog and dispatch a Botlake agent run. The hardest changes (cross-cutting design, gnarly concurrency, subtle algorithms) need strong judgment; trivial mechanical edits need less. Preserve the distinct roles and model diversity a routed skill calls for. Give file pointers rather than inlined context.
+ 
+ You own every subagent's work. Review the diff and write your own summary, don't pass through what it said. A second opinion is the same prompt against a different model. Agreement is high-signal.
+ 

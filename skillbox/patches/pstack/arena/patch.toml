@@ -1,8 +1,12 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Remove Cursor model aliases and Task fields without recreating a roster; preserve parallel isolated candidates, judgment diversity, cross-family judging, explicit judge gaps, and identical scoped inputs."
+intent = "Run isolated candidates from Botlake agent runs against the same scoped input, then use an independent cross-family judge to select and graft the strongest result. Preserve model diversity, reproducible inputs, and explicit reporting when a qualified judge is unavailable."
 
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

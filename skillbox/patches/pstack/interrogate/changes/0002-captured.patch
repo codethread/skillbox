@@ -1,0 +1,13 @@
+diff --git a/SKILL.md b/SKILL.md
+index eddb699fb80b522b14af586cca77b17fb16c475d..566aae87984051e69bc148f8d6662e27caf5c83b 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -14,7 +14,7 @@ The scope is what the user names. Otherwise it is the branch diff from its merge
+ 
+ ## Fan out
+ 
+-Run Phase A steps 3 and 4 and Phase B of the **arena** skill, with these changes. Choose adversarial reviewers and give each an isolated worktree containing the same scoped changes, including uncommitted tracked and untracked files. In place of the arena task and rationale, give each adversary the scope, the intent, and this brief:
++Run Phase A steps 3 and 4 and Phase B of the **arena** skill, with these changes. Choose adversarial reviewers from Botlake's agent catalog, preserving model diversity. If the catalog has no diverse models, state that gap. Create a Botlake task under the current context group for each reviewer lane, then dispatch one reviewer run for each isolated worktree containing the same scoped changes, including uncommitted tracked and untracked files. Use a Botlake shared context group when reviewers need the same task context. In place of the arena task and rationale, give each adversary the scope, the intent, and this brief:
+ 
+ > Break this change. Prove each finding with a run against the real code, such as a failing test, a repro script, or command output that shows the wrong behavior. For a design or plan, run a prototype or probe the current tree. Keep repros in your own worktree. Report each finding with a title, the exact command, the output it printed, and the output the intent requires. Leave out anything you did not run. That covers style, naming, structure, and risks that need a future change to matter. No findings is a valid result.
+ 

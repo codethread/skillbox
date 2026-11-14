@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Replace Cursor transcript paths, question tools, and create-skill with workspace-scoped evidence, ordinary questions, and project authoring guidance. Preserve evidence-backed personal modes in the user's project or personal source, using a consumer-owned patch only for a mode from an imported adapted bundle. Native imports use owned source or an owner handoff, never shared producer patches or generated installs."
+intent = "Create or revise a personal mode from workspace-scoped conversation evidence and explicit user answers. Write only to the owner's skill source or a consumer-owned patch of an adapted import, preserve approval before edits, and never treat generated installs or a shared producer pack as the customization source."
 
 [[patches]]
 target = "./SKILL.md"
@@ -14,3 +14,7 @@ patch = "changes/0002-captured.patch"
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0003-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0004-captured.patch"

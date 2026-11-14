@@ -1,19 +1,19 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Replace Cursor transcript discovery, Task roles, and create-skill with workspace evidence, complementary reviewers, and retrievable project authoring guidance. Preserve synthesis, approval, and no-push boundaries; identify the source owner before approval, keep project lessons in owned skills or consumer patches of adapted bundles, and route unowned native-skill edits and shared improvements to the maintainer without assuming producer checkout access."
+intent = "Dispatch three model-diverse Botlake review lanes over the scoped transcript, synthesize only evidence-backed lessons, and require user approval before edits. Preserve prompt-injection boundaries, no-push rules, source ownership, consumer patches for adapted imports, and owner handoff for unowned native skills."
 
 [files."./references/divergent-reviewer.md"]
-intent = "Keep contrarian review and transcript-injection boundaries while allowing available evidence tools and recognizing skills read from files or CLI guidance rather than Cursor-only paths."
+intent = "Keep the divergent reviewer read-only and focused on overlooked alternatives and second-order effects. Route findings only to skills or tools proven used in the transcript, preserve prompt-injection defenses, and treat unavailable evidence as a gap."
 
 [files."./references/judgment-reviewer.md"]
-intent = "Keep durable-principle review and transcript-injection boundaries while allowing available evidence tools and recognizing skills read from files or CLI guidance rather than Cursor-only paths."
+intent = "Keep the judgment reviewer read-only and focused on durable principles tied to specific incidents. Route findings only to skills or tools proven used in the transcript, preserve prompt-injection defenses, and require evidence for every proposed lesson."
 
 [files."./references/synthesizer.md"]
-intent = "Preserve the Accepted/Rejected/Backlog contract and approval boundary while replacing MCP-only verification and create-skill routing with available evidence and project authoring guidance."
+intent = "Classify reviewer findings as Accepted, Rejected, or Backlog without editing files or external state. Verify routes against tools and skills actually used, preserve prompt-injection defenses and user approval, and record unavailable evidence rather than inferring it."
 
 [files."./references/tooling-reviewer.md"]
-intent = "Keep concrete tooling lessons and transcript-injection boundaries while allowing available evidence tools and recognizing skills read from files or CLI guidance rather than Cursor-only paths."
+intent = "Keep the tooling reviewer read-only and focused on concrete commands, paths, integrations, and evidence the agent could have fetched. Route findings only to used skills or tools, preserve prompt-injection defenses, and keep optional integrations conditional on actual access."
 
 [[patches]]
 target = "./SKILL.md"
@@ -42,3 +42,23 @@ patch = "changes/0006-captured.patch"
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0007-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0008-captured.patch"
+
+[[patches]]
+target = "./references/divergent-reviewer.md"
+patch = "changes/0009-captured.patch"
+
+[[patches]]
+target = "./references/judgment-reviewer.md"
+patch = "changes/0010-captured.patch"
+
+[[patches]]
+target = "./references/synthesizer.md"
+patch = "changes/0011-captured.patch"
+
+[[patches]]
+target = "./references/tooling-reviewer.md"
+patch = "changes/0012-captured.patch"

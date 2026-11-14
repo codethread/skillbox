@@ -56,13 +56,13 @@ Use `add` for the first installation. Afterward, edit the config and run `sync` 
 
 Adapt upstream skills to your workflow with reviewable patches and a reason for each changed file. Skillbox records the source snapshot; your agent can help review updates before you adopt them.
 
-For example, this repository publishes a PSTACK adaptation for CT-configured Botlake agents:
+This repository publishes the PSTACK workflow bundle for CT-configured Botlake agents:
 
 ```sh
 skillbox add codethread/skillbox pstack
 ```
 
-Choose a producer revision containing the adaptation. Any customizations you make belong to your project's patch pack, separate from the producer's changes. Ask your agent to follow the built-in patch guidance.
+Choose the producer revision you want to use. Keep project-specific customizations in your project's patch pack, separate from the shared bundle. Ask your agent to follow the built-in patch guidance.
 
 ## What to commit
 

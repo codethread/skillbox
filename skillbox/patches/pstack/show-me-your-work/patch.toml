@@ -1,8 +1,12 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Audit against harness transcripts and supporting task records instead of Cursor paths, disclose incomplete coverage, and retain independent cross-family review with an explicit blocker when unavailable."
+intent = "Keep an auditable decision trail and verify it against the full harness transcript with Botlake records as supporting evidence. Disclose incomplete coverage, then dispatch an independent cross-family Botlake reviewer. Report that review as blocked when it cannot run; do not claim it passed."
 
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

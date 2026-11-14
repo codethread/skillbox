@@ -1,10 +1,13 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Replace Cursor Task/model mechanics with parallel read-only exploration and separate explanation, retaining the simple and complex routes and complete reference briefs."
+intent = "Explain current code through parallel, read-only Botlake explorer runs and a separate synthesis pass. Preserve the simple route for narrow questions, the complex route for subsystem questions, complete briefs, and evidence grounded in files and runtime flow."
 
 [files."./references/explainer-prompt.md"]
-intent = "Let the read-only explainer verify findings with available file and search tools instead of requiring Cursor's Read, Grep, and Glob names."
+intent = "Give the read-only explainer a complete synthesis brief that checks explorer claims against available files and search results. Keep the final explanation coherent, evidence-based, and limited to the user's question."
+
+[files."./references/explorer-prompt.md"]
+intent = "Give each read-only explorer one distinct subsystem angle, the shared question, and enough scope to trace concrete files and runtime flow. Require evidence and prohibit broad synthesis so parallel findings remain independent and composable."
 
 [[patches]]
 target = "./SKILL.md"
@@ -13,3 +16,15 @@ patch = "changes/0001-captured.patch"
 [[patches]]
 target = "./references/explainer-prompt.md"
 patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0003-captured.patch"
+
+[[patches]]
+target = "./references/explainer-prompt.md"
+patch = "changes/0004-captured.patch"
+
+[[patches]]
+target = "./references/explorer-prompt.md"
+patch = "changes/0005-captured.patch"
