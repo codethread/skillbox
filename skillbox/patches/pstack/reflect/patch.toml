@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Dispatch three model-diverse Botlake review lanes over the scoped transcript, synthesize only evidence-backed lessons, and require user approval before edits. Preserve prompt-injection boundaries, no-push rules, source ownership, consumer patches for adapted imports, and owner handoff for unowned native skills."
+intent = "Remove repeated catalog and optional second shared-group setup because Botlake owns the operating process. Keep a direct Botlake binding and tracked lanes for three parallel reviewers on different models and the later synthesizer. Preserve judgment, tooling, and divergent lenses, read-only evidence review, workspace privacy, transcript coverage disclosure, explicit approval before accepted edits, source ownership, consumer-owned patches, maintainer routing, and no PR or push."
 
 [files."./references/divergent-reviewer.md"]
 intent = "Keep the divergent reviewer read-only and focused on overlooked alternatives and second-order effects. Route findings only to skills or tools proven used in the transcript, preserve prompt-injection defenses, and treat unavailable evidence as a gap."
@@ -62,3 +62,7 @@ patch = "changes/0011-captured.patch"
 [[patches]]
 target = "./references/tooling-reviewer.md"
 patch = "changes/0012-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0013-captured.patch"

@@ -20,10 +20,10 @@
 		"automate-me": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "364b284ce50b0a79887657a9638e164c7ad575524894d43854a60fd2c6c34f9a",
+			"computedHash": "8fd0ba3a5ad4d7de54d73c85bf08a50cb6ea74e5a319b22e3f3e700d06ed554c",
 			"installMode": "copy",
-			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
-			"skillPath": "pstack/skills/automate-me/SKILL.md"
+			"skillPath": "pstack/skills/automate-me/SKILL.md",
+			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 		},
 		"benchmark-checklist": {
 			"source": "https://github.com/cursor/plugins",
@@ -91,10 +91,10 @@
 		"figure-it-out": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "7ca8e0642de7504a55a8831f7b8f025652df76eb52f0498406ce3b65d189873f",
+			"computedHash": "a9954d76a517ccb6890a275c7e457e29c5db44d68628fca4609be84e3edaa9ed",
 			"installMode": "copy",
-			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
-			"skillPath": "pstack/skills/figure-it-out/SKILL.md"
+			"skillPath": "pstack/skills/figure-it-out/SKILL.md",
+			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 		},
 		"git-commit": {
 			"source": "codethread/agents",
@@ -131,10 +131,10 @@
 		"interrogate": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "0f1fb989bb3fbaa0d84ab450a47a5263277cb774f36906770f80a525d43d73db",
+			"computedHash": "155b4cfccc86b19d8b46dd7fe32f1428d7a2cf98295fd0f1d33119f4ecb02235",
 			"installMode": "copy",
-			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
-			"skillPath": "pstack/skills/interrogate/SKILL.md"
+			"skillPath": "pstack/skills/interrogate/SKILL.md",
+			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 		},
 		"io-dependency-seams": {
 			"source": "codethread/agents",
@@ -178,10 +178,10 @@
 		"make-bot-ui": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "a1386e6ef02ea4130bd62685ec88523ab195e6e3e1e095e1021d65ad64c334f2",
+			"computedHash": "160c141c9cdfebd88c2a4dbb3e729f426e6c7befcda2b59267ec1d732dd4d47a",
 			"installMode": "copy",
-			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
-			"skillPath": "pstack/skills/make-bot-ui/SKILL.md"
+			"skillPath": "pstack/skills/make-bot-ui/SKILL.md",
+			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 		},
 		"no-comments": {
 			"source": "https://github.com/cursor/plugins",
@@ -194,18 +194,18 @@
 		"poteto-help": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "92226b801b02380388ee1ab025d07ad03f7e33d7bdac0e384ed34821c9edb867",
+			"computedHash": "6f3077b66dcab9e42d6ba6d0e5e7be60d9fdae1c4aedc261b43876270cb06c8b",
 			"installMode": "copy",
-			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
-			"skillPath": "pstack/skills/poteto-help/SKILL.md"
+			"skillPath": "pstack/skills/poteto-help/SKILL.md",
+			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 		},
 		"poteto-mode": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "8dea0cb50dcb79717148f2d740215750cb913baaccfb051e0da779268fc3175a",
+			"computedHash": "77fba8a247a00016615b8f6994ea0ab725caad4af80681470e244c7e5c82624a",
 			"installMode": "copy",
-			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
-			"skillPath": "pstack/skills/poteto-mode/SKILL.md"
+			"skillPath": "pstack/skills/poteto-mode/SKILL.md",
+			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 		},
 		"principle-attack-the-premise": {
 			"source": "https://github.com/cursor/plugins",
@@ -410,18 +410,18 @@
 		"recall": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "293f878210fe7ac0ca6f6684e7fd79f63f78a2e07555d7b4ed1384db530fda91",
+			"computedHash": "c1f3040779824c6f3570af27734dab1dfcfc32f8aee570b92ae44c3d6b653998",
 			"installMode": "copy",
-			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
-			"skillPath": "pstack/skills/recall/SKILL.md"
+			"skillPath": "pstack/skills/recall/SKILL.md",
+			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 		},
 		"reflect": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "8a4ca81573337e9dc556c88a1907efb9890557ee64b4c7384d499a35b3c67a6e",
+			"computedHash": "57edb71f213bed12b7a6eb87f342e51b428df3b141808cc3301f6cab5dda8382",
 			"installMode": "copy",
-			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
-			"skillPath": "pstack/skills/reflect/SKILL.md"
+			"skillPath": "pstack/skills/reflect/SKILL.md",
+			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 		},
 		"release": {
 			"source": "./skillbox",
@@ -437,14 +437,6 @@
 			"skillPath": "skillbox/coding/robustness/SKILL.md",
 			"installMode": "copy"
 		},
-		"setup-pstack": {
-			"source": "https://github.com/cursor/plugins",
-			"sourceType": "git",
-			"computedHash": "0d9a8cca28c685bba41a550710353bcd61293986267fc91b90927d397245bc5f",
-			"installMode": "copy",
-			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
-			"skillPath": "pstack/skills/setup-pstack/SKILL.md"
-		},
 		"sharpen": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
@@ -456,10 +448,10 @@
 		"show-me-your-work": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "0cfd0b69120999670431655afd65100dffd1a7d9f5d164b53b7c37d064786d63",
+			"computedHash": "b2f6e15f5fc62bcc276ba274496618510583f8774b09b4601c5df3b301fe8b10",
 			"installMode": "copy",
-			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
-			"skillPath": "pstack/skills/show-me-your-work/SKILL.md"
+			"skillPath": "pstack/skills/show-me-your-work/SKILL.md",
+			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 		},
 		"statechart": {
 			"source": "https://github.com/cursor/plugins",
@@ -472,10 +464,10 @@
 		"swarm": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "cce94d493725ffae4b325b1b016f4994c29cb96176b6d653988fa0a2c8e76646",
+			"computedHash": "d4cfa86e45395af7755b961a4f0bfc81cc7db807f1fe3129ac91678bcf3ed125",
 			"installMode": "copy",
-			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
-			"skillPath": "pstack/skills/swarm/SKILL.md"
+			"skillPath": "pstack/skills/swarm/SKILL.md",
+			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 		},
 		"tdd": {
 			"source": "https://github.com/cursor/plugins",
@@ -528,10 +520,10 @@
 		"why": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "21b54724ef7469deece2c3ae25c6a50232e3f901c4c1f2b8d9b0696bc7e4d8f0",
+			"computedHash": "faa781d4bc1669c99c8d8e07337ed5f81041ad4655e12c1fb661f457f54cec1b",
 			"installMode": "copy",
-			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
-			"skillPath": "pstack/skills/why/SKILL.md"
+			"skillPath": "pstack/skills/why/SKILL.md",
+			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 		}
 	}
 }

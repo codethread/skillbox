@@ -1,0 +1,22 @@
+diff --git a/references/guide/02-poteto-mode.md b/references/guide/02-poteto-mode.md
+index b5f3f7696995e33e95ef68242011894006cb36dc..8efa76ea8482b5a138bc59624d755db81ce0d8dc 100644
+--- a/references/guide/02-poteto-mode.md
++++ b/references/guide/02-poteto-mode.md
+@@ -92,7 +92,7 @@ keep going until done
+ 
+ Short works because the playbook holds the structure. Whether the skill stays attached depends on the harness; name `/poteto-mode` again when it drops. [Set up pstack](01-setup.md#run-your-first-task) shows how to start a task. Your words carry the intent, and the skill carries the rigor.
+ 
+-## Switch tasks with "new task"
++## State a changed goal
+ 
+ A long chat accumulates context from the last task. When you change subjects, say so:
+ 
+@@ -100,7 +100,7 @@ A long chat accumulates context from the last task. When you change subjects, sa
+ /poteto-mode new task. figure out why the cache entry survives logout. don't change any code yet.
+ ```
+ 
+-"new task" tells `/poteto-mode` to re-match rather than continue the prior playbook. "don't change any code yet" pins this one to Investigation. Without those two phrases, a mode mid-Feature tends to treat your question as the next feature step.
++The changed goal determines the playbook. Here, "don't change any code yet" makes the request read-only.
+ 
+ ## Give parallel work its own worktree
+ 

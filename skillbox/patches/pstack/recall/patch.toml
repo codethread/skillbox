@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Rebuild current work context from the active transcript and Botlake task, agent, activity, mail, and shared context records. Bound the search, use `/why` for product history, delegate independent slices as tracked lanes, verify live state, and state transcript or evidence gaps explicitly."
+intent = "Remove catalog-selection and optional second shared-group mechanics because Botlake supplies them. Keep direct Botlake execution for parallel history slices and task-level findings and integration status. Preserve scoped harness transcripts and Botlake work records, real activity ordering, source citations, direct search for small scopes, why for product history, live-state checks, privacy, and explicit transcript or evidence gaps."
 
 [[patches]]
 target = "./SKILL.md"
@@ -10,3 +10,7 @@ patch = "changes/0001-captured.patch"
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0003-captured.patch"

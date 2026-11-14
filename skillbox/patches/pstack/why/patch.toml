@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Investigate rationale through one read-only Botlake lane per available evidence category, seeded with concrete Git archaeology and identifiers. Preserve complete coverage accounting, source-specific evidence, citations, model diversity, and explicit gaps when an optional source is unavailable."
+intent = "Remove repeated catalog, dispatch, and shared-group mechanics because Botlake owns that process. Keep one direct binding for investigators and the later synthesizer, with per-lane tasks, findings, and integration status in the current group. Preserve read-only source ownership, one parallel investigator per available evidence category, concrete Git anchors, conditional integrations, separate synthesis after investigation, citations, confidence separation, and explicit unavailable-source gaps."
 
 [files."./references/source-playbook.md"]
 intent = "Map each evidence category to a concrete source playbook while leaving exact operations to the available integration's instructions or schema. Keep one source per investigator and require an explicit gap when access is unavailable."
@@ -13,7 +13,7 @@ intent = "Allow the session's forge access for review history instead of assumin
 intent = "Use available evidence tools for citation checks and report access gaps per source; preserve confidence separation and require Git history even when PR access is unavailable."
 
 [files."./references/sources/databricks.md"]
-intent = "Guide read-only product analytics and warehouse investigation when Databricks SQL access exists. Preserve polling for asynchronous results, query evidence and citations, and the explicit limit that SQL cannot inspect notebooks; report notebook rationale as a gap."
+intent = "Remove the assumed application tables, model naming, columns, clustering, deduplication keys, refresh intervals, and shortcut that skips DESCRIBE. The connected warehouse and model definitions own those facts. Keep conditional read-only Databricks access, asynchronous result polling, discovered schema, bounded queries, useful vendor-system examples, event and threshold investigations, experiment lookup, lineage handoff, exact query evidence, and compact summaries. Report unknown schema, uniqueness, access, refresh, retention, backfill, and notebook coverage as gaps. Do not replace the removed conventions with another presumed schema map."
 
 [files."./references/sources/datadog.md"]
 intent = "Guide broad-to-narrow production telemetry investigation when Datadog access exists. Use the available search operations, preserve time bounds and cited evidence, and report unavailable access instead of inventing runtime findings."
@@ -77,3 +77,11 @@ patch = "changes/0011-captured.patch"
 [[patches]]
 target = "./references/sources/slack.md"
 patch = "changes/0012-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0013-captured.patch"
+
+[[patches]]
+target = "./references/sources/databricks.md"
+patch = "changes/0014-captured.patch"

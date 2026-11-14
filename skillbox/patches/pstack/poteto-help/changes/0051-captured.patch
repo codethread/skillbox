@@ -1,0 +1,58 @@
+diff --git a/references/guide/01-setup.md b/references/guide/01-setup.md
+index c379b1c0c92413c10350a68f8328c0b99aeb40d5..baabee5b14ffdb397f848e5f0e173b85d2f4f990 100644
+--- a/references/guide/01-setup.md
++++ b/references/guide/01-setup.md
+@@ -1,43 +1,33 @@
+ # Set up pstack
+ 
+-In this page you install the bundle, pick which agents pstack uses, and run your first task. Setup is one command plus a short conversation.
++Install the bundle and run your first task with the existing agent configuration.
+ 
+ ## Install the bundle
+ 
+ Install the pstack bundle with the project's Skillbox configuration. For installation questions, load `skillbox skills get skillbox-configure`.
+ 
+-## Pick your agents
++## Get agent configuration help when needed
+ 
+-Run:
++The existing defaults are ready to use. If you need different agents or want to change cost, consult Botlake's agent catalog and the project's agent configuration. Use supported models and reasoning effort. Preserve independent judgment and model diversity where the routed skill requires them.
+ 
+-```text
+-/setup-pstack
+-```
+-
+-[`/setup-pstack`](../../../setup-pstack/SKILL.md) reads the Botlake agent catalog, asks for a reasoning budget, shows you each role (code delegates, judgment, the review panels), and asks what you want. Answer the questions. The existing configuration supplies the defaults; setup does not create a second pstack roster.
+-
+-The budget labels are `unlimited` (max reasoning), `large` (xhigh), `medium` (high), and `small` (medium). Setup maps them to supported choices rather than assuming every model has every effort level.
+-
+-You only override what you care about. Persistent changes use the project's existing agent configuration, with your approval of their scope: a shared agent's model change affects other workflows too. Task-specific choices, such as panel size or a model comparison, belong in the task prompt.
++Put task-specific choices, such as panel size or a model comparison, in the task prompt. For persistent changes, follow Botlake's configuration guidance. The agent must explain the scope and get your approval before changing shared configuration, since a shared agent's model change affects other workflows too.
+ 
+ ## Accept the verification offers, or don't
+ 
+-At the end of setup, `/setup-pstack` looks for a way to prove app behavior in your project, either a `verify-*` skill or an existing harness. If it finds neither, it offers once to generate one with [`/create-verification-skill`](../../../create-verification-skill/SKILL.md).
+-
+-Say yes and it writes a project-local `verify-<app>` skill into the project's skill source directory, which teaches agents to drive your app the way a user does. It proves the skill works once before handing it over. Say no and setup moves on. You can run `/create-verification-skill` yourself any time. [Verify and ship](06-verify-and-ship.md#create-a-project-verification-skill) covers it in depth.
++Ask `/poteto-help` for onboarding. It checks for a way to drive your real app, either a `verify-*` skill or an existing harness. If it finds neither, it offers [`/create-verification-skill`](../../../create-verification-skill/SKILL.md) once per chat.
+ 
+-If you're new to pstack, say yes. An agent that can check its own work keeps going until the check passes. An agent that can't hands every result back to you to check by hand. Of everything in this guide, the verification skill pays off the most.
++Accept to get a prompt for creating a project-local `verify-<app>` skill that teaches agents to drive your app the way a user does. Send that prompt when you want creation to start. The creator must run the generated instructions and retain evidence before reporting a verified result. Decline to continue without it. You can run `/create-verification-skill` yourself any time. [Verify and ship](06-verify-and-ship.md#create-a-project-verification-skill) covers it in depth.
+ 
+-Then setup offers once to generate a formal verification skill with [`/create-formal-verification-skill`](../../../create-formal-verification-skill/SKILL.md), unless the project already has one. Tests check the cases someone thought to write. A formal verification skill checks one key property of your code, such as "a job never runs twice at once", in every case within a stated scope. Say yes when your code has concurrency, retries, a state machine, or a parser, where a bug is costly and tests rarely reach the case that breaks. Otherwise say no, and run it later if that changes. [Verify and ship](06-verify-and-ship.md#prove-a-property-with-a-formal-verification-skill) covers it.
++If your project has no formal verification skill, `/poteto-help` also offers [`/create-formal-verification-skill`](../../../create-formal-verification-skill/SKILL.md) once per chat. Accept to get a prompt when you need to check a property that tests rarely reach, such as "a job never runs twice at once". A passing check covers only the stated model, bounds, and assumptions, not the whole system. Decline if you don't need it now. [Verify and ship](06-verify-and-ship.md#prove-a-property-with-a-formal-verification-skill) covers it.
+ 
+-Setup reports what changed and when the configured runtime picks it up.
++Neither offer starts work inside the help answer. You choose when to send the creator's prompt. Both creators write to the consuming project's owned skill source, never a generated installation. As the app changes, use [`/maintain-verification-skill`](../../../maintain-verification-skill/SKILL.md) to check the app-driving skill and its feature map. Use [`/maintain-formal-verification-skill`](../../../maintain-formal-verification-skill/SKILL.md) to check whether a formal verification still describes the code.
+ 
+ ## Keep the cost in check
+ 
+ pstack spends extra tokens on subagents and review panels. That's the price of the rigor. To spend fewer:
+ 
+-- Rerun `/setup-pstack` and pick a smaller reasoning budget or cheaper models. A strong model for judgment with cheaper, faster models in the code roles is a good split.
+-- Ask for fewer panelists when the task needs less scrutiny.
++- Review cheaper agents or lower supported reasoning effort in Botlake's configuration. Keep stronger judgment for difficult work.
++- Ask for fewer panelists when the task needs less scrutiny. Preserve the routed skill's required independence and model diversity.
+ - Save `/poteto-mode` for work that needs rigor. A small, obvious edit doesn't.
+ 
+ ## Run your first task

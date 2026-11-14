@@ -1,0 +1,13 @@
+diff --git a/references/guide/04-design.md b/references/guide/04-design.md
+index 0dc4a500a839b06408e34f8f693e823d5d51d4de..f8ab4f73ac5a023b3d9197066e6cbd32ef2bf39d 100644
+--- a/references/guide/04-design.md
++++ b/references/guide/04-design.md
+@@ -44,7 +44,7 @@ flowchart LR
+     H --> I[Verify]
+ ```
+ 
+-The panel uses the Botlake agent catalog, and you can adjust it per task. [`/setup-pstack`](../../../setup-pstack/SKILL.md) helps review those choices. Ask for more candidates when the decision matters, fewer when it doesn't:
++Choose the panel from Botlake's agent catalog using the project's agent configuration. Adjust it in the task prompt while preserving `/arena`'s model diversity and independent judging rules. Ask for more candidates when the decision matters, fewer when it doesn't:
+ 
+ ```text
+ /arena this, 5 candidates. the cache key format is expensive to change later.

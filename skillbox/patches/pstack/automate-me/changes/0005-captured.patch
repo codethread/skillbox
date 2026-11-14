@@ -1,0 +1,13 @@
+diff --git a/SKILL.md b/SKILL.md
+index 6dba24308c271d26050a9c3ac26736e963dffa0d..53de0dfaedd2907586e742e6a93818656d141a7f 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -28,7 +28,7 @@ Update mode changes the rest of the flow:
+ 
+ Use the active harness for conversation history and Botlake for task, agent, and activity records. Stay within the active workspace. Do not read private chats from unrelated projects.
+ 
+-Survey recent agent conversations within that scope for recurring patterns. Create a Botlake task under the current context group for each independently delegated mining lane, then choose agents from Botlake's agent catalog and dispatch parallel runs across slices of history (for example, split the last 2 to 4 weeks into three slices). Use a Botlake shared context group when the agents need the same durable context. Give each agent only workspace-scoped records. Ask each to return a short, structured list of patterns with evidence pointers. Default signals worth hunting:
++Survey recent agent conversations within that scope for recurring patterns. Use Botlake to run history slices in parallel and track each independent mining lane as a task under the current context group. Record each lane's findings and integration status. For example, split the last 2 to 4 weeks into three slices. Give each agent only workspace-scoped records. Ask each to return a short, structured list of patterns with evidence pointers. Default signals worth hunting:
+ 
+ - Response preferences (length, tone, format, "dumb it down" corrections)
+ - Delegated-agent habits (models, specialized workflows, parallelism)
