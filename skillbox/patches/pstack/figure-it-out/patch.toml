@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Remove the obsolete Cursor-oriented Subagents policy pointer while preserving seam-based parallelism, worker isolation, and the auditable hypothesis loop."
+intent = "Remove the obsolete Cursor-oriented Subagents policy pointer while preserving seam-based parallelism, worker isolation, and the auditable hypothesis loop. Keep ordinary task-list and delegation language: CT-configured agents already receive task guidance and discover available agents, so this workflow needs no Botlake command catalog."
 
 [[patches]]
 target = "./SKILL.md"

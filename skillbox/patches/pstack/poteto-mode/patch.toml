@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Remove Cursor-only question, plugin-agent, model-slug, authoring, control-skill, and loop assumptions. Keep the principles, autonomy limits, delegation ownership, role diversity, and playbook routing; configured agent context supplies mechanics and useful continuity."
+intent = "Adapt the main workflow for consuming projects with CT-configured Botlake agents, whose prompts and on-demand guidance already supply task, delegation, and tool-discovery mechanics. Remove Cursor-only question, plugin-agent, model-slug, authoring, control-skill, and loop assumptions. Preserve upstream voice and structure where compatible, along with principles, autonomy limits, delegation ownership, role diversity, and playbook routing. Use current agent/tool context rather than a copied roster or runtime manual; retain useful agent continuity."
 
 [files."./playbooks/authoring-a-skill.md"]
 intent = "Use available project authoring guidance instead of Cursor create-skill; retrieve Skillbox guidance through skills get when relevant. Identify the editable source and owner, distinguishing owned skills, optional complementary local skills, consumer patches of adapted imports, and shared maintainer changes. Native imports use owned source or an owner handoff. Preserve voice, validation, structural testing, and PR steps without requiring producer checkout access."

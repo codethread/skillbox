@@ -399,12 +399,6 @@
 			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
 			"skillPath": "pstack/skills/principle-type-system-discipline/SKILL.md"
 		},
-		"pstack-migration": {
-			"source": "./skillbox",
-			"sourceType": "local",
-			"computedHash": "3e656409864d789095168a12ad0245b353e6472ba74cd3ccfbaf4e15c0bcec6a",
-			"installMode": "copy"
-		},
 		"purge": {
 			"source": "codethread/agents",
 			"sourceType": "github",

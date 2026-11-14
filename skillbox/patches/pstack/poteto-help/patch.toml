@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Keep the help router, prompt-first handoff, skill map, and engineering advice. Route setup through existing agent configuration and installation/authoring through Skillbox's on-demand guidance; replace unavailable Cursor modes, hosted agents, loop, and bot UI claims, and link carried guide pages without a second runtime manual. Route personal preferences to owned source or consumer patches of adapted bundles and distinguish shared maintainer changes without requiring a producer checkout."
+intent = "Keep the help router, prompt-first handoff, skill map, and engineering advice. Carry the upstream guide inside the skill because consumers install skills and supporting files, not the plugin root. Route setup through existing agent configuration and installation/authoring through Skillbox's on-demand guidance; replace unavailable Cursor modes, hosted agents, loop, and bot UI claims, and link carried guide pages without a second runtime manual. Route personal preferences to owned source or consumer patches of adapted bundles and distinguish shared maintainer changes without requiring a producer checkout."
 
 [files."./references/prompting.md"]
 intent = "Replace the Cursor /loop handoff with the Autonomous run playbook while preserving checkable finish conditions, isolation, decision logging, and the escape hatch in away prompts."
@@ -10,7 +10,7 @@ intent = "Replace the Cursor /loop handoff with the Autonomous run playbook whil
 intent = "Remove the Cursor /loop command from the away recipe; keep the same goal, proof predicate, worktree, decision log, permissions, and dead-end exit."
 
 [files."./references/upstream/ATTRIBUTION.md"]
-intent = "Record the carried guide's repository, pinned commit and subtree identities, MIT license, and adaptation scope so copied documentation remains traceable outside the upstream tree. Align the source URL with the recorded pinned revision."
+intent = "Record the carried guide's repository, pinned commit and subtree identities, MIT license, and adaptation scope so copied documentation remains traceable outside the upstream tree. Align the source URL with the recorded pinned revision. Keep the origin usable for comparing copied pages with their upstream originals during updates; clean replay of added copies cannot detect changes to those originals."
 
 [files."./references/upstream/LICENSE"]
 intent = "Carry the upstream MIT license unchanged with the copied guide pages to preserve their attribution and redistribution terms."

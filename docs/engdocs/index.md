@@ -1,3 +1,2 @@
 - [Skillbox acceptance criteria](PRD.md)
 - [Maintainer setup](setup.md)
-- [PSTACK bundles and patches](pstack-patches.md)

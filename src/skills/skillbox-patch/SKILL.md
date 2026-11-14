@@ -49,6 +49,8 @@ Use the result's `pendingIntents` count and workspace-relative `intentFiles` pat
 - **Outcome:** the behavior the adapted file must retain.
 - **Constraints:** compatibility, policy, or scope that future regeneration must preserve.
 
+File intent should be sufficient to review or regenerate the change without a separate adaptation guide.
+
 Intent is explanatory: changing it does not invalidate the patch hash. Patch targets and paths, diff payloads, and the bundle's source identity remain integrity-protected.
 
 The prepared workspace is reusable. After capture or manual intent annotation, make further edits in the same `edited/skills/` tree and capture again. Existing reasons remain attached and shared by every patch for that target; only new targets need annotation. The user owns the continuing accuracy of those notes as the file evolves—capture does not rewrite or guess intent.
