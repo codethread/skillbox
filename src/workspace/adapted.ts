@@ -58,7 +58,6 @@ export const bundleLockSchema = z.strictObject({
 	tree: revisionSchema,
 	sourceHash: digestSchema,
 	patchHash: digestSchema,
-	outputs: z.record(bundleSchema, digestSchema),
 });
 export const patchSchema = z.strictObject({
 	schema: z.literal(1),
@@ -426,20 +425,6 @@ async function materializeBundle(
 	}
 	if (conflicts.length) throw new ResponseError(conflicts);
 	const outputs = await hashSkillOutputs(destination, pack.descriptor.skills_root);
-	if (
-		!revision &&
-		JSON.stringify(outputs) !==
-			JSON.stringify(
-				Object.fromEntries(
-					Object.entries(pack.lock.outputs).sort(([a], [b]) => a.localeCompare(b)),
-				),
-			)
-	)
-		throw responseError(
-			"BUNDLE_LOCK_DRIFT",
-			`Patched output differs from the lock for ${bundle}.`,
-			{ skill: bundle },
-		);
 	const canonical = join(dirname(destination), "canonical");
 	await mkdir(join(canonical, "skillbox", bundle), { recursive: true });
 	await cp(join(destination, pack.descriptor.skills_root), join(canonical, "skillbox", bundle), {

@@ -106,7 +106,7 @@ skillbox --workspace frontend sync
 
 Edit `skillbox/config.json` to add or remove sources/bundles, then run sync. Both tracking files must already exist; use `add` for the first installation. Sync installs newly selected skills, removes deselected managed skills and their lock entries, and preserves the config's formatting. Local paths in the config resolve from the selected workspace root. Use `"sources": []` to remove all managed skills.
 
-Retained native skills must still match their locked content hashes; sync does not update those hashes or refs. Adapted bundles use their recorded patch and output hashes, as described below. New skills receive SDK-generated lock entries. Unmanaged skill paths and name collisions are rejected before publishing. Installed managed files are generated output and can be replaced or removed by sync.
+Retained native skills must still match their locked content hashes; sync does not update those hashes or refs. Adapted bundles use their recorded source and patch hashes, as described below. New skills receive SDK-generated lock entries. Unmanaged skill paths and name collisions are rejected before publishing. Installed managed files are generated output and can be replaced or removed by sync.
 
 The JSON result reports `installed`, `unchanged`, and `removed` skill counts. Repeating sync with matching installed contents and lock entries reports an unchanged result without rewriting them.
 
@@ -143,7 +143,7 @@ Run sync only after every intent is nonblank:
 skillbox sync
 ```
 
-Otherwise sync returns `INTENT_REQUIRED` without changing the installation. Sync validates the adapted source, patch, and output hashes before publishing and still rejects native source content that differs from its locked hash. The bundle lock pins the upstream revision; each patch record contains only its target and diff path. File intent is explanatory and may be edited directly; integrity hashes protect source identity, patch targets and paths, and diff payloads.
+Otherwise sync returns `INTENT_REQUIRED` without changing the installation. Sync validates the adapted source and patch hashes before publishing and still rejects native source content that differs from its locked hash. Capture verifies that replay reproduces the edited tree. The bundle lock records the source identity, exact revision, and source and patch hashes; each patch record contains only its target and diff path. File intent is explanatory and may be edited directly; integrity hashes protect source identity, patch targets and paths, and diff payloads.
 
 Source snapshots are cached outside the project under the XDG cache directory (override with `SKILLBOX_CACHE_DIR`). A verified cached revision can be restored offline; a cold cache needs access to the pinned Git revision.
 
@@ -154,16 +154,20 @@ skillbox update pstack                 # resolve the configured update_ref
 skillbox update pstack --ref <commit>  # choose a particular revision
 ```
 
-Update advances the adapted bundle lock with strict replay but does not install until sync. On `UPDATE_CONFLICT`, the current tracking files and live installation remain unchanged and the result provides a regeneration workspace. Edit its `edited/skills/` tree, then adopt it:
+Update always stages the exact resolved candidate. It does not change a tracked pin or install skills. The JSON result returns `source`, `from`, `to`, `workspace`, `pristine`, and `editable`. A clean replay has status `prepared` and an empty `conflicts` array. `UPDATE_CONFLICT` returns nonzero with the same paths, status `conflicted`, and the failed skill, target, patch, and reason. The pristine tree is the new source. The editable tree is the new source plus successful replays, and it can be partial after a conflict. Later patches for a failed target are skipped.
+
+Review the upstream Git log and diff from the old pin to the exact candidate pin, scoped to the descriptor root. Read broad changes, including new files, runtime assumptions, renames, deletions, scripts, and executable modes. Compare those changes with each per-file intent and the current adapted result. A clean replay can still hide a semantic conflict or an upstream change that has absorbed a local patch.
+
+Edit the returned workspace and capture the candidate:
 
 ```sh
-skillbox patch adopt pstack --from <returned-workspace>
-# Preserve an existing reason across an exact upstream rename:
-skillbox patch adopt pstack --from <returned-workspace> \
+skillbox patch capture pstack --from <returned-workspace>
+# Preserve intent across an exact upstream rename:
+skillbox patch capture pstack --from <returned-workspace> \
   --map 'skill/references/old.md=skill/references/new.md'
 ```
 
-Adopt may rebuild ordered diffs against the new pristine source while preserving file notes. Annotate blank intents for new targets, then sync. This repository uses the same workflow for its PSTACK adaptation; see [the PSTACK bundle guide](docs/engdocs/pstack-patches.md) for provenance and maintained scope.
+Capture records the exact candidate pin and regenerates diffs while retaining per-file intent. You can edit and capture repeatedly; later captures append as usual. Annotate blank intents for new targets, then sync. A later upstream push does not change the staged candidate. This repository uses the same workflow for its PSTACK adaptation; see [the PSTACK bundle guide](docs/engdocs/pstack-patches.md) for provenance and maintained scope.
 
 Native bundle revision pin creation, automatic ignore setup in consuming projects, migration, and multi-workspace orchestration remain separate work.
 

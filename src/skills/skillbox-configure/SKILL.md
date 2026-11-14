@@ -62,6 +62,6 @@ For configuration fields, source examples, or a failed command, load:
 skillbox skills file skillbox-configure references/configuration.md
 ```
 
-For third-party plugin skills, load `skillbox skills get skillbox-patch` before importing, editing, capturing, updating, or adopting an adapted bundle.
+For third-party plugin skills, load `skillbox skills get skillbox-patch` before importing, editing, capturing, or updating an adapted bundle.
 
 Treat managed installed files as generated output: sync can replace edits within managed skill directories. Change an owned source or an adapted bundle's prepared `edited/skills/` tree instead. Commit the relevant tracking and patch files. Native bundles retain their existing hash-checking behavior; automatic migration remains separate work.

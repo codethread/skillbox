@@ -48,7 +48,7 @@ Skillbox does not read or modify the root `skills-lock.json` used by `npx skills
 
 ## Adapted bundles and patches
 
-Load `skillbox skills get skillbox-patch` for the import, editable-workspace, capture, intent, update, conflict, and adoption workflow. Keep generated installations separate from committed patch artifacts.
+Load `skillbox skills get skillbox-patch` for the import, editable-workspace, capture, intent, update, and conflict workflow. Keep generated installations separate from committed patch artifacts.
 
 ## Failure decisions
 

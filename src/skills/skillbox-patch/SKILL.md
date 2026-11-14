@@ -53,10 +53,10 @@ The prepared workspace is reusable. After capture or manual intent annotation, m
 
 ## Install
 
-Run `skillbox sync` only after every intent is nonblank. Otherwise sync returns `INTENT_REQUIRED` without changing the installation. A valid sync verifies bundle source, patch, and output hashes, accepts the adapted content recorded by capture, and still rejects native source content that differs from its locked hash.
+Run `skillbox sync` only after every intent is nonblank. Otherwise sync returns `INTENT_REQUIRED` without changing the installation. A valid sync verifies the recorded bundle source and patches. Runtime capture has already verified that replay reproduces the edited tree. Sync still rejects native source content that differs from its locked hash.
 
-## Update or resolve a conflict
+## Update from upstream
 
-`skillbox update <bundle>` advances the adapted bundle lock and strictly replays its patches. It does not install; run sync after reviewing the result.
+An upstream update requires more than a successful patch replay. Compare the old and candidate pins in Git, read the upstream-authored changes, and judge the candidate against each file intent. Check broad changes, including new files, renames, deletions, scripts, executable modes, and runtime assumptions.
 
-On a replay conflict, update preserves both tracking files and the live installation and returns a regeneration workspace. Edit its `edited/skills/` tree, then run `skillbox patch adopt <bundle> --from <workspace>`. Adopt may rebuild ordered diffs against the new pristine source while retaining file intent. For an exact upstream rename, pass `--map skill/old-path=skill/new-path` so the existing reason follows the target. New targets receive blank intent; annotate them, then sync.
+Before updating, run `skillbox skills file skillbox-patch references/updating.md`. The reference explains which Git revisions and trees to compare, how to review file intent, and how to capture the candidate and sync.

@@ -88,12 +88,6 @@ export async function patchInit(input: {
 			skill: bundle,
 		});
 	const occupied = new Set(existingLock ? Object.keys(readLock(existingLock).skills) : []);
-	for (const entry of current.sources) {
-		for (const name of entry.bundles) {
-			const adapted = await readAdaptedBundle(workspace, name);
-			if (adapted) for (const skill of Object.keys(adapted.lock.outputs)) occupied.add(skill);
-		}
-	}
 	const source = await input.adapted.acquireSource(descriptor, requested);
 	const outputs = await hashSkillOutputs(source.root, descriptor.skills_root);
 	const names = Object.keys(outputs);
@@ -103,14 +97,27 @@ export async function patchInit(input: {
 			"No skill directories found in the selected source subtree.",
 			{ source: input.source },
 		);
-	for (const skill of names)
-		if (occupied.has(skill))
-			throw responseError("SKILL_NAME_COLLISION", "Skill name collision: " + skill, {
-				skill,
-			});
 	const staging = await mkdtemp(join(workspace, ".skillbox-init-"));
 	let retain = false;
 	try {
+		for (const entry of current.sources) {
+			for (const name of entry.bundles) {
+				if (!(await readAdaptedBundle(workspace, name))) continue;
+				const directory = join(staging, "occupied", name);
+				await mkdir(directory, { recursive: true });
+				const materialized = await input.adapted.materializeBundle(
+					workspace,
+					name,
+					join(directory, "edited"),
+				);
+				for (const skill of Object.keys(materialized.outputs)) occupied.add(skill);
+			}
+		}
+		for (const skill of names)
+			if (occupied.has(skill))
+				throw responseError("SKILL_NAME_COLLISION", "Skill name collision: " + skill, {
+					skill,
+				});
 		const pack = join(staging, packPath);
 		await mkdir(pack, { recursive: true });
 		await writeFile(join(pack, "bundle.toml"), descriptorText(descriptor));
@@ -124,7 +131,6 @@ export async function patchInit(input: {
 				tree: source.tree,
 				sourceHash: source.sourceHash,
 				patchHash: await hashPatchPack(pack),
-				outputs,
 			}),
 		);
 		await input.adapted.prepareBundle(staging, bundle, join(staging, "editing"));
@@ -197,43 +203,62 @@ export async function patchUpdate(input: {
 	const staging = await mkdtemp(join(input.workspace, ".skillbox-update-" + input.bundle + "-"));
 	let retain = false;
 	try {
-		let outputs: Record<string, string>;
+		await cp(source.root, join(staging, "pristine"), {
+			recursive: true,
+			preserveTimestamps: true,
+		});
+		let conflict: ResponseError | undefined;
 		try {
-			outputs = (
-				await input.adapted.materializeBundle(
-					input.workspace,
-					input.bundle,
-					join(staging, "edited"),
-					source.revision,
-				)
-			).outputs;
+			const materialized = await input.adapted.materializeBundle(
+				input.workspace,
+				input.bundle,
+				join(staging, "edited"),
+				source.revision,
+			);
+			await rm(materialized.canonical, { recursive: true });
 		} catch (cause) {
 			if (
 				!(cause instanceof ResponseError) ||
 				cause.errors.some((error) => error.code !== "PATCH_APPLY_FAILED")
 			)
 				throw cause;
-			await cp(source.root, join(staging, "pristine"), {
-				recursive: true,
-				preserveTimestamps: true,
-			});
-			await writeFile(
-				join(staging, "manifest.json"),
-				JSON.stringify(
-					{
-						schema: 1,
-						bundle: input.bundle,
-						source: descriptor.source,
-						revision: source.revision,
-						sourceHash: source.sourceHash,
-						patchHash: current.patchHash,
-						previous_revision: current.revision,
-					},
-					null,
-					2,
-				) + "\n",
-			);
-			retain = true;
+			conflict = cause;
+		}
+		await writeFile(
+			join(staging, "manifest.json"),
+			JSON.stringify(
+				{
+					schema: 1,
+					bundle: input.bundle,
+					source: descriptor.source,
+					revision: source.revision,
+					sourceHash: source.sourceHash,
+					patchHash: current.patchHash,
+					previous_revision: current.revision,
+				},
+				null,
+				2,
+			) + "\n",
+		);
+		const data = {
+			status: conflict ? "conflicted" : "prepared",
+			bundle: input.bundle,
+			source: descriptor.source,
+			from: current.revision,
+			to: source.revision,
+			workspace: staging,
+			pristine: join(staging, "pristine"),
+			editable: join(staging, "edited"),
+			conflicts:
+				conflict?.errors.map((error) => ({
+					skill: error.skill,
+					target: error.target,
+					patch: error.patch,
+					reason: error.reason,
+				})) ?? [],
+		};
+		retain = true;
+		if (conflict)
 			throw new ResponseError(
 				[
 					{
@@ -243,53 +268,9 @@ export async function patchUpdate(input: {
 						skill: input.bundle,
 					},
 				],
-				{
-					cause,
-					data: {
-						bundle: input.bundle,
-						source: descriptor.source,
-						from: current.revision,
-						to: source.revision,
-						workspace: staging,
-						editable: join(staging, "edited"),
-						conflicts: cause.errors.map((error) => ({
-							skill: error.skill,
-							target: error.target,
-							patch: error.patch,
-							reason: error.reason,
-						})),
-					},
-				},
+				{ cause: conflict, data },
 			);
-		}
-		if (source.revision !== current.revision) {
-			const stagedPack = join(staging, "pack");
-			await cp(pack.directory, stagedPack, { recursive: true, preserveTimestamps: true });
-			await writeFile(
-				join(stagedPack, "lock.json"),
-				lockText({
-					...current,
-					revision: source.revision,
-					tree: source.tree,
-					sourceHash: source.sourceHash,
-					outputs,
-				}),
-			);
-			try {
-				await publish(staging, [{ staged: stagedPack, target: pack.directory }]);
-			} catch (cause) {
-				retain = true;
-				throw publicationError(staging, cause);
-			}
-		}
-		return {
-			status: current.revision === source.revision ? "unchanged" : "updated",
-			bundle: input.bundle,
-			source: descriptor.source,
-			revision: source.revision,
-			from: current.revision,
-			to: source.revision,
-		};
+		return data;
 	} finally {
 		if (!retain) await rm(staging, { recursive: true, force: true });
 	}
@@ -312,16 +293,13 @@ export async function patchCapture(input: {
 	);
 	const live = await requirePack(input.workspace, input.bundle);
 	const { descriptor, lock } = live;
-	const adopting = manifest.previous_revision !== undefined;
-	if (adopting && input.skill)
-		throw responseError("REGEN_WORKSPACE_INVALID", "Adopt the complete regenerated bundle.", {
+	const updating = manifest.previous_revision !== undefined;
+	if (updating && input.skill)
+		throw responseError("REGEN_WORKSPACE_INVALID", "Capture the complete update candidate.", {
 			input: input.from,
 		});
-	if (mappings.length && !adopting)
-		throw responseError(
-			"RENAME_MAP_INVALID",
-			"Rename mappings apply to upstream regeneration workspaces.",
-		);
+	if (mappings.length && !updating)
+		throw responseError("RENAME_MAP_INVALID", "Rename mappings apply to update workspaces.");
 	if (
 		manifest.bundle !== input.bundle ||
 		manifest.source !== descriptor.source ||
@@ -354,8 +332,8 @@ export async function patchCapture(input: {
 	try {
 		const stagedPack = join(staging, "pack");
 		await cp(live.directory, stagedPack, { recursive: true, preserveTimestamps: true });
-		const baseline = adopting ? join(outer, "pristine") : join(staging, "recorded");
-		if (!adopting)
+		const baseline = updating ? join(outer, "pristine") : join(staging, "recorded");
+		if (!updating)
 			await input.adapted.materializeBundle(input.workspace, input.bundle, baseline);
 		const skillsRoot = descriptor.skills_root;
 		const beforeRoot = join(baseline, skillsRoot);
@@ -392,10 +370,10 @@ export async function patchCapture(input: {
 		let changed = 0;
 		for (const skill of selected) {
 			const old = await readManifest(stagedPack, skill);
-			const next: PatchManifest = adopting
+			const next: PatchManifest = updating
 				? { schema: 1, files: {}, patches: [] }
 				: structuredClone(old);
-			if (adopting) await rm(join(stagedPack, skill), { recursive: true, force: true });
+			if (updating) await rm(join(stagedPack, skill), { recursive: true, force: true });
 			const diffs = await input.adapted.diffFiles(
 				join(beforeRoot, skill),
 				join(editedRoot, skill),
@@ -431,13 +409,13 @@ export async function patchCapture(input: {
 				changed += diffs.length;
 			}
 		}
-		if (adopting) {
+		if (updating) {
 			for (const entry of await readdir(stagedPack, { withFileTypes: true })) {
 				if (entry.isDirectory() && !selected.includes(entry.name))
 					await rm(join(stagedPack, entry.name), { recursive: true });
 			}
 		}
-		if (changed || adopting) {
+		if (changed || updating) {
 			const patchHash = await hashPatchPack(stagedPack);
 			const nextLock = {
 				...lock,
@@ -470,7 +448,6 @@ export async function patchCapture(input: {
 						{ skill: name },
 					);
 			}
-			await writeFile(join(stagedPack, "lock.json"), lockText({ ...nextLock, outputs }));
 			await writeFile(
 				join(staging, "manifest.json"),
 				JSON.stringify(
@@ -501,7 +478,7 @@ export async function patchCapture(input: {
 		}
 		const pending = await pendingIntents(live.directory);
 		return {
-			status: changed || adopting ? "captured" : "unchanged",
+			status: changed || updating ? "captured" : "unchanged",
 			bundle: input.bundle,
 			source: manifest.source,
 			revision: manifest.revision,

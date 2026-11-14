@@ -24,6 +24,7 @@ interface Fixture {
 	root: string;
 	client: string;
 	source: string;
+	remote: string;
 	cache: string;
 	revision: string;
 }
@@ -69,8 +70,11 @@ test("init pins and registers a bundle, creates an editable workspace, and does 
 
 	const lock = await json(join(f.client, "skillbox/patches/pstack/lock.json"));
 	expect(lock.revision).toBe(f.revision);
-	expect(lock.source).toBe(pathToFileURL(f.source).href);
+	expect(lock.source).toBe(pathToFileURL(f.remote).href);
 	expect(lock.root).toBe("plugin");
+	expect(lock.tree).toEqual(expect.any(String));
+	expect(lock.sourceHash).toEqual(expect.any(String));
+	expect(lock.patchHash).toEqual(expect.any(String));
 	expect(await exists(join(f.client, ".agents/skills/alpha"))).toBe(false);
 
 	expectSuccess(await run(f, "sync"));
@@ -149,7 +153,7 @@ test("capture writes replayable draft artifacts for nested, deleted, binary, and
 	);
 	const expected = await snapshot(join(f.client, ".agents/skills"));
 
-	await rename(f.source, `${f.source}-unavailable`);
+	await rename(f.remote, `${f.remote}-unavailable`);
 	await removeGenerated(f);
 	expectSuccess(await run(f, "sync"));
 	expect(await snapshot(join(f.client, ".agents/skills"))).toEqual(expected);
@@ -337,50 +341,128 @@ test("capture can remove a skill over multiple edits, including its remaining su
 	expect((await readdir(join(f.client, ".agents/skills"))).sort()).toEqual(["beta"]);
 }, 60_000);
 
-test("update advances a clean source pin without installing until sync", async () => {
+test("update stages a clean review candidate and capture pins that exact source without installing", async () => {
 	const f = await fixture();
-	await initializeAnnotatedChoice(f);
-	const installed = await snapshot(join(f.client, ".agents/skills"));
-	const installedLock = await readFile(join(f.client, "skillbox/lock.json"), "utf8");
+	const original =
+		[
+			"Introduction",
+			"Scope",
+			"Examples",
+			"Audience",
+			"Conventions",
+			"Prefer type aliases for shared contracts.",
+			"Compatibility",
+			"Migration",
+			"Testing",
+			"Review",
+			"References",
+			"Appendix",
+		].join("\n") + "\n";
+	await put(f.source, "plugin/skills/alpha/references/choice.md", original);
+	f.revision = await commitAndPush(f, "Expand the upstream reference");
+	const initialized = expectSuccess(await initialize(f));
+	expectSuccess(await run(f, "sync"));
 	await put(
-		f.source,
-		"plugin/skills/beta/SKILL.md",
-		skill("beta", "A newer upstream instruction."),
+		requiredPath(initialized, "editable"),
+		"skills/alpha/references/choice.md",
+		original.replace("Prefer type aliases", "Prefer interfaces"),
 	);
-	const next = await commit(f.source, "Change unrelated skill");
+	expectSuccess(
+		await run(
+			f,
+			"patch",
+			"capture",
+			"pstack",
+			"--from",
+			requiredPath(initialized, "workspace"),
+		),
+	);
+	await annotateIntent(
+		join(f.client, "skillbox/patches/pstack/alpha/patch.toml"),
+		"./references/choice.md",
+		reason,
+	);
+	expectSuccess(await run(f, "sync"));
+	const before = await projectState(f);
+	const trackedLock = await readFile(join(f.client, "skillbox/patches/pstack/lock.json"), "utf8");
+	const shifted = `Upstream overview\n${original.replace("Appendix", "Adapter notes from upstream.")}`;
+	await put(f.source, "plugin/skills/alpha/references/choice.md", shifted);
+	await rm(join(f.source, "plugin/skills/beta"), { recursive: true });
+	await put(f.source, "plugin/skills/gamma/SKILL.md", skill("gamma", "A new upstream skill."));
+	await put(f.source, "plugin/skills/gamma/scripts/check.sh", "#!/bin/sh\nprintf 'gamma\\n'\n");
+	await chmod(join(f.source, "plugin/skills/gamma/scripts/check.sh"), 0o755);
+	const next = await commitAndPush(f, "Move the adapted line, replace beta with gamma");
 
-	const updated = expectSuccess(await run(f, "update", "pstack"));
-	expect(updated.status).toBe("updated");
+	const prepared = expectSuccess(await run(f, "update", "pstack"));
+	expect(prepared).toMatchObject({
+		status: "prepared",
+		bundle: "pstack",
+		source: pathToFileURL(f.remote).href,
+		from: f.revision,
+		to: next,
+		conflicts: [],
+	});
+	const workspace = requiredPath(prepared, "workspace");
+	const pristine = requiredPath(prepared, "pristine");
+	const editable = requiredPath(prepared, "editable");
+	expect(await readFile(join(pristine, "skills/alpha/references/choice.md"), "utf8")).toBe(
+		shifted,
+	);
+	expect(await readFile(join(editable, "skills/alpha/references/choice.md"), "utf8")).toBe(
+		shifted.replace("Prefer type aliases", "Prefer interfaces"),
+	);
+	expect(await exists(join(pristine, "skills/beta"))).toBe(false);
+	expect(await projectState(f)).toEqual(before);
+	expect(await readFile(join(f.client, "skillbox/patches/pstack/lock.json"), "utf8")).toBe(
+		trackedLock,
+	);
+
+	await put(f.source, "plugin/README.md", "# A later upstream commit\n");
+	await commitAndPush(f, "Push after candidate preparation");
+	await put(editable, "skills/alpha/references/new.md", "Candidate-only guidance.\n");
+	const captured = expectSuccess(await run(f, "patch", "capture", "pstack", "--from", workspace));
+	expect(captured.pendingIntents).toBe(1);
 	expect((await json(join(f.client, "skillbox/patches/pstack/lock.json"))).revision).toBe(next);
-	expect(await snapshot(join(f.client, ".agents/skills"))).toEqual(installed);
-	expect(await readFile(join(f.client, "skillbox/lock.json"), "utf8")).toBe(installedLock);
+	expect(await optionalSnapshot(join(f.client, ".agents/skills"))).toEqual(before.installed);
+	const manifestPath = join(f.client, "skillbox/patches/pstack/alpha/patch.toml");
+	const manifest = await readFile(manifestPath, "utf8");
+	expect(intentFor(manifest, "./references/choice.md")).toBe(reason);
+	expect(intentFor(manifest, "./references/new.md")).toBe("");
+	await annotateIntent(manifestPath, "./references/new.md", "Add candidate-specific guidance.");
 
 	expectSuccess(await run(f, "sync"));
-	expect(await readFile(join(f.client, ".agents/skills/beta/SKILL.md"), "utf8")).toContain(
-		"newer upstream",
+	expect(await exists(join(f.client, ".agents/skills/beta"))).toBe(false);
+	expect(await readFile(join(f.client, ".agents/skills/gamma/SKILL.md"), "utf8")).toContain(
+		"new upstream skill",
 	);
 	expect(
-		await readFile(join(f.client, ".agents/skills/alpha/references/choice.md"), "utf8"),
-	).toContain("interfaces");
-	expect((await json(join(f.client, "skillbox/lock.json"))).skills.alpha.ref).toBe(next);
-
-	await put(f.source, "plugin/README.md", "# Updated source context, unchanged skills\n");
-	const docsRevision = await commit(f.source, "Update source documentation only");
-	expectSuccess(await run(f, "update", "pstack"));
+		(await lstat(join(f.client, ".agents/skills/gamma/scripts/check.sh"))).mode & 0o111,
+	).not.toBe(0);
+	expect(await readFile(join(f.client, ".agents/skills/alpha/references/new.md"), "utf8")).toBe(
+		"Candidate-only guidance.\n",
+	);
+	await put(
+		editable,
+		"skills/alpha/references/choice.md",
+		shifted
+			.replace("Prefer type aliases for shared contracts.\n", "")
+			.replace(
+				"Adapter notes from upstream.",
+				"Adapter notes from upstream.\nPrefer interfaces for shared contracts and adapters.",
+			),
+	);
+	const repeated = expectSuccess(await run(f, "patch", "capture", "pstack", "--from", workspace));
+	expect(repeated.pendingIntents).toBe(0);
+	const refreshed = await readFile(manifestPath, "utf8");
+	expect(intentFor(refreshed, "./references/choice.md")).toBe(reason);
+	expect(intentFor(refreshed, "./references/new.md")).toBe("Add candidate-specific guidance.");
 	expectSuccess(await run(f, "sync"));
-	expect((await json(join(f.client, "skillbox/lock.json"))).skills.alpha.ref).toBe(docsRevision);
 }, 60_000);
 
-test("update conflicts preserve tracked and live state, then rename adoption captures without installing", async () => {
+test("update reports a mechanical rename conflict and capture maps the reviewed candidate", async () => {
 	const f = await fixture();
 	await initializeAnnotatedChoice(f);
-	const workspace = join(f.client, ".skillbox-prepare-pstack");
-	await put(
-		join(workspace, "edited"),
-		"skills/alpha/references/choice.md",
-		"Prefer interfaces for shared contracts and adapters.\n",
-	);
-	expectSuccess(await run(f, "patch", "capture", "pstack", "--from", workspace));
+	const before = await projectState(f);
 	await rename(
 		join(f.source, "plugin/skills/alpha/references/choice.md"),
 		join(f.source, "plugin/skills/alpha/references/preferences.md"),
@@ -390,26 +472,44 @@ test("update conflicts preserve tracked and live state, then rename adoption cap
 		"plugin/skills/alpha/references/preferences.md",
 		"Upstream now prefers explicit type aliases.\n",
 	);
-	const next = await commit(f.source, "Rename the upstream reference");
-	const beforeConflict = await projectState(f);
-	const conflict = await run(f, "update", "pstack", "--ref", next);
-	expect(conflict.response.success).toBe(false);
-	expect(conflict.response.errors.some((error) => error.code === "UPDATE_CONFLICT")).toBe(true);
-	expect(await projectState(f)).toEqual(beforeConflict);
+	const next = await commitAndPush(f, "Rename the upstream reference");
 
+	const conflict = await run(f, "update", "pstack", "--ref", next);
+	expect(conflict.exitCode).not.toBe(0);
+	expect(conflict.response.errors.some((error) => error.code === "UPDATE_CONFLICT")).toBe(true);
+	expect(conflict.response.data).toMatchObject({
+		status: "conflicted",
+		bundle: "pstack",
+		from: f.revision,
+		to: next,
+		conflicts: [
+			{
+				skill: "alpha",
+				target: "./references/choice.md",
+				patch: expect.any(String),
+				reason: expect.any(String),
+			},
+		],
+	});
+	expect(await projectState(f)).toEqual(before);
 	const data = conflict.response.data!;
+	const pristine = requiredPath(data, "pristine");
 	const edited = requiredPath(data, "editable");
+	expect(await exists(join(pristine, "skills/alpha/references/choice.md"))).toBe(false);
+	expect(
+		await readFile(join(pristine, "skills/alpha/references/preferences.md"), "utf8"),
+	).toContain("type aliases");
 	await put(
 		edited,
 		"skills/alpha/references/preferences.md",
 		"Prefer interfaces for extensible project contracts.\n",
 	);
 	await put(edited, "skills/alpha/references/unrelated.md", "This new change needs a reason.\n");
-	const adopted = expectSuccess(
+	const captured = expectSuccess(
 		await run(
 			f,
 			"patch",
-			"adopt",
+			"capture",
 			"pstack",
 			"--from",
 			requiredPath(data, "workspace"),
@@ -417,11 +517,9 @@ test("update conflicts preserve tracked and live state, then rename adoption cap
 			"alpha/references/choice.md=alpha/references/preferences.md",
 		),
 	);
-	expect(adopted.pendingIntents).toBe(1);
+	expect(captured.pendingIntents).toBe(1);
 	expect((await json(join(f.client, "skillbox/patches/pstack/lock.json"))).revision).toBe(next);
-	expect(await optionalSnapshot(join(f.client, ".agents/skills"))).toEqual(
-		beforeConflict.installed,
-	);
+	expect(await optionalSnapshot(join(f.client, ".agents/skills"))).toEqual(before.installed);
 	const manifestPath = join(f.client, "skillbox/patches/pstack/alpha/patch.toml");
 	const manifest = await readFile(manifestPath, "utf8");
 	expect(intentFor(manifest, "./references/preferences.md")).toBe(reason);
@@ -431,12 +529,146 @@ test("update conflicts preserve tracked and live state, then rename adoption cap
 		"./references/unrelated.md",
 		"Document the renamed workflow.",
 	);
-
 	expectSuccess(await run(f, "sync"));
 	expect(await exists(join(f.client, ".agents/skills/alpha/references/choice.md"))).toBe(false);
 	expect(
 		await readFile(join(f.client, ".agents/skills/alpha/references/preferences.md"), "utf8"),
 	).toContain("interfaces");
+}, 60_000);
+
+test("update skips later patches on a conflicted target while replaying independent edits", async () => {
+	const f = await fixture();
+	const initialized = expectSuccess(await initialize(f));
+	const workspace = requiredPath(initialized, "workspace");
+	const editable = requiredPath(initialized, "editable");
+	await put(
+		editable,
+		"skills/alpha/references/choice.md",
+		"Prefer type aliases for shared contracts.\nLocal review note one.\n",
+	);
+	expectSuccess(await run(f, "patch", "capture", "pstack", "--from", workspace));
+	const manifestPath = join(f.client, "skillbox/patches/pstack/alpha/patch.toml");
+	await annotateIntent(manifestPath, "./references/choice.md", reason);
+	await put(
+		editable,
+		"skills/alpha/references/choice.md",
+		"Prefer type aliases for shared contracts.\nLocal review note one.\nLocal review note two.\n",
+	);
+	await put(
+		editable,
+		"skills/beta/SKILL.md",
+		skill("beta", "The original upstream instruction.\n\nIndependent local guidance."),
+	);
+	expectSuccess(await run(f, "patch", "capture", "pstack", "--from", workspace));
+	await annotateIntent(
+		join(f.client, "skillbox/patches/pstack/beta/patch.toml"),
+		"./SKILL.md",
+		"Keep independent local guidance.",
+	);
+	await put(
+		f.source,
+		"plugin/skills/alpha/references/choice.md",
+		"Upstream rewrote the shared-contract recommendation.\n",
+	);
+	const next = await commitAndPush(f, "Rewrite the adapted target upstream");
+
+	const conflict = await run(f, "update", "pstack");
+	expect(conflict.response.errors.some((error) => error.code === "UPDATE_CONFLICT")).toBe(true);
+	const data = conflict.response.data!;
+	expect(data).toMatchObject({
+		status: "conflicted",
+		to: next,
+		conflicts: [
+			{
+				skill: "alpha",
+				target: "./references/choice.md",
+				patch: expect.any(String),
+				reason: expect.any(String),
+			},
+		],
+	});
+	const candidate = requiredPath(data, "editable");
+	expect(await readFile(join(candidate, "skills/beta/SKILL.md"), "utf8")).toContain(
+		"Independent local guidance.",
+	);
+	expect(await readFile(join(candidate, "skills/alpha/references/choice.md"), "utf8")).toBe(
+		"Upstream rewrote the shared-contract recommendation.\n",
+	);
+	await put(
+		candidate,
+		"skills/alpha/references/choice.md",
+		"Upstream rewrote the shared-contract recommendation.\nLocal review note one.\nLocal review note two.\n",
+	);
+	const captured = expectSuccess(
+		await run(f, "patch", "capture", "pstack", "--from", requiredPath(data, "workspace")),
+	);
+	expect(captured.pendingIntents).toBe(0);
+	expect(intentFor(await readFile(manifestPath, "utf8"), "./references/choice.md")).toBe(reason);
+	expectSuccess(await run(f, "sync"));
+	expect(
+		await readFile(join(f.client, ".agents/skills/alpha/references/choice.md"), "utf8"),
+	).toContain("Local review note two.");
+	expect(await readFile(join(f.client, ".agents/skills/beta/SKILL.md"), "utf8")).toContain(
+		"Independent local guidance.",
+	);
+}, 60_000);
+
+test("capture can retire a local diff that upstream already incorporated", async () => {
+	const f = await fixture();
+	await initializeAnnotatedChoice(f);
+	await put(
+		f.source,
+		"plugin/skills/alpha/references/choice.md",
+		"Prefer interfaces for shared contracts.\n",
+	);
+	const next = await commitAndPush(f, "Incorporate the downstream choice");
+	const update = await run(f, "update", "pstack");
+	expect(update.response.errors.some((error) => error.code === "UPDATE_CONFLICT")).toBe(true);
+	const data = update.response.data!;
+	const edited = requiredPath(data, "editable");
+	expect(
+		await readFile(
+			join(requiredPath(data, "pristine"), "skills/alpha/references/choice.md"),
+			"utf8",
+		),
+	).toBe("Prefer interfaces for shared contracts.\n");
+	await put(
+		edited,
+		"skills/alpha/references/choice.md",
+		"Prefer interfaces for shared contracts.\n",
+	);
+	const captured = expectSuccess(
+		await run(f, "patch", "capture", "pstack", "--from", requiredPath(data, "workspace")),
+	);
+	expect(captured.pendingIntents).toBe(0);
+	expect((await json(join(f.client, "skillbox/patches/pstack/lock.json"))).revision).toBe(next);
+	expectSuccess(await run(f, "sync"));
+	expect(
+		await readFile(join(f.client, ".agents/skills/alpha/references/choice.md"), "utf8"),
+	).toBe("Prefer interfaces for shared contracts.\n");
+}, 60_000);
+
+test("a pending unsynced adapted bundle reserves skill names from replayed output inventory", async () => {
+	const f = await fixture();
+	expectSuccess(await initialize(f));
+	const before = await projectState(f);
+	const collision = await run(
+		f,
+		"patch",
+		"init",
+		"other",
+		"--source",
+		pathToFileURL(f.remote).href,
+		"--root",
+		"plugin",
+		"--skills-root",
+		"skills",
+		"--ref",
+		f.revision,
+	);
+	expect(collision.response.success).toBe(false);
+	expect(collision.response.errors).toMatchObject([{ code: "SKILL_NAME_COLLISION" }]);
+	expect(await projectState(f)).toEqual(before);
 }, 60_000);
 
 test("sync validates patch artifacts and incomplete packs without mutating installation", async () => {
@@ -475,16 +707,6 @@ test("sync validates patch artifacts and incomplete packs without mutating insta
 	const beforeSourceValidation = await liveState(sourceHash);
 	expect((await run(sourceHash, "sync")).response.success).toBe(false);
 	expect(await liveState(sourceHash)).toEqual(beforeSourceValidation);
-
-	const outputHash = await fixture();
-	expectSuccess(await initialize(outputHash));
-	const outputLockPath = join(outputHash.client, "skillbox/patches/pstack/lock.json");
-	const outputLock = await json(outputLockPath);
-	outputLock.outputs.alpha = "0".repeat(64);
-	await writeFile(outputLockPath, `${JSON.stringify(outputLock, null, 2)}\n`);
-	const beforeOutputValidation = await liveState(outputHash);
-	expect((await run(outputHash, "sync")).response.success).toBe(false);
-	expect(await liveState(outputHash)).toEqual(beforeOutputValidation);
 }, 60_000);
 
 test("capture only creates artifacts when unrelated native content drifts; sync rejects the drift atomically", async () => {
@@ -589,7 +811,7 @@ test("prepare recreates an editable workspace for a draft bundle and capture rej
 test("a cold offline sync fails without changing the recorded pin or installation", async () => {
 	const f = await fixture();
 	expectSuccess(await initialize(f));
-	await rename(f.source, `${f.source}-unavailable`);
+	await rename(f.remote, `${f.remote}-unavailable`);
 	expectSuccess(await run(f, "sync"));
 	expect(await exists(join(f.client, ".agents/skills/alpha/SKILL.md"))).toBe(true);
 	await rm(f.cache, { recursive: true, force: true });
@@ -605,11 +827,14 @@ test("a cold offline sync fails without changing the recorded pin or installatio
 async function fixture(): Promise<Fixture> {
 	const root = await realpath(await mkdtemp(join(tmpdir(), "skillbox-patches-")));
 	temporary.push(root);
-	const source = join(root, "source");
+	const source = join(root, "author");
+	const remote = join(root, "remote.git");
 	const client = join(root, "client");
 	await mkdir(source);
 	await mkdir(client);
+	await git(root, "init", "--bare", "--quiet", remote);
 	await git(source, "init", "--quiet", "--initial-branch=main");
+	await git(source, "remote", "add", "origin", remote);
 	await git(client, "init", "--quiet", "--initial-branch=main");
 	await put(client, ".gitignore", "/.agents/skills/\n/.claude/skills\n/.skillbox-*/\n");
 	await put(
@@ -637,12 +862,15 @@ async function fixture(): Promise<Fixture> {
 	await put(source, "plugin/README.md", "# Complete source context\n");
 	await put(source, "plugin/agents/special.md", "This plugin agent must not be installed.\n");
 	await put(source, "plugin/hooks/session.sh", "This plugin hook must not run.\n");
+	const revision = await commit(source, "Initial source");
+	await git(source, "push", "--quiet", "--set-upstream", "origin", "main");
 	return {
 		root,
 		source,
+		remote,
 		client,
 		cache: join(root, "cache"),
-		revision: await commit(source, "Initial source"),
+		revision,
 	};
 }
 
@@ -657,7 +885,7 @@ async function initialize(f: Fixture, output?: string): Promise<Outcome> {
 		"init",
 		"pstack",
 		"--source",
-		pathToFileURL(f.source).href,
+		pathToFileURL(f.remote).href,
 		"--root",
 		"plugin",
 		"--skills-root",
@@ -784,6 +1012,12 @@ async function commit(source: string, message: string): Promise<string> {
 		message,
 	);
 	return git(source, "rev-parse", "HEAD");
+}
+
+async function commitAndPush(f: Fixture, message: string): Promise<string> {
+	const revision = await commit(f.source, message);
+	await git(f.source, "push", "--quiet", "origin", "main");
+	return revision;
 }
 
 async function put(root: string, path: string, contents: string): Promise<void> {

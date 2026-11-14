@@ -70,7 +70,7 @@ const patch = program
 	.description("Edit pinned bundles and record file intent with ordered diffs.")
 	.addHelpText(
 		"after",
-		"\nWorkflow: init → edit → capture → annotate file intent → sync.\nRepeat edit/capture in the same workspace; capture preserves file notes.\nAgent guidance: skills get skillbox-patch.",
+		"\nWorkflow: init → edit → capture → annotate file intent → sync.\nUpdates: update → review/edit → capture → sync.\nRepeat edit/capture in the same workspace; capture preserves file notes.\nAgent guidance: skills get skillbox-patch.",
 	);
 patch
 	.command("init")
@@ -124,10 +124,16 @@ patch
 	});
 patch
 	.command("capture")
-	.description("Append diffs for edited files; annotate new file intent before sync.")
+	.description(
+		"Record edited files or accept an update candidate; annotate new file intent before sync.",
+	)
 	.argument("<bundle>")
 	.requiredOption("--from <dir>", "prepared workspace containing manifest.json and edited/")
 	.option("--skill <name>", "capture only this skill")
+	.option(
+		"--map <mapping...>",
+		"preserve intent across skill/old-path=skill/new-path renames in an update",
+	)
 	.action(async (bundle, options) => {
 		const cwd = process.cwd();
 		writeJson(
@@ -138,36 +144,20 @@ patch
 					bundle,
 					from: options.from,
 					skill: options.skill,
-				}),
-			),
-		);
-	});
-patch
-	.command("adopt")
-	.description("Adopt regenerated edits after an upstream update conflict.")
-	.argument("<bundle>")
-	.requiredOption("--from <dir>", "prepared workspace containing manifest.json and edited/")
-	.option("--map <mapping...>", "preserve intent across skill/old-path=skill/new-path renames")
-	.action(async (bundle, options) => {
-		const cwd = process.cwd();
-		writeJson(
-			successResponse(
-				await patchCapture({
-					adapted: createAdaptedBundles(),
-					workspace: await selectedWorkspace(cwd),
-					bundle,
-					from: options.from,
 					maps: options.map,
 				}),
 			),
 		);
 	});
-
 program
 	.command("update")
-	.description("Advance a bundle pin and verify replay; install with sync.")
+	.description("Prepare an exact-source update candidate; review and accept with patch capture.")
 	.argument("<bundle>")
 	.option("--ref <ref>", "source revision to resolve to an immutable commit")
+	.addHelpText(
+		"after",
+		"\nUses the bundle's update_ref when --ref is omitted.\nReturns source refs and editable paths; tracked files and installations stay unchanged.\nUPDATE_CONFLICT retains the candidate and reports failed patches.\nReview with Git and file intent, then accept with patch capture and install with sync.",
+	)
 	.action(async (bundle, options) => {
 		const cwd = process.cwd();
 		writeJson(
@@ -184,7 +174,7 @@ program
 
 program
 	.command("sync")
-	.description("Reconcile configured skills while preserving retained content hashes.")
+	.description("Install configured skills from recorded sources and patches.")
 	.action(async () => {
 		const cwd = process.cwd();
 		const result = await sync({
