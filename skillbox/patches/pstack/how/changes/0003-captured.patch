@@ -1,0 +1,12 @@
+diff --git a/references/explorer-prompt.md b/references/explorer-prompt.md
+index 724bacfc7df759865c0c29705bfee641e4c1aeca..fcb6526d932bd80be3cf3fb1fe229950a56b3657 100644
+--- a/references/explorer-prompt.md
++++ b/references/explorer-prompt.md
+@@ -1,6 +1,6 @@
+ # Explorer Prompt Template
+ 
+-Build each explorer subagent's prompt from this template. Fill in the placeholders.
++Build each explorer run's brief from this template. Fill in the placeholders.
+ 
+ ---
+ 

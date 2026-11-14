@@ -1,0 +1,13 @@
+diff --git a/scripts/check-plan.test.ts b/scripts/check-plan.test.ts
+index cd1debfa31579068dc41b8657b7de3b341be29a0..21b0a572d96202ed6f2e81604e01a33ab7494ee0 100644
+--- a/scripts/check-plan.test.ts
++++ b/scripts/check-plan.test.ts
+@@ -20,7 +20,7 @@ ${rule}
+ ### PR mechanics
+ ### Verdict and merge
+ ### Boot recipe
+-\`git show origin/main:\` /loop 1h status message
++\`.agents/skills/\` audit observation cycle status message
+ 
+ ## PR 1
+ **Depends on.** None.

@@ -1,0 +1,13 @@
+diff --git a/references/sources/datadog.md b/references/sources/datadog.md
+index 536466ddd8ae6543836abb84bdf1efd8e43089ba..6c9d1cd5b6fc750e17dfb242c7487d2046d53f1e 100644
+--- a/references/sources/datadog.md
++++ b/references/sources/datadog.md
+@@ -14,7 +14,7 @@ Datadog holds the runtime record, what actually happened in production, as oppos
+ 
+ ## How to search it
+ 
+-Use the Datadog MCP. Start broad, then narrow.
++Use whatever Datadog access this session exposes: a native tool, an MCP server, or a CLI. Inspect its help or schema first; operation names below are examples, so map them to the exposed interface rather than inventing a missing command. Start broad, then narrow. If none exists, record the gap.
+ 
+ 1. **Identify the owning service(s).**
+ 

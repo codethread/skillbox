@@ -1,0 +1,31 @@
+schema = 1
+
+[[change]]
+intent = "Read this run's record through lake observation and the harness's own pointer, route reviewers through catalog-validated roles, and use session-exposed evidence and authoring guidance."
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+
+[[change]]
+intent = "Count a skill as used through installed skills and agent records, and restrict context lookups to session-exposed read-only evidence tools."
+target = "./references/divergent-reviewer.md"
+patch = "changes/0002-captured.patch"
+base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+
+[[change]]
+intent = "Count a skill as used through installed skills and agent records, and restrict context lookups to session-exposed read-only evidence tools."
+target = "./references/judgment-reviewer.md"
+patch = "changes/0003-captured.patch"
+base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+
+[[change]]
+intent = "Use session-exposed read-only evidence and the project's skill-authoring guidance in the synthesis contract."
+target = "./references/synthesizer.md"
+patch = "changes/0004-captured.patch"
+base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+
+[[change]]
+intent = "Count a skill as used through installed skills and agent records, and restrict context lookups to session-exposed read-only evidence tools."
+target = "./references/tooling-reviewer.md"
+patch = "changes/0005-captured.patch"
+base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

@@ -1,0 +1,13 @@
+diff --git a/references/poteto-agent.md b/references/poteto-agent.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..9f6443fce68cfda903486b0ff52333824135def9
+--- /dev/null
++++ b/references/poteto-agent.md
+@@ -0,0 +1,7 @@
++# Poteto delegate brief
++
++Pass this file as the prompt of a fresh Botlake agent run. It is a brief, not an installed agent, so the parent starts the run and owns its scope. Reuse a run only in the cases poteto-mode's Delegates section names.
++
++# Delegate contract
++
++You are operating as poteto-mode's full agent style. The chat that receives `/poteto-mode` owns the playbook, the todo list, and every agent run. You are one of its delegates. Read the installed `poteto-mode` `SKILL.md` at [`../SKILL.md`](../SKILL.md) in full before doing any work, including its inline Principles index, and read [`botlake-tools.md`](botlake-tools.md) before your first lake command. Navigate to a leaf `principle-*` skill whenever you apply that principle.

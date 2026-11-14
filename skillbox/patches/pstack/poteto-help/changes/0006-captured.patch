@@ -1,0 +1,64 @@
+diff --git a/references/upstream/guide/01-setup.md b/references/upstream/guide/01-setup.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..5597ef6e9844062eff00ffd2750320d3981c606c
+--- /dev/null
++++ b/references/upstream/guide/01-setup.md
+@@ -0,0 +1,58 @@
++# Set up pstack
++
++In this page you install the bundle, pick which seats pstack uses, and run your first task. Setup is one command plus a short conversation.
++
++## Install the bundle
++
++Install the pstack bundle with Skillbox in the project, then run `skillbox sync` to generate `.agents/skills/`. The bundle README owns the exact commands. This guide covers the Botlake surface: the lake's seats, role table, and agent runs replace Cursor plugin commands and model rules. Read [`botlake-tools.md`](../../../../poteto-mode/references/botlake-tools.md) before your first runtime step.
++
++## Pick your seats
++
++Run:
++
++```text
++/setup-pstack
++```
++
++[`/setup-pstack`](../../../../setup-pstack/SKILL.md) reads the seats from `bl agent catalog`, asks for a reasoning budget, shows you each role (code delegates, judgment, the review panels), and asks what you want. Answer the questions. It writes `.botlake/pstack-roles.md`, a small role table every pstack skill reads before it starts an agent run.
++
++The defaults run at `high` effort, one step below the `large` budget. `unlimited` lifts each role to its highest supported effort, up to `max`, where the seat supports it. `medium` and `small` lower the reasoning and spend fewer tokens.
++
++You only override what you care about. A role with no line in the table keeps the skill's default. To restore a default, delete that role's line. A rerun of `/setup-pstack` keeps any role you changed. When a default changes, a table written before the change still pins the old choice, so delete those role lines, or delete the file, then run `/setup-pstack` again.
++
++Botlake runs always start from a seat, so the table names one for every role; there is no parent-model alias. For a panel role the value is a list, and one run starts per entry, so the list length sets the panel size. Setup also configures `swarm workers`, the default seat for every `/swarm` worker unless a race names a seat for each arm.
++
++## Accept the verification offers, or don't
++
++At the end of setup, `/setup-pstack` looks for a way to prove app behavior in your project, either a `verify-*` skill or an existing harness. If it finds neither, it offers once to generate one with [`/create-verification-skill`](../../../../create-verification-skill/SKILL.md).
++
++Say yes and it writes a project-local `verify-<app>` skill into the project's skill source directory, which teaches agents to drive your app the way a user does. It proves the skill works once before handing it over. Say no and setup moves on. You can run `/create-verification-skill` yourself any time. [Verify and ship](06-verify-and-ship.md#create-a-project-verification-skill) covers it in depth.
++
++If you're new to pstack, say yes. An agent that can check its own work keeps going until the check passes. An agent that can't hands every result back to you to check by hand. Of everything in this guide, the verification skill pays off the most.
++
++Then setup offers once to generate a formal verification skill with [`/create-formal-verification-skill`](../../../../create-formal-verification-skill/SKILL.md), unless the project already has one. Tests check the cases someone thought to write. A formal verification skill checks one key property of your code, such as "a job never runs twice at once", in every case within a stated scope. Say yes when your code has concurrency, retries, a state machine, or a parser, where a bug is costly and tests rarely reach the case that breaks. Otherwise say no, and run it later if that changes. [Verify and ship](06-verify-and-ship.md#prove-a-property-with-a-formal-verification-skill) covers it.
++
++After setup, start a new agent run. The role table applies to new runs.
++
++## Keep the cost in check
++
++pstack spends extra tokens on delegated runs and review panels. That's the price of the rigor. To spend fewer:
++
++- Rerun `/setup-pstack` and pick a smaller reasoning budget or cheaper seats. A strong seat for judgment with cheaper, faster seats for code roles is a good split.
++- Lower a routine role's effort instead of changing its seat.
++- Shorten a panel list. Each entry starts one run.
++- Save `/poteto-mode` for work that needs rigor. A small, obvious edit doesn't.
++
++## Run your first task
++
++Pick something real but small, and describe it the way you'd describe it to a colleague:
++
++```text
++/poteto-mode add a --json flag to this command. text output stays byte-identical. verify both.
++```
++
++Watch the todo list. Its first items are the matched playbook's steps copied in, the Feature playbook for this prompt. If `/poteto-mode` skips a step, the step stays in the list with `skip: <reason>`, so you can see what it chose not to do.
++
++From here you can type normal follow-ups. Whether `/poteto-mode` stays in context depends on the harness: when it drops, name the skill again. Each task should start from the skill's playbook, not from the previous task's momentum. This install has no separate persistent-mode step.
++
++Next: [Route work through `/poteto-mode`](02-poteto-mode.md).
