@@ -1,22 +1,13 @@
 diff --git a/SKILL.md b/SKILL.md
-index 88e23ca105b89e67f4085d0e676c40d4b170a623..815f7b9603e493fc555715a3a811e0c404eff77b 100644
+index 88e23ca105b89e67f4085d0e676c40d4b170a623..d770ec8bfa62b5a13d54f91971f5e65fe0d4f539 100644
 --- a/SKILL.md
 +++ b/SKILL.md
-@@ -10,7 +10,7 @@ Sketch types, function signatures, class shapes, and module boundaries with `not
- 
- ## Start
- 
--Open a todolist with one entry per phase before starting.
-+Before starting, create or reuse a lake Work group and track one task per phase. Record the grounding artifact, candidate run ids and paths, synthesis decision, approved deviations, and verification result in task notes.
- 
- 1. Ground
- 2. Sketch
 @@ -28,7 +28,7 @@ Skip Phase A only when the work is genuinely greenfield with no surrounding syst
  
  Run the **arena** skill with the design-sketch task and the Phase A grounding artifacts. Pass `references/runner-prompt.md` as each runner's prompt.
  
 -Take the runners from the `architect runners` line in the `pstack-models.mdc` rule, in place of the `arena runners` line. If the rule or that line is missing, use `claude-opus-5-5-xhigh` and `grok-4.7-xhigh-fast`. Alias and rejected entries follow the runner rules in the **arena** skill's Phase A.
-+Use the `architect runners` list from `.botlake/pstack-roles.md`, including optional efforts, in place of `arena runners`. Validate the list against the live catalog and apply the purpose-based fallback and diversity rules in the **arena** skill's Phase A when the role is missing or invalid. Run mechanics are in [`../poteto-mode/references/botlake-tools.md`](../poteto-mode/references/botlake-tools.md).
++Choose independent agents suited to architectural design, using different models for distinct perspectives. Apply the runner rules in the **arena** skill's Phase A.
  
  Design it twice. Require at least two structurally distinct candidates before synthesis, even when the first looks sufficient. This is the **exhaust-the-design-space** principle skill made concrete. Whole-shape alternatives, not point fixes inside one shape.
  

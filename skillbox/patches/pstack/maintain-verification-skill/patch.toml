@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Locate the verification skill through the project's source or installed skills tree, and read feature files with lake agent runs."
+intent = "Locate the verification skill's authored source instead of assuming a Cursor install path, using an installed copy only to find that source. Express the parallel source-reading wave as ordinary agents while retaining every-feature source/live coverage, edit scope, and outcome criteria."
 
 [[patches]]
 target = "./SKILL.md"

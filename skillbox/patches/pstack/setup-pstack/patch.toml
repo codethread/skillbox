@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Replace Cursor model-slug detection and the ~/.cursor rule file with the lake's agent catalog and a project-local role table, so role seats and reasoning effort are real Botlake choices instead of Cursor Task model fields."
+intent = "Preserve setup's role review, reasoning budgets, confirmation, validation, and optional verification offers using the existing configured agent catalog. Replace Cursor model slugs and always-applied rule creation with current-task choices and explicitly requested, scope-confirmed local configuration overrides; do not create a parallel PSTACK roster or mutate the shared CT preset."
 
 [[patches]]
 target = "./SKILL.md"

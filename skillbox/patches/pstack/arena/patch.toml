@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Track phases in durable Work, validate configured seats against the live catalog, and run candidates in isolated wktree-managed checkouts with independently evidenced model diversity."
+intent = "Remove Cursor model aliases and Task fields without recreating a roster; preserve parallel isolated candidates, judgment diversity, cross-family judging, explicit judge gaps, and identical scoped inputs."
 
 [[patches]]
 target = "./SKILL.md"

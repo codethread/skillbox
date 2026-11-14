@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Mine lake run records instead of Cursor transcript directories, use the project's actual authoring guidance, and place mode skills in a real source directory rather than the generated install."
+intent = "Replace Cursor transcript paths, question tools, and create-skill with workspace-scoped evidence, ordinary questions, and project authoring guidance; preserve evidence-backed personal modes and edit their source rather than generated installs."
 
 [[patches]]
 target = "./SKILL.md"

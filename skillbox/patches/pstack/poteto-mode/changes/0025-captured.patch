@@ -1,22 +1,86 @@
-diff --git a/scripts/check-plan.mjs b/scripts/check-plan.mjs
-index c3ddc398997d29d3c97a414e5c2b37172b901254..3d7db60d5dc0f8bf6c36f07466c08cfb5690378e 100755
---- a/scripts/check-plan.mjs
-+++ b/scripts/check-plan.mjs
-@@ -17,7 +17,7 @@ const SUB_BLOCKS = [
- 	"Merge.",
- ];
- const PROGRAM_H3 = ["Arm the program", "Spawn owners", "PR mechanics", "Verdict and merge", "Boot recipe"];
--const PROGRAM_MARKERS = ["git show origin/main:", "/loop 1h", "status message"];
-+const PROGRAM_MARKERS = [".agents/skills/", "audit observation cycle", "status message"];
- const HOW_TO_READ_MARKERS = [
- 	"One box is one unit of work",
- 	"names the evidence",
-@@ -155,7 +155,7 @@ for (const pr of prSections) {
+diff --git a/scripts/worktree-audit.sh b/scripts/worktree-audit.sh
+index 47e08919d7b08c32923a7bdaaa70b17ca708f5f6..1f9bb88407466cfee0ab29f1a01c2d45b17c214a 100755
+--- a/scripts/worktree-audit.sh
++++ b/scripts/worktree-audit.sh
+@@ -1,8 +1,8 @@
+ #!/usr/bin/env bash
+ # Read-only worktree prune audit. Classifies every git worktree by size, merge
+-# state, uncommitted work, remote/PR state, and the most recent chat that
+-# operated in it. Emits a table sorted by size with a suggested bucket. Never
+-# deletes anything; deletion stays a human-gated step in the playbook.
++# state, uncommitted work, and remote/PR state. Emits a table sorted by size
++# with a suggested bucket. Does not check live usage or delete anything;
++# usage checks and deletion stay in the playbook.
+ #
+ # Usage: worktree-audit.sh [-b|--base <ref>] [repo-path]
+ #   repo-path defaults to the current repo.
+@@ -47,14 +47,6 @@ origin/*) git fetch origin "+refs/heads/${base#origin/}:refs/remotes/$base" --qu
+ esac
+ git rev-parse --verify --quiet "$base^{commit}" >/dev/null 2>&1 || { echo "error: base ref not found: $base" >&2; exit 1; }
  
- 	const live = block("Verify, live.");
- 	if (live) {
--		if (!LANES.test(live.rest)) fail(live.n, `${pr.title}: Verify, live lacks "Ten lanes on \`<swarm workers model>\` at the PR head" with the model filled in`);
-+		if (!LANES.test(live.rest)) fail(live.n, `${pr.title}: Verify, live lacks "Ten lanes on \`<swarm workers seat>\` from the role table at the PR head" with the seat filled in`);
- 		const lanes = boxes(live.lines).map((b) => ({ ...b, m: b.text.match(/^Lane (\d+)\. /) }));
- 		const numbers = lanes.filter((b) => b.m).map((b) => Number(b.m[1])).sort((a, b) => a - b);
- 		if (numbers.join(",") !== "1,2,3,4,5,6,7,8,9,10") fail(live.n, `${pr.title}: lanes are [${numbers.join(",")}], expected 1 to 10`);
+-# GNU coreutils (Linux, Homebrew gnubin) reads `stat -f` as file system status
+-# and `date -r` as a file, so pick the stat and date flags once.
+-if stat -c %Y / >/dev/null 2>&1; then
+-	stat_fmt=(-c '%Y %n'); fmt_day() { date -d "@$1" '+%Y-%m-%d'; }
+-else
+-	stat_fmt=(-f '%m %N'); fmt_day() { date -r "$1" '+%Y-%m-%d'; }
+-fi
+-
+ # PR state by branch, fetched once as [{number, state, head}] with a lowercase
+ # state. Origin when its CLI can read this repo's PRs, otherwise gh. Empty when
+ # neither can.
+@@ -69,13 +61,10 @@ elif raw=$(gh pr list --author "@me" --state all --limit 1000 \
+ fi
+ [ -s "$prs" ] || echo "[]" > "$prs"
+ 
+-# Transcripts dir: ~/.cursor/projects/<slugified-repo-path>/agent-transcripts.
+-slug=$(printf '%s' "$main_wt" | sed 's#^/##; s#/#-#g')
+-transcripts="$HOME/.cursor/projects/$slug/agent-transcripts"
+ now=$(date +%s)
+ 
+ echo "# base: $base"
+-printf "SIZE\tAGE\tMERGED\tDIRTY\tREMOTE\tPR\tLAST_CHAT\tBUCKET\tWORKTREE\n"
++printf "SIZE\tAGE\tMERGED\tDIRTY\tREMOTE\tPR\tBUCKET\tWORKTREE\n"
+ 
+ git worktree list --porcelain | awk '/^worktree /{print $2}' | while read -r wt; do
+ 	[ "$wt" = "$main_wt" ] && continue
+@@ -89,7 +78,7 @@ git worktree list --porcelain | awk '/^worktree /{print $2}' | while read -r wt;
+ 	# real signal; merge-base only catches fast-forward/rebase merges.
+ 	git merge-base --is-ancestor "$head" "$base" 2>/dev/null && merged=YES || merged=no
+ 
+-	# Distinguish real WIP (tracked edits) from disposable untracked scratch.
++	# Distinguish tracked edits from untracked files.
+ 	porcelain=$(git -C "$wt" status --porcelain 2>/dev/null)
+ 	if [ -z "$porcelain" ]; then dirty=clean
+ 	elif printf '%s\n' "$porcelain" | grep -qv '^??'; then
+@@ -108,27 +97,15 @@ git worktree list --porcelain | awk '/^worktree /{print $2}' | while read -r wt;
+ 		'.[] | select(.head==$b) | "#\(.number)/\(.state)"' "$prs" 2>/dev/null | head -1)
+ 	[ -z "$pr" ] && pr="-"
+ 
+-	# Most recent chat whose transcript operated in this worktree. Match path
+-	# followed by "/" or a quote so glint-482 does not match glint-482-r37.
+-	last="-"; last_ts=0
+-	if [ -d "$transcripts" ]; then
+-		f=$(rg -l -e "${wt}/" -e "${wt}\"" "$transcripts" 2>/dev/null \
+-			| xargs stat "${stat_fmt[@]}" 2>/dev/null | sort -rn | head -1)
+-		if [ -n "$f" ]; then last_ts=$(echo "$f" | awk '{print $1}')
+-			last=$(fmt_day "$last_ts" 2>/dev/null); fi
+-	fi
+-	recent=$([ "$last_ts" -gt 0 ] 2>/dev/null && [ $(( (now - last_ts) / 86400 )) -le 4 ] && echo yes || echo no)
+-
+ 	case "$dirty" in wip:*) bucket=hold-wip ;; *)
+ 		case "$pr" in */open|*/draft) bucket=hold-open-pr ;; *)
+-			if [ "$recent" = yes ]; then bucket=verify-recent-chat
+-			elif [ "$merged" = YES ] || [ "$pr" != "-" ]; then bucket=safe
++			if [ "$merged" = YES ] || [ "$pr" != "-" ]; then bucket=verify-usage
+ 			else bucket=review; fi ;;
+ 		esac ;;
+ 	esac
+ 
+-	printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
+-		"$size" "$age" "$merged" "$dirty" "$remote" "$pr" "$last" "$bucket" "$wt"
++	printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
++		"$size" "$age" "$merged" "$dirty" "$remote" "$pr" "$bucket" "$wt"
+ done | sort -t$'\t' -k1,1 -rh
+ 
+ rm -f "$prs"

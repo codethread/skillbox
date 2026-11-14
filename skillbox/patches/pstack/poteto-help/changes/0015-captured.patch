@@ -1,6 +1,6 @@
 diff --git a/references/upstream/guide/10-recipes-and-pitfalls.md b/references/upstream/guide/10-recipes-and-pitfalls.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..f4f55e696587a183111f942021983927cecf5f44
+index 0000000000000000000000000000000000000000..8898ef690ae443fcff6d6c44b5cb0662856ee830
 --- /dev/null
 +++ b/references/upstream/guide/10-recipes-and-pitfalls.md
 @@ -0,0 +1,182 @@
@@ -171,15 +171,15 @@ index 0000000000000000000000000000000000000000..f4f55e696587a183111f942021983927
 +- **Enumerating skills in the prompt.** "use /how then /architect then /arena" reorders steps the playbook already sequences. State the goal and constraints. Name a skill only to override a default.
 +- **A vague finish condition.** "make it better" gives the run nothing to check. Give a command or artifact that can pass or fail.
 +- **Leading with your theory of the cause.** The agent searches wherever you pointed. Ask it to restate the problem first, then share your hunch.
-+- **Taking the first design.** One attempt locks in the first shape that came to mind. Ask for prototypes or `/architect` and pick from evidence.
++- **Taking the first design.** One attempt locks in the first shape the model thought of. Ask for prototypes or `/architect` and pick from evidence.
 +- **Polishing an abstract plan.** Adversarial review of a plan with no code behind it invents risks that will never happen. Settle the open questions with prototypes, then review what got built.
-+- **Parallel agents in one worktree.** They overwrite each other, and nobody can tell which agent changed what. Give each run its own worktree with `wktree add --branch <branch>`, and pass its path as `--cwd`.
++- **Parallel agents in one worktree.** They overwrite each other, and nobody can tell which agent changed what. Say "own worktree per attempt".
 +- **Looping before you trust the loop.** A loop that can't verify its own work only makes unchecked work faster. Get the verification skill working first.
 +- **Trusting an unvetted number.** A warm cache or a skipped code path can fake a speedup. Run `/benchmark-checklist` before the number goes anywhere.
 +- **Correcting the same mistake by hand.** A correction in chat helps one run. `/correct` fixes the repo so no later run repeats it.
 +- **Using `/arena` for coverage.** `/arena` repeats one design or code brief, then picks a base and grafts the best parts. `/swarm` partitions slices or declared race arms and aggregates one report.
 +- **Accepting every review comment.** Bots and humans both file real catches and noise in one list. `/interrogate` keeps only the findings a rerun proves and lists what it dropped and why, and you can override either way.
-+- **Picking a seat from memory.** Seats come from `bl agent catalog`, and each role reads its seat and effort from `.botlake/pstack-roles.md`. [Setup](01-setup.md) covers the roles.
++- **Picking an unavailable model.** Use the configured agent catalog rather than copying model names from Cursor examples. [Setup](01-setup.md) covers the roles.
 +- **Reporting success off a green build.** A build proves it compiles. Ask for the real command, flow, stored value, or profile, and expect the evidence in the reply.
 +- **Writing a `SKILL.md` freehand.** Route it through the [Authoring or modifying a skill playbook](../../../../poteto-mode/playbooks/authoring-a-skill.md) so validation and review happen.
 +

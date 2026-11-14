@@ -1,6 +1,6 @@
 diff --git a/references/upstream/guide/08-principles.md b/references/upstream/guide/08-principles.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..09e445747444efe48c3858cf650265eef8ad2c03
+index 0000000000000000000000000000000000000000..7962eca5939ada3b4db47e264c5f585faa7cac10
 --- /dev/null
 +++ b/references/upstream/guide/08-principles.md
 @@ -0,0 +1,72 @@
@@ -66,7 +66,7 @@ index 0000000000000000000000000000000000000000..09e445747444efe48c3858cf650265ee
 +
 +The delegation principles keep parallel work sane:
 +
-+- [Guard the Context Window](../../../../principle-guard-the-context-window/SKILL.md) routes bulk reading to agent runs and keeps findings in the main chat.
++- [Guard the Context Window](../../../../principle-guard-the-context-window/SKILL.md) routes bulk reading to subagents and keeps findings in the main chat.
 +- [Never Block on the Human](../../../../principle-never-block-on-the-human/SKILL.md) proceeds on reversible work and presents the result.
 +
 +And one meta principle:

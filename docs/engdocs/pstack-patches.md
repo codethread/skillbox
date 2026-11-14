@@ -36,17 +36,13 @@ PSTACK's source tree contains more than skills. The source snapshot remains avai
 
 Sibling skill links remain valid in the flat installation. The Botlake patch carries the useful plugin guide pages, licence, and attribution into `poteto-help/references/upstream/` and updates their links. Two useful agent briefs are retained as supporting references; they do not register plugin agents.
 
-## Botlake adaptation
+## CT-configured Botlake audience
 
-The patch preserves PSTACK's engineering workflows while changing their runtime instructions to use the lake's configured capabilities:
+This repository selects CT config's agent, Work, priming, and Mail descriptors. Its agents already receive Botlake discovery and task guidance; coordination details are available through the configured prompts, help, and runbooks.
 
-- Work groups, tasks, dependencies, and notes for durable coordination.
-- Registered agent seats and managed runs for delegation and model selection.
-- Mail for coordination between agents.
-- Gates for machine-checkable waiting conditions.
-- Explicit run inspection and session recovery instead of assuming Cursor transcript locations or background task tools.
+The adaptation preserves PSTACK's engineering workflows, voice, role distinctions, and evidence requirements. It changes Cursor-specific assumptions and concrete conflicts with this audience. Ordinary concepts such as a task list, a delegated agent, and a worktree usually need no extra runtime explanation. The configured catalog supplies available agents; the port does not maintain a second roster or an embedded Botlake operating manual.
 
-Runtime-sensitive entry points include `poteto-mode`, `setup-pstack`, investigation and review skills, session recovery, and the coordination playbooks. Supporting documents must agree with the entry points they explain.
+Runtime-sensitive entry points include `poteto-mode`, `setup-pstack`, investigation and review skills, session recovery, and coordination playbooks. Their supporting documents and scripts must agree. Reviews compare the final result with pristine upstream, so unnecessary adaptations can be removed rather than carried forward. Source replay and installation checks establish reproducibility; fresh-agent workflow checks assess whether the adapted instructions retain their intended behavior.
 
 ## Agreed implementation draft
 
@@ -127,12 +123,13 @@ Capture records the exact candidate pin, regenerates diffs against its pristine 
 
 ## Verified POC result
 
-The dogfood artifacts select all 58 PSTACK skills beside the nine existing native skills. Running `bun run src/cli.ts sync` produces 67 skills under ignored `.agents/skills/`.
+The dogfood artifacts select all 58 PSTACK skills beside ten native skills, including the local migration policy. Running `bun run src/cli.ts sync` produces 68 skills under ignored `.agents/skills/`.
 
-- The patch pack records 75 captured changes across 17 skills: 58 modifications, 16 additions, and one deletion. Each target has file-level intent, each patch points to a concrete Git diff, and the bundle lock records the exact source revision.
-- The PSTACK installation contains 550 files, including 423 files under script directories. Its bytes and executable modes match the prepared edited source. The nine native lock entries remain unchanged.
-- The deleted file is `poteto-mode/scripts/worktree-audit.sh`, whose Cursor transcript assumptions do not apply here. The corresponding playbook uses Botlake records and `wktree`; the deletion and its reason are recorded. The other five upstream executable files retain their executable modes.
-- Removing generated output and restoring with the Node build recreates all 67 skills. Repeated sync preserves file modification times. Bun source, packaged Node, and standalone binary sync all pass.
+- The patch pack records 67 captured changes across 19 skills: 52 modifications and 15 additions, with every upstream file retained. Each target has file-level intent, each patch points to a concrete Git diff, and the bundle lock records the exact source revision.
+- The PSTACK installation contains 550 files, including 424 files under script directories. Its bytes and executable modes match the prepared edited source. The nine pre-existing native lock entries remain unchanged; the local migration policy adds one entry.
+- `poteto-mode/scripts/worktree-audit.sh` retains its useful Git/size/dirty/PR audit with the Cursor transcript scan removed. Its candidates require live usage checks in the playbook, and removal follows the project's worktree tooling. All six upstream executable files retain their executable modes.
+- Removing generated output and restoring with the Node build recreates all 68 skills. Repeated sync preserves file modification times. Bun source, packaged Node, and standalone binary sync all pass.
 - `bun run check` passes: 38 tests, 54 snapshots, lint, types, formatting, and changelog validation. Fifteen tests cover the patch lifecycle, including staged updates, overlapping conflicts, renamed targets, new and removed skills, upstream-incorporated changes, and exact candidate pins despite later pushes. Both packaged builds pass. The adapted `poteto-mode` scripts passed their 61 tests and typecheck in a disposable copy.
+- Three Astra authoring reviews and a fresh combined review checked the adaptation against pristine source and CT context. A fresh Astra consumer followed the adapted `how` workflow through a real explainer run using the existing delegation guidance. These checks cover the reviewed text, helpers, and that bounded workflow; they do not claim live execution of every PSTACK workflow.
 
 Review the [source descriptor](../../skillbox/patches/pstack/bundle.toml), [source and patch lock](../../skillbox/patches/pstack/lock.json), and [mode's per-file intents](../../skillbox/patches/pstack/poteto-mode/patch.toml). The `changes/` directory next to each intent manifest contains the replayable diffs.

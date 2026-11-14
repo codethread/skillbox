@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Rebuild recent context from lake agent, work, and Mail records instead of Cursor chat transcript paths, while keeping a native transcript as an optional pointer."
+intent = "Reconstruct workspace context from harness conversation history and task, agent, and Mail records instead of Cursor paths; retain bounded history mining, shared-source investigation, live verification, and explicit transcript gaps."
 
 [[patches]]
 target = "./SKILL.md"

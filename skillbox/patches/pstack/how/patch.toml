@@ -1,13 +1,10 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Replace Task fields and model slugs with no-write lake runs whose complete briefs use catalog-validated configured roles or live purpose-based catalog choices."
+intent = "Replace Cursor Task/model mechanics with parallel read-only exploration and separate explanation, retaining the simple and complex routes and complete reference briefs."
 
 [files."./references/explainer-prompt.md"]
-intent = "Make the explainer template a portable no-write agent brief without assuming Cursor's built-in file tools."
-
-[files."./references/explorer-prompt.md"]
-intent = "Describe the template as a brief for an agent run, not a subagent prompt, so the carried prompt files match the adapted how skill."
+intent = "Let the read-only explainer verify findings with available file and search tools instead of requiring Cursor's Read, Grep, and Glob names."
 
 [[patches]]
 target = "./SKILL.md"
@@ -16,7 +13,3 @@ patch = "changes/0001-captured.patch"
 [[patches]]
 target = "./references/explainer-prompt.md"
 patch = "changes/0002-captured.patch"
-
-[[patches]]
-target = "./references/explorer-prompt.md"
-patch = "changes/0003-captured.patch"

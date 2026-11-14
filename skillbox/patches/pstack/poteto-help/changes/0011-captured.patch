@@ -1,6 +1,6 @@
 diff --git a/references/upstream/guide/06-verify-and-ship.md b/references/upstream/guide/06-verify-and-ship.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..7684a842777028e7a4a19a8525b959051870075e
+index 0000000000000000000000000000000000000000..bef711f6ced2da626a6c3b47f9358a9598eae5a9
 --- /dev/null
 +++ b/references/upstream/guide/06-verify-and-ship.md
 @@ -0,0 +1,162 @@
@@ -91,7 +91,7 @@ index 0000000000000000000000000000000000000000..7684a842777028e7a4a19a8525b95905
 +
 +## Keep the verification skill honest
 +
-+Apps change, and feature maps go out of date. Run this at least once a day, ideally from a scheduled run when the lake or harness provides one, so nobody has to remember:
++Apps change, and feature maps go out of date. Run this at least once a day, ideally from a scheduled automation so nobody has to remember:
 +
 +```text
 +/maintain-verification-skill

@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Replace the external Cursor webhook workflow with a real Botlake UI workflow: discover the configured UI, use task/agent views for status, build a narrow local action page over registered lake commands with validated inputs, and prove one harmless action against lake state. This keeps the skill identity and removes runnable obsolete setup."
+intent = "Preserve the page-click-to-agent-action objective, server-side credentials, harmless end-to-end proof, and optional Tailscale access. Replace unavailable Cursor Grok Bot routines, secret-request cards, and wake payloads with the project's existing agent integration; retain user-only invocation without introducing a viewer-first workflow or new command framework."
 
 [[patches]]
 target = "./SKILL.md"

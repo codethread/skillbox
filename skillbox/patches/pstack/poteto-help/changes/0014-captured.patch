@@ -1,12 +1,12 @@
 diff --git a/references/upstream/guide/09-make-it-yours.md b/references/upstream/guide/09-make-it-yours.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..326f00fb14c132b3505c8013c271ac5dc82154b2
+index 0000000000000000000000000000000000000000..f9a8774b5fd1476f274c4010d7e7842ad99ecede
 --- /dev/null
 +++ b/references/upstream/guide/09-make-it-yours.md
 @@ -0,0 +1,100 @@
 +# Make it yours
 +
-+poteto-mode is one person's style. The playbooks, routing, and seat roles underneath it work just as well with yours. This page covers generating a personal mode, capturing lessons from a session, fixing the repo so agents stop repeating mistakes, authoring a focused skill, and testing a skill change before you trust it.
++poteto-mode is one person's style. The playbooks, routing, and model roles underneath it work just as well with yours. This page covers generating a personal mode, capturing lessons from a session, fixing the repo so agents stop repeating mistakes, authoring a focused skill, and testing a skill change before you trust it.
 +
 +Start smaller than you think. You don't need many skills on day one, or even this whole plugin. Prompt plainly, watch where agents fail, and add a skill or a check when the same failure shows up twice.
 +
@@ -16,7 +16,7 @@ index 0000000000000000000000000000000000000000..326f00fb14c132b3505c8013c271ac5d
 +/automate-me
 +```
 +
-+You don't describe your style, because [`/automate-me`](../../../../automate-me/SKILL.md) reads it out of your history. It mines your recent lake run and work records for repeated preferences, in how you like replies, delegation, verification, code, prose, and process, then asks you which patterns are really you. It drafts a `<your-name>-mode` skill in the project's skill source directory through the project's skill-authoring guidance (`skillbox-author` when installed), runs the draft through [`/unslop`](../../../../unslop/SKILL.md), and opens a PR from a worktree so you review it like any other change.
++You don't describe your style, because [`/automate-me`](../../../../automate-me/SKILL.md) reads it out of your history. It mines your available recent session history for repeated preferences, in how you like replies, delegation, verification, code, prose, and process, then asks you which patterns are really you. It drafts a `<your-name>-mode` skill in the project's skill source directory through the project's skill-authoring guidance (for Skillbox, `skillbox skills get skillbox-author`), runs the draft through [`/unslop`](../../../../unslop/SKILL.md), and opens a PR from a worktree so you review it like any other change.
 +
 +Run it again whenever your habits drift:
 +
@@ -34,7 +34,7 @@ index 0000000000000000000000000000000000000000..326f00fb14c132b3505c8013c271ac5d
 +/reflect that took way too long. capture what we learned so the next run doesn't repeat it.
 +```
 +
-+[`/reflect`](../../../../reflect/SKILL.md) sends the run record to three parallel reviewer runs, then a synthesizer sorts the proposals into `Accepted`, `Rejected`, and `Backlog` and waits for your approval before any skill changes. Approve a proposal only if it would change a future decision. One weird session is an anecdote, not a rule.
++[`/reflect`](../../../../reflect/SKILL.md) sends the transcript to three parallel reviewers, then a synthesizer sorts the proposals into `Accepted`, `Rejected`, and `Backlog` and waits for your approval before any skill changes. Approve a proposal only if it would change a future decision. One weird session is an anecdote, not a rule.
 +
 +## Fix the environment with `/correct`
 +
@@ -99,7 +99,7 @@ index 0000000000000000000000000000000000000000..326f00fb14c132b3505c8013c271ac5d
 +
 +## Build a bot UI with `/make-bot-ui`
 +
-+One situational skill is for Grok Bot users. [`/make-bot-ui`](../../../../make-bot-ui/SKILL.md) builds a small page whose buttons wake a bot over a webhook routine. For example, you could swipe through a review queue and have each swipe ask the bot to act on that item. A server on your machine holds the webhook's sender key, so the key never reaches the browser or the chat. The skill also covers exposing the page on Tailscale.
++[`/make-bot-ui`](../../../../make-bot-ui/SKILL.md) builds a small page whose buttons ask an agent to act. For example, you could swipe through a review queue and have each swipe ask the agent to act on that item. A server on your machine uses the project's configured agent integration, with credentials kept out of the browser and chat. The skill also covers exposing the page on Tailscale. Cursor's Grok Bot webhook routines are not available in this bundle.
 +
 +**Pitfall:** don't edit a skill mid-task because it's misbehaving. Fix it in its own PR and keep the task moving. A skill edit that ships tangled into feature work is invisible to review and impossible to evaluate.
 +

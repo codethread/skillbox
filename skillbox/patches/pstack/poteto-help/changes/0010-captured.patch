@@ -1,6 +1,6 @@
 diff --git a/references/upstream/guide/05-build-and-clean.md b/references/upstream/guide/05-build-and-clean.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..c45cbf9e068acf6762d515c73c0de1e697d3fc91
+index 0000000000000000000000000000000000000000..ec5a537604d7c957267e43b3952d8c429b0acde2
 --- /dev/null
 +++ b/references/upstream/guide/05-build-and-clean.md
 @@ -0,0 +1,83 @@
@@ -62,7 +62,7 @@ index 0000000000000000000000000000000000000000..c45cbf9e068acf6762d515c73c0de1e6
 +
 +## Clean before you commit
 +
-+The [Opening a PR playbook](../../../../poteto-mode/playbooks/opening-a-pr.md) strips slop per poteto-mode's Comments rule before each commit and applies [`/unslop`](../../../../unslop/SKILL.md) to the PR description and commit bodies. This install has no separate slop skill, so ask for the same outcome in plain words: remove narrating comments, unsupported guards, dead compatibility paths, and unrelated edits.
++The [Opening a PR playbook](../../../../poteto-mode/playbooks/opening-a-pr.md) cleans the diff before each commit and applies [`/unslop`](../../../../unslop/SKILL.md) to the PR description and commit bodies. `/deslop` ships in the `cursor-team-kit` plugin, not in this bundle. Ask for the same outcome in plain words: remove narrating comments, unsupported guards, dead compatibility paths, and unrelated edits.
 +
 +For prose, `/unslop` takes a target and any extra rules you have:
 +
@@ -80,10 +80,10 @@ index 0000000000000000000000000000000000000000..c45cbf9e068acf6762d515c73c0de1e6
 +/no-comments the diff
 +```
 +
-+[`/no-comments`](../../../../no-comments/SKILL.md) spawns [Comment Sicko](../../../../no-comments/references/comment-sicko.md), a read-only reviewer run with a short keep list: license headers, doc comments on a public API, links that explain what code can't, behavior forced by an external dependency you can't reshape. Everything else goes. A surprise in your own code gets no such pass. The comment comes back as a refactor flag, and `/no-comments` fixes the flags it accepts at the root cause. When a comment claims a constraint, "do not remove", the skill offers to encode the claim as a type, test, or lint. Either way, the comment comes out.
++[`/no-comments`](../../../../no-comments/SKILL.md) spawns [Comment Sicko](../../../../no-comments/references/comment-sicko.md), an independent reviewer that may delete comments but not edit application code with a short keep list: license headers, doc comments on a public API, links that explain what code can't, behavior forced by an external dependency you can't reshape. Everything else goes. A surprise in your own code gets no such pass. The comment comes back as a refactor flag, and `/no-comments` fixes the flags it accepts at the root cause. When a comment claims a constraint, "do not remove", the skill offers to encode the claim as a type, test, or lint. Either way, the comment comes out.
 +
-+The division of labor is worth keeping straight. The Comments rule cleans slop out of the code, `/unslop` cleans it out of prose, and `/no-comments` hands the comments to a reviewer that didn't write them.
++The division of labor is worth keeping straight. Code cleanup removes slop from the diff, `/unslop` cleans it out of prose, and `/no-comments` hands the comments to a reviewer who didn't write them.
 +
-+**Pitfall:** cleanup is not optional polish. A diff with narrating comments and defensive dead weight reads as unfinished to reviewers, and the extra code is where the next bug hides. If the diff feels padded, say "strip the slop" before you commit, not after review calls it out.
++**Pitfall:** cleanup is not optional polish. A diff with narrating comments and defensive dead weight reads as unfinished to reviewers, and the extra code is where the next bug hides. If the diff feels padded, say `deslop it` before you commit, not after review calls it out.
 +
 +Next: [Verify and ship](06-verify-and-ship.md).

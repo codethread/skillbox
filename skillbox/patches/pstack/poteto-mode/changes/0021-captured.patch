@@ -1,13 +1,24 @@
-diff --git a/playbooks/visual-parity.md b/playbooks/visual-parity.md
-index 248830ec74a593fc22143a842026388f92f1b9f4..3bed23cf2ee51dc4275c489b56e77b72a1e54e9c 100644
---- a/playbooks/visual-parity.md
-+++ b/playbooks/visual-parity.md
-@@ -5,7 +5,7 @@
- 1. Establish the baseline first, before any migration: a visual regression harness that screenshots the current component across its states, plus the target when matching two implementations. No baseline, no parity claim. A blocking prerequisite, not a follow-up.
- 2. Anti-shortcut clauses, stated and held: no harness modifications, no baseline tampering, no component restructuring to make a diff pass. If the baseline looks wrong, stop and ask, don't edit it.
- 3. Migrate one component at a time. Parallelize across worktrees, one owner per component (the **separate-before-serializing-shared-state** principle skill). Shared primitives migrate first as a blocking phase.
--4. Verify each component against its baseline via image diff on the matching surface via the control skill. A nonzero diff is a fail. Investigate the pixel delta. `/loop` per component until the diff is zero.
-+4. Verify each component against its baseline via image diff on the matching surface through the project's verification skill or named driver. A nonzero diff is a fail. Investigate the pixel delta. Re-run the bounded comparison per component until the diff is zero, keeping each pass's artifact (see [`../references/botlake-tools.md`](../references/botlake-tools.md)).
- 5. Run **Opening a PR** per component or per safe batch.
+diff --git a/playbooks/worktree-cleanup.md b/playbooks/worktree-cleanup.md
+index 45e1af693cc40d0271249a0e98f15bfc815af615..536b86d7f0308ce9381f2c7e3a120a3921a9dcec 100644
+--- a/playbooks/worktree-cleanup.md
++++ b/playbooks/worktree-cleanup.md
+@@ -1,12 +1,12 @@
+ ### Worktree and simulator cleanup
  
- **Reply:** components migrated, the diff result for each, the baseline harness location, what's left.
+-1. Snapshot and audit. Record `df -h /`, then run `scripts/worktree-audit.sh [-b <pr-base-ref>] [repo-path]` (principle-build-the-lever). Without `-b` it checks `MERGED` against `origin/HEAD`, so pass `-b origin/<branch>` when PRs target another branch. It reads paths from `git worktree list`, never hand-typed, since a hand-typed `myrepo-worktrees/x` misses one that lives at `.cursor/worktrees/myrepo/x` (principle-encode-lessons-in-structure). It classifies each worktree by size, age, merge state, uncommitted work, PR state, and the newest chat that touched it, then suggests a bucket. The transcript scan is slow, so background it.
+-2. The bucket is advice, not permission. The pinned and active chats are the real artifact (principle-prove-it-works). Get that set from the user or sidebar and cross-check every candidate. The lever has marked `safe` a worktree the user had pinned, so the pinned set wins.
+-3. Verify usage before deleting. For every `verify-recent-chat` row, or anything you doubt, fan subagents out to read the transcripts and report whether the chat is pinned or ongoing and which worktrees it touches (principle-guard-the-context-window, transcripts are bulk). A pinned chat spawns arena and repro trees into sibling worktrees via background subagents, and those are in use even when their names never hit the sidebar. Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section.
+-4. Pause on irreversible loss. `wip:N` is N tracked uncommitted edits. Show the diff and get a decision first, since removing a clean worktree is recoverable from its branch but uncommitted work is gone. `scratch:N` is untracked throwaway, safe to drop, but name the files. Per Autonomy, clean and merged and not-in-use proceeds. `wip` and in-use pause.
+-5. Prune the confirmed set. Per path, `git worktree remove --force <path>`. If the dir survives on ignored build artifacts, `rm -rf` it, then `git worktree prune`. Branch refs survive, so no commits are lost. Confirm with `df -h /` and re-list.
+-6. Simulators and other reclaimers. Simulators are usually the next-biggest win. `xcrun simctl --set testing delete all` (XCTestDevices clones), `xcrun simctl delete unavailable`, and `xcrun simctl runtime list` then `runtime delete <id>` for old runtimes. More when needed: Xcode `DerivedData` and `iOS DeviceSupport`, `~/Library/Application Support/Cursor` (`state.vscdb.backup`, and `snapshots/roots/<root>` where a `<root>` named for a folder you opened as a workspace balloons), package caches (pnpm, uv, brew, yarn). Clear only caches the user has not said to keep.
++1. Snapshot and audit. Record `df -h /`, then run `scripts/worktree-audit.sh [-b <pr-base-ref>] [repo-path]` (principle-build-the-lever). Without `-b` it checks `MERGED` against `origin/HEAD`, so pass `-b origin/<branch>` when PRs target another branch. It reads paths from `git worktree list`, never hand-typed (principle-encode-lessons-in-structure). It classifies each worktree by size, age, merge state, uncommitted work, and PR state, then suggests a bucket. It does not check live usage.
++2. The bucket is advice, not permission. Active agents, processes, and the operator's pinned worktrees are the real artifact (principle-prove-it-works). Cross-check every candidate. The pinned set wins over a heuristic.
++3. Verify usage before deleting. For every `verify-usage` row, or anything you doubt, inspect agent records and live processes and report which worktrees they use. Include arena and repro trees in sibling worktrees, not just the agent's main checkout. Delegate bulk inspection (principle-guard-the-context-window).
++4. Pause on irreversible loss. `wip:N` is N tracked uncommitted edits. Show the diff and get a decision first, since removing a clean worktree is recoverable from its branch but uncommitted work is gone. `scratch:N` is untracked data. Name the files and get permission before discarding them unless the operator already authorized that exact set. Per Autonomy, clean and merged and not-in-use proceeds. `wip`, unapproved scratch data, and in-use pause.
++5. Prune the confirmed set using the project's worktree tooling and cleanup policy. Preserve branch refs so no commits are lost. Confirm with `df -h /` and re-list.
++6. Simulators and other reclaimers. Simulators are usually the next-biggest win. `xcrun simctl --set testing delete all` (XCTestDevices clones), `xcrun simctl delete unavailable`, and `xcrun simctl runtime list` then `runtime delete <id>` for old runtimes. More when needed: Xcode `DerivedData` and `iOS DeviceSupport`, package caches (pnpm, uv, brew, yarn). Clear only caches the user has not said to keep.
+ 
+ This is the one playbook that deletes user state with no code review to catch a slip, so the gates above are the review.
+ 
+-**Reply:** `df -h /` before and after with space reclaimed, the worktrees pruned, and a one-line reason for each held back (in-use by which chat, or uncommitted work).
++**Reply:** `df -h /` before and after with space reclaimed, the worktrees pruned, and a one-line reason for each held back (in-use by which agent or process, operator pin, or uncommitted work).

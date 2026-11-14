@@ -1,10 +1,10 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Start Comment Sicko as a lake reviewer run with the carried brief instead of an uninstalled Cursor agent type."
+intent = "Supply the carried Comment Sicko brief to an independent reviewer rather than an uninstalled Cursor agent type; retain comment deletion authority and the prohibition on application-code edits."
 
 [files."./references/comment-sicko.md"]
-intent = "Carry Comment Sicko's brief in the skill. The plugin agent is never installed, so a Botlake reviewer run needs the text and the read-only scope as its prompt."
+intent = "Carry the otherwise uninstalled upstream reviewer body unchanged, with pinned source provenance and comment-only editing scope, so no-comments can audit actual deletions and refactor flags."
 
 [[patches]]
 target = "./SKILL.md"

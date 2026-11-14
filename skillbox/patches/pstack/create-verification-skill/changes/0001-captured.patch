@@ -1,5 +1,5 @@
 diff --git a/SKILL.md b/SKILL.md
-index 140d033a001e8d27acd14b06004506c43053b199..457a6ddd522d674bdea2637655563bbae911f0c4 100644
+index 140d033a001e8d27acd14b06004506c43053b199..c9da52a80a314da28eaa1d51d803b36f88a982f6 100644
 --- a/SKILL.md
 +++ b/SKILL.md
 @@ -6,7 +6,7 @@ disable-model-invocation: true
@@ -7,7 +7,7 @@ index 140d033a001e8d27acd14b06004506c43053b199..457a6ddd522d674bdea2637655563bba
  # Create a verification skill
  
 -Every serious project needs a scripted way to drive the real app and prove behavior: launch it, exercise a feature the way a user would, and capture evidence. This skill generates that as a project-local skill (`.cursor/skills/verify-<app>/`) tailored to the repo. You write the generator's output for the next agent, not for a human: it will be read cold, mid-task, by an agent that has never seen the app.
-+Every serious project needs a scripted way to drive the real app and prove behavior: launch it, exercise a feature the way a user would, and capture evidence. This skill generates that as a project-local `verify-<app>` skill tailored to the repo, written to the project's skill source directory rather than the generated `.agents/skills/` output. When the proof needs a lake run or a bounded wait, the run mechanics are in [`../poteto-mode/references/botlake-tools.md`](../poteto-mode/references/botlake-tools.md). You write the generator's output for the next agent, not for a human: it will be read cold, mid-task, by an agent that has never seen the app.
++Every serious project needs a scripted way to drive the real app and prove behavior: launch it, exercise a feature the way a user would, and capture evidence. This skill generates that as a project-local `verify-<app>` skill tailored to the repo. Use the project's skill-authoring guidance to locate its source directory; for Skillbox, load `skillbox skills get skillbox-author`. You write the generator's output for the next agent, not for a human: it will be read cold, mid-task, by an agent that has never seen the app.
  
  ## 1. Interview the repo, not the user
  

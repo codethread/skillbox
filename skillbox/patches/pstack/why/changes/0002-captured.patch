@@ -1,15 +1,12 @@
 diff --git a/references/source-playbook.md b/references/source-playbook.md
-index aa3d877cd539763ff05e266ae0a02dd811441e2b..62e87c24c1aca2fdfa62407c21db402b41351f4b 100644
+index aa3d877cd539763ff05e266ae0a02dd811441e2b..5ed026994aaef402bebc16a463c09dd434976e89 100644
 --- a/references/source-playbook.md
 +++ b/references/source-playbook.md
-@@ -1,8 +1,8 @@
+@@ -1,6 +1,6 @@
  # Source playbooks
  
 -The why skill spawns one investigator per available evidence category, each reading a single source-specific playbook below. The playbooks are concrete examples for common MCPs. Adapt them for a different MCP in the same category.
-+The why skill spawns one investigator per available evidence category, each reading a single source-specific playbook below. The playbooks are concrete examples for common evidence tools. Adapt them for a different tool in the same category, and record a gap when the session exposes none.
++The why skill spawns one investigator per available evidence category, each reading a single source-specific playbook below. The playbooks are concrete examples for common MCPs. Adapt them for the available tool in the same category, using its help or schema to map the example operations. Record a gap when no access is available.
  
--| Category | Playbook | Example MCP it documents |
-+| Category | Playbook | Example tool it documents |
+ | Category | Playbook | Example MCP it documents |
  |---|---|---|
- | Source control history | [`code-archaeology.md`](./sources/code-archaeology.md) | git, `gh` |
- | Issue / ticket tracker | [`linear.md`](./sources/linear.md) | Linear (adapt for Jira, GitHub Issues, Plane, Shortcut) |

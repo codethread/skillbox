@@ -1,147 +1,22 @@
-diff --git a/references/botlake-tools.md b/references/botlake-tools.md
-new file mode 100644
-index 0000000000000000000000000000000000000000..55aec738496a836d83fc6df4882fd0d43803f13a
---- /dev/null
-+++ b/references/botlake-tools.md
-@@ -0,0 +1,141 @@
-+# Botlake tools
-+
-+The playbooks, skills, and role table in pstack name a runtime primitive. This page maps each one to its Botlake operation. Read it once when a skill sends you here, then use the named command. Discover exact flags with `bl help <op>` and read the runbook with `bl prime <op>`. Never guess a flag. If a command in this page is missing from `bl help`, say so and stop instead of inventing a substitute.
-+
-+## Seats and the role table
-+
-+`.botlake/pstack-roles.md` is the project's pstack role table, written by `setup-pstack`. It maps a role (`feature`, `judgment and prose`, `swarm workers`, a panel list) to a Botlake seat and an optional effort. It is not lake configuration.
-+
-+`bl agent catalog` lists the seats this lake can start, with each seat's provider, model, configured effort, and purpose. `bl agent catalog <seat>` explains one seat's candidates and reasons. Every seat used by a run must appear in that live catalog. A missing role line triggers a catalog lookup by purpose; no seat alias is universally available. A panel list names one seat per entry and starts that many runs.
-+
-+Pick a seat per run, never a model slug. Omit `--effort` to use the seat's configured value. Pass an effort only when the role table records one supported by catalog evidence for that seat. Pass `--model` only for an operator-selected model that the expanded seat lists.
-+
-+## Start a run
-+
-+```sh
-+wktree add --branch <branch>
-+bl agent start --seat <seat> --cwd "$(wktree path --branch <branch>)" --prompt "$(cat brief.md)"
-+```
-+
-+Use `wktree` for the worktree lifecycle; run `wktree -h` before unfamiliar operations. `wktree list --json` inspects checkouts and `wktree remove --branch <branch>` prunes one safely.
-+
-+- `--prompt` is the whole brief. Put the goal, scope, files the run may write, how to verify, and what to report. A run does not inherit your conversation. It sees what the brief gives it plus the lake records and any Mail a peer sends it, so do not rely on context you never passed.
-+- `--cwd` sets the execution directory only. Custody, activity, and `BL_WORKSPACE` stay with the selected lake.
-+- `--target <task-id> --policy close-on-complete` binds a run to owned work. The default `stop-on-complete` reports only.
-+- `--request-id` makes admission idempotent.
-+- Keep the returned `id`.
-+
-+Start a fresh run for independent work. When the existing agent's interpretation or decision trail is useful, send the focused follow-up or missing context through Mail; configured delivery may resume a stopped agent. Resume a settled run with `bl agent resume RUN_ID '<continuation>'` when the continuation needs session state such as its checkout, uncommitted changes, or a process it still holds. A replacement run gets the consolidated brief, prior reports, work notes, and branch.
-+
-+## Observe a run
-+
-+```sh
-+bl agent list
-+bl agent show RUN_ID
-+bl agent activity peek RUN_ID
-+bl agent activity search '<phrase>' --target RUN_ID
-+bl await --query agent-run-settled --params '{"runId":"RUN_ID"}' --min-count 1 --timeout-secs 900
-+```
-+
-+`bl await` returns `reason=satisfied` or `reason=timeout`, both exit zero. Check `reason`. A timeout is a bounded observation gap, not a stopped run. Run settlement is not task completion.
-+
-+`bl agent show` is the run record. `bl agent activity peek` is a bounded snapshot of recent events, not a full transcript and not liveness proof. When you need the full native transcript, use the pointer this harness names for the run. Never guess a global transcript directory or read another project's history.
-+
-+Do not call a run stuck from one quiet activity snapshot or one wait timeout. Compare its recorded state, outstanding tools, work notes, branch or PR side effects, and the next checkpoint in its brief. Cancel with `bl agent cancel RUN_ID` only after that evidence shows the run is failed, looping, or no longer useful. `bl agent retry RUN_ID` retries a settled managed failure with no served target.
-+
-+## Work, groups, criteria, and dependencies
-+
-+```sh
-+bl work create "<title>" --description "<why it exists>" --criterion "<checkable condition>"
-+bl work create "<program>" --kind group --description "<shared constraints>"
-+bl work create "<task>" --parent <group> --prerequisite <blocker> --criterion "<condition>"
-+bl work show <id> --history
-+bl work tree --lean
-+bl work graph <id> --show-description --show-criteria
-+bl work criterion add <task> "<condition>"
-+bl work criterion resolve <task> <criterion-id> "<assessment>"
-+bl work update <id> --notes "<findings, artifact paths, next step>"
-+bl work claim <id>
-+bl work link <task> <blocker> --relation depends-on
-+bl work close <id>
-+```
-+
-+Work records replace a project tracker. Every program runs under a group. A task's notes hold the outcome and artifact pointers, so a replacement agent inherits the trail without scrolling a chat. Dependencies do not assert success. Resolve criteria before closing, and close only work that passed its predicate. `bl work abandon <id> --reason "<why>"` is terminal withdrawal, not success.
-+
-+Human-only decisions are `--audience HITL --assignee <operator>` and wait in `bl work list --view human --assignee <operator>`. Do not route ordinary reversible work to the operator.
-+
-+## Gates for machine-checkable waits
-+
-+```sh
-+bl gate probes
-+bl gate create "<title>" --probe <probe> --param key=value --dependent <task>
-+bl gate retry <gate-id> --reason "<why another evaluation can succeed>"
-+bl gate clear <gate-id> --reason "<why the condition is satisfied>"
-+bl gate clear <gate-id> --reason "<why the condition no longer applies>" --dismiss
-+```
-+
-+A gate holds a dependent task while open. `pending` is due now, `waiting` has a retry scheduled, `exhausted` needs `bl gate retry` or `bl gate clear`. Cleared and dismissed are both terminal and satisfy readiness. Prefer a gate over polling when a condition is machine-checkable and durable across turns. When `bl gate probes` is empty, the lake has no probe for that condition; record the gap and use bounded `bl await` instead of creating a gate that cannot evaluate.
-+
-+## Mail between agents
-+
-+```sh
-+bl mail send <recipient> "<subject>" "<body>" --about <task-id>
-+bl mail inbox
-+bl mail read <id>
-+bl mail ack <id>
-+bl mail reply <id> "<body>"
-+```
-+
-+Mail is for agent-to-agent coordination: a handoff, a question a peer can answer, a report a parent must see. Acknowledge what you read. Keep the operator conversation in the chat reply, not in unsolicited Mail. An urgent Mail is reserved for something that changes the operator's next decision.
-+
-+Delivery means the plugin reported a handoff. It is not proof a person read it. When agent delivery is configured, Mail resumes a stopped agent within the grace window; no arming step is needed.
-+
-+## Loops, autonomy, and waiting
-+
-+An unattended run states its exit predicate, works one verifiable unit per turn, and re-arms a bounded wait:
-+
-+```sh
-+bl await --query children-active --params '{"parent":"<group-id>"}' --max-count 0 --timeout-secs 900
-+bl await --query node-closed --params '{"id":"<task-id>"}' --min-count 1 --timeout-secs 900
-+```
-+
-+`bl query` lists the registered query names and parameters. `bl await` checks once per second inside its budget and returns data on timeout. It is bounded observation, not scheduling or a durable cadence. A timeout means inspect the records and decide whether another bounded observation is useful. It never stops runs or closes work. Discover any scheduling the lake provides through `bl help`, `botlake bin list`, and the selected extensions' docs; do not assume a scheduler exists.
-+
-+An event-free observation cycle is a bounded wait followed by a re-read of the playbook and work records. Record the policy in work notes so session recovery does not depend on memory. Each audit records a row through `show-me-your-work` and compares `bl agent show`, `bl agent activity peek`, outstanding tools, task notes, and branch or PR side effects. A timeout or quiet snapshot alone never replaces a run. Stand-down cancels or holds runs and records the order in the work notes.
-+
-+## Session pickup and pause
-+
-+Session pickup reads lake records, not a chat directory:
-+
-+```sh
-+bl agent list
-+bl agent show RUN_ID
-+bl agent activity peek RUN_ID
-+bl work show <id> --history
-+bl work tree --lean
-+```
-+
-+The branch, worktree, commits, open criteria, and notes are the operational state. A native transcript is an optional pointer this run's harness supplies, never a global glob.
-+
-+Pause writes a resume note, commits work in progress, and records the resume point with `bl work update <id> --notes "<resume point, verified state, next action>"`. Leave the run settled or cancel it. Resume with `bl agent resume RUN_ID '<first action>'` when the session state matters, otherwise start a fresh run with the note and the branch.
-+
-+## Tool and skill discovery
-+
-+- `bl help <op>` and `bl prime <op>` for lake commands.
-+- `bl query` for registered wait queries.
-+- `botlake bin list` and `botlake bin run <name> --help` for lake-provided programs.
-+- `.agents/skills/` for installed skills. Read a skill's `SKILL.md` before invoking it.
-+- The harness's own tool list for anything else. An MCP server is usable only when the harness exposes it in this session; a tool named in a reference is not evidence that it exists here.
-+
-+## Showing work to a person
-+
-+`botlake bin run ui open <task-or-agent-id>` opens a task, group, or agent on the enrolled phone. `botlake bin run ui show --input <JSON|@FILE|->` displays work on one foreground client and waits for acknowledgement. `botlake bin run ui clients list` shows connected clients; `views list --source <lake-id>` and `settings get` read saved views.
-+
-+This is a viewer and notifier. It does not drive an app, run a webhook, or accept page input. To prove app behavior, use the project's `verify-*` skill or a named driver. Use the UI to put a decision or a finished task in front of the operator, never as the only step that proves the work.
-+
-+## Boundaries
-+
-+- Never edit `.agents/skills/` or `.claude/skills/` by hand. They are generated output.
-+- Edit the prepared source tree, then capture the change through the product CLI when you are authorized to publish it. Do not hand-edit committed patch artifacts: intent and diffs come from capture or adopt.
-+- Restoring generated skills is `skillbox sync`; run it only when the task calls for it, and never treat the generated tree as the source of truth.
-+- Do not invent lake commands, flags, probes, seats, or work IDs. `bl help`, `bl agent catalog`, `bl gate probes`, and the actual records are the source.
+diff --git a/scripts/check-plan.mjs b/scripts/check-plan.mjs
+index c3ddc398997d29d3c97a414e5c2b37172b901254..eeca958f9ace950382cb489c7acfdf436f42e89a 100755
+--- a/scripts/check-plan.mjs
++++ b/scripts/check-plan.mjs
+@@ -17,7 +17,7 @@ const SUB_BLOCKS = [
+ 	"Merge.",
+ ];
+ const PROGRAM_H3 = ["Arm the program", "Spawn owners", "PR mechanics", "Verdict and merge", "Boot recipe"];
+-const PROGRAM_MARKERS = ["git show origin/main:", "/loop 1h", "status message"];
++const PROGRAM_MARKERS = [".agents/skills/", "audit observation cycle", "status message"];
+ const HOW_TO_READ_MARKERS = [
+ 	"One box is one unit of work",
+ 	"names the evidence",
+@@ -155,7 +155,7 @@ for (const pr of prSections) {
+ 
+ 	const live = block("Verify, live.");
+ 	if (live) {
+-		if (!LANES.test(live.rest)) fail(live.n, `${pr.title}: Verify, live lacks "Ten lanes on \`<swarm workers model>\` at the PR head" with the model filled in`);
++		if (!LANES.test(live.rest)) fail(live.n, `${pr.title}: Verify, live lacks "Ten lanes on \`<verification agent>\` at the PR head" with the agent filled in`);
+ 		const lanes = boxes(live.lines).map((b) => ({ ...b, m: b.text.match(/^Lane (\d+)\. /) }));
+ 		const numbers = lanes.filter((b) => b.m).map((b) => Number(b.m[1])).sort((a, b) => a - b);
+ 		if (numbers.join(",") !== "1,2,3,4,5,6,7,8,9,10") fail(live.n, `${pr.title}: lanes are [${numbers.join(",")}], expected 1 to 10`);

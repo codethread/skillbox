@@ -1,21 +1,13 @@
 diff --git a/references/explainer-prompt.md b/references/explainer-prompt.md
-index 3a36fb6736c5b74ac2774350841e332a019dec94..a79b0b48a26c8b427ae1dde1ab59321f4470b17e 100644
+index 3a36fb6736c5b74ac2774350841e332a019dec94..805440dde616fc9ee9971ab30307f02445946d82 100644
 --- a/references/explainer-prompt.md
 +++ b/references/explainer-prompt.md
-@@ -1,6 +1,6 @@
- # Explainer Prompt Template
- 
--Build the explainer subagent's prompt from this template. Fill in the placeholders.
-+Build the explainer run's brief from this template. Fill in the placeholders.
- 
- ---
- 
 @@ -20,7 +20,7 @@ The explorers each investigated a different angle of the same subsystem. Their f
  
  Write an explanation a senior engineer unfamiliar with this area could read and walk away with a solid mental model, understanding the architecture well enough to start working in it confidently.
  
 -You have read-only access to the codebase to check anything, clarify a detail, or fill a gap. Use Read, Grep, and Glob as needed. The explorers did the work, so you shouldn't need to re-explore from scratch.
-+Do not modify the codebase. Use the file-reading and search tools this harness exposes to check details or fill a gap. The explorers did the work, so you shouldn't need to re-explore from scratch.
++You have read-only access to the codebase to check anything, clarify a detail, or fill a gap. Use the available file-reading and search tools as needed. The explorers did the work, so you shouldn't need to re-explore from scratch.
  
  ## Output Format
  

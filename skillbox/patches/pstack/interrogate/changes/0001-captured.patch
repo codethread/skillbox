@@ -1,5 +1,5 @@
 diff --git a/SKILL.md b/SKILL.md
-index 169f5b478f4cb53a4c5ab6046576034b4b07cfe8..f4110079adbc595dbff058b25434a424452c04e5 100644
+index 169f5b478f4cb53a4c5ab6046576034b4b07cfe8..eddb699fb80b522b14af586cca77b17fb16c475d 100644
 --- a/SKILL.md
 +++ b/SKILL.md
 @@ -14,7 +14,7 @@ The scope is what the user names. Otherwise it is the branch diff from its merge
@@ -7,7 +7,7 @@ index 169f5b478f4cb53a4c5ab6046576034b4b07cfe8..f4110079adbc595dbff058b25434a424
  ## Fan out
  
 -Run Phase A steps 3 and 4 and Phase B of the **arena** skill, with four changes. Read the `interrogate reviewers` line in place of `arena runners`. Copy the scope's uncommitted changes into each worktree. Spawn each adversary as `generalPurpose`. In place of the arena task and rationale, give each adversary the scope, the intent, and this brief:
-+Run Phase A steps 3 and 4 and Phase B of the **arena** skill, with four changes. Use the `interrogate reviewers` list, including optional efforts, in place of `arena runners`. Before launch, snapshot the named scope once: capture tracked changes with `git diff --binary HEAD` and list scoped untracked files with `git ls-files --others --exclude-standard`; apply and copy that same snapshot into every wktree-managed candidate checkout, excluding unrelated files. Start each adversary as a lake run with the brief below and its checkout as `--cwd`; mechanics are in [`../poteto-mode/references/botlake-tools.md`](../poteto-mode/references/botlake-tools.md). In place of the arena task and rationale, give each adversary the scope, the intent, and this brief:
++Run Phase A steps 3 and 4 and Phase B of the **arena** skill, with these changes. Choose adversarial reviewers and give each an isolated worktree containing the same scoped changes, including uncommitted tracked and untracked files. In place of the arena task and rationale, give each adversary the scope, the intent, and this brief:
  
  > Break this change. Prove each finding with a run against the real code, such as a failing test, a repro script, or command output that shows the wrong behavior. For a design or plan, run a prototype or probe the current tree. Keep repros in your own worktree. Report each finding with a title, the exact command, the output it printed, and the output the intent requires. Leave out anything you did not run. That covers style, naming, structure, and risks that need a future change to matter. No findings is a valid result.
  

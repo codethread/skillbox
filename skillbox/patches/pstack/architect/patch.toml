@@ -1,15 +1,8 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Track architecture phases in durable Work and validate role-table runners against the live catalog before use."
-
-[files."./references/runner-prompt.md"]
-intent = "Keep the carried architect runner brief consistent with wktree isolation and seat-based diversity."
+intent = "Replace Cursor model-rule selection with independent architectural agents while retaining diverse models, two distinct designs, and arena synthesis."
 
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
-
-[[patches]]
-target = "./references/runner-prompt.md"
-patch = "changes/0002-captured.patch"

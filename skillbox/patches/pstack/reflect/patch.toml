@@ -1,19 +1,19 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Read this run's record through lake observation and the harness's own pointer, route reviewers through catalog-validated roles, and use session-exposed evidence and authoring guidance."
+intent = "Replace Cursor transcript discovery, Task roles, and create-skill with workspace evidence, complementary reviewers, and retrievable project authoring guidance; preserve synthesis, approval, and source-only skill edits."
 
 [files."./references/divergent-reviewer.md"]
-intent = "Count a skill as used through installed skills and agent records, and restrict context lookups to session-exposed read-only evidence tools."
+intent = "Keep contrarian review and transcript-injection boundaries while allowing available evidence tools and recognizing skills read from files or CLI guidance rather than Cursor-only paths."
 
 [files."./references/judgment-reviewer.md"]
-intent = "Count a skill as used through installed skills and agent records, and restrict context lookups to session-exposed read-only evidence tools."
+intent = "Keep durable-principle review and transcript-injection boundaries while allowing available evidence tools and recognizing skills read from files or CLI guidance rather than Cursor-only paths."
 
 [files."./references/synthesizer.md"]
-intent = "Use session-exposed read-only evidence and the project's skill-authoring guidance in the synthesis contract."
+intent = "Preserve the Accepted/Rejected/Backlog contract and approval boundary while replacing MCP-only verification and create-skill routing with available evidence and project authoring guidance."
 
 [files."./references/tooling-reviewer.md"]
-intent = "Count a skill as used through installed skills and agent records, and restrict context lookups to session-exposed read-only evidence tools."
+intent = "Keep concrete tooling lessons and transcript-injection boundaries while allowing available evidence tools and recognizing skills read from files or CLI guidance rather than Cursor-only paths."
 
 [[patches]]
 target = "./SKILL.md"

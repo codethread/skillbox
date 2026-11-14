@@ -1,6 +1,6 @@
 diff --git a/references/upstream/guide/02-poteto-mode.md b/references/upstream/guide/02-poteto-mode.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..a5f43bcc5980da160c06178daae4a5687526da27
+index 0000000000000000000000000000000000000000..dbfe3efda7e2316139a00e8d38a40e28e3a8a606
 --- /dev/null
 +++ b/references/upstream/guide/02-poteto-mode.md
 @@ -0,0 +1,139 @@
@@ -96,7 +96,7 @@ index 0000000000000000000000000000000000000000..a5f43bcc5980da160c06178daae4a568
 +keep going until done
 +```
 +
-+Short works because the playbook holds the structure. Whether the skill stays attached depends on the harness; name `/poteto-mode` again when it drops. [Set up pstack](01-setup.md#run-your-first-task) shows how to start one. Your words carry the intent, and the skill carries the rigor.
++Short works because the playbook holds the structure. Whether the skill stays attached depends on the harness; name `/poteto-mode` again when it drops. [Set up pstack](01-setup.md#run-your-first-task) shows how to start a task. Your words carry the intent, and the skill carries the rigor.
 +
 +## Switch tasks with "new task"
 +
@@ -108,9 +108,9 @@ index 0000000000000000000000000000000000000000..a5f43bcc5980da160c06178daae4a568
 +
 +"new task" tells `/poteto-mode` to re-match rather than continue the prior playbook. "don't change any code yet" pins this one to Investigation. Without those two phrases, a mode mid-Feature tends to treat your question as the next feature step.
 +
-+## Give parallel work its own machine
++## Give parallel work its own worktree
 +
-+If you run several agents against one repository on one computer, they will fight over the working tree, the ports, and the build output. Give each run its own worktree: create one with `wktree add --branch <branch>` (run `wktree -h` first), then start the run with `--cwd` at `wktree path --branch <branch>`. The run can install dependencies, launch the app, and record video in its own checkout without touching yours. See [`botlake-tools.md`](../../../../poteto-mode/references/botlake-tools.md) for the run commands.
++If you run several agents against one repository on one computer, they will fight over the working tree, the ports, and the build output. Give each agent its own worktree and isolate app instances and build output too. A worktree separates files, not machine resources; it is not Cursor's hosted VM.
 +
 +Ask for a worktree up front:
 +

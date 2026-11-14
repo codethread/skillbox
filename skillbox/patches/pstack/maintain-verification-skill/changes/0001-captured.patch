@@ -1,5 +1,5 @@
 diff --git a/SKILL.md b/SKILL.md
-index a2680b91fead45a0b4963d8c367a854956bea59d..8f7a549bc79eac445411f35ef3b2a6996e8a2aeb 100644
+index a2680b91fead45a0b4963d8c367a854956bea59d..a29f29667ff58965175d09b5bb804189ff368e04 100644
 --- a/SKILL.md
 +++ b/SKILL.md
 @@ -22,11 +22,11 @@ Only edit the verification skill's own directory (its SKILL.md, features/, and a
@@ -12,7 +12,7 @@ index a2680b91fead45a0b4963d8c367a854956bea59d..8f7a549bc79eac445411f35ef3b2a699
  1. **Index hygiene.** Read the feature map README and glob its sibling files. Fix missing, extra, duplicate, or dead entries. Lightweight; no generated inventory.
  
 -2. **Source wave.** One read-only subagent per feature file, launched concurrently. Each explains "how does this user-facing feature work?" from source, flags likely doc drift with citations, and returns one concise live-verification recipe. Children never drive the app and never edit files. Return shape: feature summary / source entry points / likely drift or none / one recipe.
-+2. **Source wave.** One read-only agent run per feature file, launched concurrently (mechanics in [`../poteto-mode/references/botlake-tools.md`](../poteto-mode/references/botlake-tools.md)). Each explains "how does this user-facing feature work?" from source, flags likely doc drift with citations, and returns one concise live-verification recipe. Runs never drive the app and never edit files. Return shape: feature summary / source entry points / likely drift or none / one recipe.
++2. **Source wave.** One read-only agent per feature file, launched concurrently. Each explains "how does this user-facing feature work?" from source, flags likely doc drift with citations, and returns one concise live-verification recipe. Children never drive the app and never edit files. Return shape: feature summary / source entry points / likely drift or none / one recipe.
  
  3. **Reconcile.** Every feature file has a returned summary. Merge overlapping recipes into as few app states as practical. Spot-check cited drift; don't re-prove clean claims. Sweep recent churn for user-facing surfaces missing from the map — require a concrete source path before calling one missing.
  

@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Fan workers out as lake runs in isolated worktrees on the role seat, replacing Task fields, cloud environments, and cloud base branches."
+intent = "Replace Cursor model and cloud Task fields with task-suited parallel agents and isolated writable outputs; preserve branch selection, self-contained briefs, measurement evidence, and race rules."
 
 [[patches]]
 target = "./SKILL.md"

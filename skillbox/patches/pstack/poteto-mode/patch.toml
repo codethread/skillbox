@@ -1,85 +1,79 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Adapt the mode's hub: point at the shared adapter, replace Cursor Task/subagent defaults with catalog-backed lake runs and the role table, preserve useful agent continuity through Mail, and remove Cursor-only control, slop, authoring, and loop instructions."
+intent = "Remove Cursor-only question, plugin-agent, model-slug, authoring, control-skill, and loop assumptions. Keep the principles, autonomy limits, delegation ownership, role diversity, and playbook routing; configured agent context supplies mechanics and useful continuity."
 
 [files."./playbooks/authoring-a-skill.md"]
-intent = "Replace Cursor's built-in create-skill with the project's actual skill-authoring guidance and the shared runtime adapter."
+intent = "Use available project authoring guidance instead of Cursor create-skill; retrieve Skillbox guidance through skills get when relevant, preserving voice, validation, and structural testing steps."
 
 [files."./playbooks/autonomous-run.md"]
-intent = "Replace the Cursor /loop wake mechanism with bounded lake observations whose records distinguish timeout from progress, and replace AskQuestion with the operator conversation, so an unattended run has real evidence and no unavailable command."
+intent = "Replace Cursor /loop with event reporting and bounded active waits, explicitly distinguishing them from persistent scheduling and progress. Preserve the exit predicate, iteration evidence, side-fix autonomy, and dead-end rule."
 
 [files."./playbooks/autopilot-full.md"]
-intent = "Owners become worktree agent runs, audit cycles use bounded observation without treating silence as liveness proof, and uninstalled slop and control skills become project verification plus the inline slop-strip rule."
+intent = "Use isolated agents and durable task notes instead of cloud VMs and a system-prompt agent store. Replace unavailable deslop/control plugins and /loop while retaining owner lifecycle, independent swarm evidence, merge authorization, and side-effect-based stall detection without concurrent replacement writers."
 
 [files."./playbooks/babysit.md"]
-intent = "Replace the Cursor built-in and /loop polling with forge polling re-armed on bounded waits, and name the adapter for wait mechanics."
+intent = "Remove the Cursor built-in collision warning and /loop dependency. Keep the supplied forge watcher, request modes, frontier discipline, skeptical triage, and merge-ready stopping conditions."
 
 [files."./playbooks/bug-fix.md"]
-intent = "Replace subagent/model defaults and Cursor /loop with lake runs, the role table, and bounded autonomous observation."
+intent = "Remove the fixed Cursor implementation model and loop command; use configured delegation and the project verification driver while preserving self-reproduction, mechanism proof, minimal fixes, and red-first history."
 
 [files."./playbooks/eval.md"]
-intent = "Candidates and judges become lake runs on different seats, and chain verification reads agent records rather than assuming a Cursor transcript directory."
+intent = "Use task-scoped activity records or harness transcripts instead of Cursor's transcript directory, and defer agent selection to the hub. Preserve model diversity, blinded judging, organic prompts, and evidence of actual file reads rather than self-report."
 
 [files."./playbooks/feature.md"]
-intent = "Delegate on the feature role seat from the Botlake role table and use run language instead of subagent/model fields."
+intent = "Remove the fixed feature model and Cursor speed settings while retaining mandatory delegation, precise scope/data-shape criteria, arena alternatives, review separation, and the throughput checkpoint."
 
 [files."./playbooks/hillclimb.md"]
-intent = "Hillclimb iterations delegate to lake runs on the role seat, with worktree isolation for parallel hypotheses."
+intent = "Replace fixed model/speed settings with configured agent selection; retain isolated parallel hypotheses, frozen measurement, per-attempt regression gates, and keep-or-revert discipline."
 
 [files."./playbooks/multi-phase-plan.md"]
-intent = "Settle plan-time delegation on catalog-backed lake runs, remove the remaining hard-coded model slug, name project verification instead of Cursor control skills, and make observation cycles and installed paths real for Botlake."
+intent = "Use installed skill paths, project plan locations, configured verification agents, available surface drivers, and an active hourly audit policy instead of Cursor plugin paths, cloud defaults, and /loop. Preserve the checklist skeleton, ten live lanes, perf gates, operator review, evidence requirements, and explicit execution go."
 
 [files."./playbooks/opening-a-pr.md"]
-intent = "Replace Task worktree rules and the uninstalled Cursor slop skill with isolated workflow runs, one writer per branch, and the inline slop-strip rule."
+intent = "Replace Task-specific worktree inheritance/reset assumptions with separate concurrent writers and reviewed handoffs. Replace unavailable deslop with the existing Comments/unslop guidance while retaining forge operations, PR structure, stacking, and babysit timing."
 
 [files."./playbooks/orchestrate.md"]
-intent = "Run the program on lake work records and isolated agent runs instead of Task spawns, the Project store, and cloud VMs; retain authorized repository scripts and use Mail when agent context is useful."
-
-[files."./playbooks/pause-safely.md"]
-intent = "Cancel lake runs rather than Cursor subagents, and record the resume point in the work notes so a replacement run inherits it."
+intent = "Replace Task, Project-store, cloud-VM, and runtime-control assumptions with delegated workers, shared task records, isolated writers, and available verification surfaces. Allow direct coordination and useful continuity while preserving owner/verifier separation, bounded topology, supervision, and retry policy."
 
 [files."./playbooks/perf-issue.md"]
-intent = "Use the project verification skill for the baseline trace and the perf-issue role seat for implementation, instead of Cursor control skills and model slugs."
+intent = "Use available verification drivers and configured agents instead of Cursor control skills and hard-coded model/speed settings; preserve baseline vetting, mantra order, trace comparison, and measured claims."
 
 [files."./playbooks/prototype.md"]
-intent = "Name the project verification skill instead of the uninstalled control skill when proving a prototype."
+intent = "Use the project's verification skill or named driver rather than an unavailable control skill; preserve throwaway scope, alternative exploration, direct observation, and the handoff to real implementation."
 
 [files."./playbooks/refactoring.md"]
-intent = "Delegate mechanical refactoring through the catalog-backed refactoring role instead of the remaining Cursor subagent model slug and speed fields, and name the project verification driver for equivalence proof."
+intent = "Remove fixed model/speed settings and the external control-skill dependency; preserve contract pinning, small behavior-preserving steps, caller migration, and real-artifact equivalence proof."
 
 [files."./playbooks/runtime-forensics.md"]
-intent = "Name the project verification skill rather than an uninstalled control skill, and use lake run seats for artifact parsing."
+intent = "Use available verification drivers and configured parsing delegates instead of Cursor control/model assumptions, retaining live instrumentation, reduced artifact findings, mechanism proof, and diagnosis-only scope."
 
 [files."./playbooks/session-pickup.md"]
-intent = "Read the prior trail from lake agent and work records instead of a Cursor transcript directory, while keeping the transcript as an optional harness pointer."
+intent = "Find the prior trail through task/agent records, scoped harness transcripts, or a pushed branch rather than Cursor history paths and cloud URLs; preserve reconstruction, avoiding repeated work, and verifying inherited claims."
 
 [files."./playbooks/shipping.md"]
-intent = "Verifiers become worktree agent runs on the role seats, and the stack watcher is re-armed on bounded waits rather than a Cursor /loop."
+intent = "Replace Cursor cloud verifiers/control plugins with isolated independent agents and available drivers, and rearm the supplied watcher without /loop. Preserve per-PR verdicts, patch-id validity, bottom-up landing, and the verified ceiling."
 
 [files."./playbooks/trace-forensics.md"]
-intent = "Parse captured artifacts in lake runs with a chosen seat instead of Cursor subagent fields."
+intent = "Defer parsing-agent selection to configured context instead of Cursor reasoning/speed settings, leaving the fixed-dataset query, attribution, paired-capture, and diagnosis-only method intact."
 
 [files."./playbooks/visual-parity.md"]
-intent = "Replace the Cursor /loop repetition with bounded comparison passes against the baseline and name the project verification driver instead of a generic external control skill."
+intent = "Use an available verification driver and ordinary repeated comparisons instead of a Cursor control skill and /loop; preserve baseline immutability, component isolation, and zero-diff completion."
 
 [files."./playbooks/worktree-cleanup.md"]
-intent = "Base in-use checks on live worktrees, lake agent records, processes, and the operator's pinned set. The deleted transcript auditor no longer supplies chat evidence; deletion follows wktree's branch safety and explicit authorization for untracked data."
-
-[files."./references/botlake-tools.md"]
-intent = "Add the shared Botlake adapter: one mapping from every runtime primitive pstack named (Task fields, cloud agents, model slugs, Project store, transcripts, loops, control skills) to the lake operation that replaces it, so each independently invoked skill points here instead of restating mechanics."
+intent = "Retain the upstream audit lever, but require live agent/process/pin checks instead of Cursor chat/sidebar evidence. Align verify-usage rows with the adapted helper, preserve authorization for untracked data, and defer removal to the project's worktree tooling instead of force-removal commands. Remove Cursor-specific cache advice while preserving cleanup gates and reporting."
 
 [files."./references/poteto-agent.md"]
-intent = "Carry the delegate brief in the skill itself. The plugin agent is never installed, so a Botlake run needs the poteto-mode reading contract, the correct installed path, and delegate terminology rather than a Cursor plugin search or subagent identity."
+intent = "Carry the upstream plugin agent's mandatory full-skill/principle reading contract as a portable delegate brief because plugin agents are not installed as skills. Pin its upstream source for update review and use a resolvable skill-relative path without Cursor plugin discovery."
 
 [files."./scripts/check-plan.mjs"]
-intent = "Update the plan checker's program markers to the adapted plan: installed skills are read from .agents/skills, and the audit policy is an active bounded observation cycle rather than a Cursor /loop cadence."
+intent = "Change only program-location/audit markers and verification-agent diagnostic text to match the adapted plan; preserve all structural, ten-lane, evidence, and prose checks."
 
 [files."./scripts/check-plan.test.ts"]
-intent = "Keep the checker's fixture aligned with the adapted observation-cycle marker so the retained supporting test proves the same plan contract the prose declares."
+intent = "Align only the valid fixture's location/audit markers and example agent label with the adapted plan contract, preserving upstream checker test coverage."
 
 [files."./scripts/worktree-audit.sh"]
-intent = "Delete the runtime-only worktree auditor. Its delete-safety column depends on Cursor's global chat transcript store, which does not exist under Botlake; the cleanup playbook now bases in-use checks on lake agent records and live worktrees instead of a script that would silently report stale chat evidence."
+intent = "Preserve the executable git/size/age/dirty/PR audit while removing Cursor transcript lookup and LAST_CHAT output. Otherwise eligible trees become verify-usage candidates, never safe based on absent chat evidence; the playbook supplies live usage checks."
 
 [[patches]]
 target = "./SKILL.md"
@@ -130,61 +124,53 @@ target = "./playbooks/orchestrate.md"
 patch = "changes/0012-captured.patch"
 
 [[patches]]
-target = "./playbooks/pause-safely.md"
+target = "./playbooks/perf-issue.md"
 patch = "changes/0013-captured.patch"
 
 [[patches]]
-target = "./playbooks/perf-issue.md"
+target = "./playbooks/prototype.md"
 patch = "changes/0014-captured.patch"
 
 [[patches]]
-target = "./playbooks/prototype.md"
+target = "./playbooks/refactoring.md"
 patch = "changes/0015-captured.patch"
 
 [[patches]]
-target = "./playbooks/refactoring.md"
+target = "./playbooks/runtime-forensics.md"
 patch = "changes/0016-captured.patch"
 
 [[patches]]
-target = "./playbooks/runtime-forensics.md"
+target = "./playbooks/session-pickup.md"
 patch = "changes/0017-captured.patch"
 
 [[patches]]
-target = "./playbooks/session-pickup.md"
+target = "./playbooks/shipping.md"
 patch = "changes/0018-captured.patch"
 
 [[patches]]
-target = "./playbooks/shipping.md"
+target = "./playbooks/trace-forensics.md"
 patch = "changes/0019-captured.patch"
 
 [[patches]]
-target = "./playbooks/trace-forensics.md"
+target = "./playbooks/visual-parity.md"
 patch = "changes/0020-captured.patch"
 
 [[patches]]
-target = "./playbooks/visual-parity.md"
+target = "./playbooks/worktree-cleanup.md"
 patch = "changes/0021-captured.patch"
 
 [[patches]]
-target = "./playbooks/worktree-cleanup.md"
+target = "./references/poteto-agent.md"
 patch = "changes/0022-captured.patch"
 
 [[patches]]
-target = "./references/botlake-tools.md"
+target = "./scripts/check-plan.mjs"
 patch = "changes/0023-captured.patch"
 
 [[patches]]
-target = "./references/poteto-agent.md"
+target = "./scripts/check-plan.test.ts"
 patch = "changes/0024-captured.patch"
 
 [[patches]]
-target = "./scripts/check-plan.mjs"
-patch = "changes/0025-captured.patch"
-
-[[patches]]
-target = "./scripts/check-plan.test.ts"
-patch = "changes/0026-captured.patch"
-
-[[patches]]
 target = "./scripts/worktree-audit.sh"
-patch = "changes/0027-captured.patch"
+patch = "changes/0025-captured.patch"

@@ -1,0 +1,8 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Remove the obsolete Cursor-oriented Subagents policy pointer while preserving seam-based parallelism, worker isolation, and the auditable hypothesis loop."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"

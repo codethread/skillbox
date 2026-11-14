@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Audit the trail against lake run records and the harness's own transcript pointer, and run the cross-model review as an agent run on another seat."
+intent = "Audit against harness transcripts and supporting task records instead of Cursor paths, disclose incomplete coverage, and retain independent cross-family review with an explicit blocker when unavailable."
 
 [[patches]]
 target = "./SKILL.md"
