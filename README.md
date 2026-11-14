@@ -114,6 +114,10 @@ Operational commands return JSON with explicit `success`, concise result data, a
 
 Exact revision pin creation, shared caching, automatic ignore setup in consuming projects, migration, patches, and multi-workspace orchestration are not implemented yet.
 
+## Botlake Mail
+
+The repository lake enables direct Mail, registered identity links, and automatic live-agent delivery with five-minute post-stop resumption. Agents use `bl mail` and should inspect delivery status.
+
 ## Changelog
 
 Read [the changelog](CHANGELOG.md), or query the history bundled in the installed CLI without a workspace, Git checkout, or network:

@@ -1,6 +1,6 @@
 import { createLake } from "@botlake/core";
 import batteriesExtension from "@botlake/extension-batteries";
-import identityExtension from "@botlake/extension-identity";
+import { mailExtensions } from "./src/mail.ts";
 import flags from "./src/flags.ts";
 import references from "./src/references.ts";
 import agents from "./src/agents.ts";
@@ -13,7 +13,7 @@ export const lake = createLake({
 	name: "skillbox",
 	extensions: [
 		batteriesExtension,
-		identityExtension,
+		...mailExtensions,
 		flags,
 		references,
 		agents,
