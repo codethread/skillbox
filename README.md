@@ -51,11 +51,11 @@ A tree URL pointing to `skillbox/<bundle>` is also supported and implies the bun
 skillbox add https://github.com/codethread/agents/tree/main/skillbox/dev
 ```
 
-Git source strings are retained, not canonicalized: tree URLs for `dev` and `coding` create separate entries even when they refer to the same repository and ref. A repository URL and its GitHub shorthand also remain separate if mixed. Keep the intended Git ref when choosing a source; different refs are not interchangeable. The SDK handles fetching and discovery.
+Git source strings are retained, not canonicalized: tree URLs for `dev` and `coding` create separate entries even when they refer to the same repository and ref. A repository URL and its GitHub shorthand also remain separate if mixed. Keep the intended Git ref when choosing a source; different refs are not interchangeable. The SDK handles native bundle fetching and discovery.
 
 Local repositories also use explicit bundle names: `skillbox add ../my-skills development`.
 
-Bundles live under `skillbox/<bundle>/<skill>/SKILL.md`. The command copies each selected skill and its supporting files into the client's `.agents/skills/` and links `.claude/skills` to it. Unmanaged skill paths and name collisions are rejected without overwriting their contents.
+Native bundles live under `skillbox/<bundle>/<skill>/SKILL.md`. Producers can also export adapted bundles from `skillbox/patches/<bundle>/`; see [Consume a shared adaptation](#consume-a-shared-adaptation). The command copies each selected skill and its supporting files into the client's `.agents/skills/` and links `.claude/skills` to it. Unmanaged skill paths and name collisions are rejected without overwriting their contents.
 
 Ignore both generated installation paths in the workspace's `.gitignore` (the Claude path is a symlink, so its rule has no trailing slash):
 
@@ -66,7 +66,7 @@ Ignore both generated installation paths in the workspace's `.gitignore` (the Cl
 
 The CLI does not add these rules automatically. If either path is already tracked, use `git rm -r --cached -- <path>` to untrack it without deleting the installation.
 
-Two files record the installation; commit both:
+Two files record the installation; commit both, along with any `skillbox/patches/` packs:
 
 - `skillbox/config.json` records source repositories and requested bundles. Local source paths are relative to the workspace root; Git sources retain their source string.
 - `skillbox/lock.json` is Skillbox's lockfile, retaining the SDK's native format. It records per-skill source information, content hashes, copy mode, and Git refs and skill paths where available. Local source paths remain relative to the workspace root. A branch such as `main`, or a content hash by itself, is **not an immutable revision pin**.
@@ -112,6 +112,32 @@ The JSON result reports `installed`, `unchanged`, and `removed` skill counts. Re
 
 Operational commands return JSON with explicit `success`, concise result data, and structured errors. Full skill contents and config/lockfile dumps are not included by default.
 
+## Consume a shared adaptation
+
+Skillbox is the CLI. This repository also produces a shared CT-Botlake adaptation of PSTACK. From your consuming project, import that bundle from the producer repository:
+
+```sh
+skillbox add codethread/skillbox pstack
+```
+
+Use a producer revision containing the adaptation. A sibling checkout works too: `skillbox add ../skillbox pstack`. Add installs the adapted skills and creates an empty consumer-owned pack under `skillbox/patches/pstack/`. It records the producer snapshot without copying the producer's diffs or claiming ownership of its intents. Commit your config, lock, and patch pack. You do not need a checkout of the producer or a manual copy of its generated skills.
+
+Ordinary sync restores the recorded producer snapshot and your patches. Git producers are pinned to exact commits; local producers use content-digest snapshots. The producer's own lock retains the original PSTACK source pin. A producer push or local edit does not silently advance your installation.
+
+To customize an imported skill in your project:
+
+```sh
+skillbox patch prepare pstack
+# Edit .skillbox-prepare-pstack/edited/skills/.
+skillbox patch capture pstack --from .skillbox-prepare-pstack
+# Annotate the reported file intents in your own patch pack.
+skillbox sync
+```
+
+Your patches apply on top of the producer's adaptation. To adopt a newer producer version, run `skillbox update pstack`, review the staged result, then capture and sync as described below. This updates the producer snapshot, not its original upstream independently. Git owns review, history, and reverts.
+
+A separate local skill is another option when you want a personal mode, project verification workflow, or preferences alongside PSTACK. Author it at `skillbox/local/<name>/SKILL.md` and select it with `skillbox add . local`. Use a distinct skill name; local bundles do not override imported skills by name. Neither a local overlay nor a patch is mandatory. Changes meant for every consumer belong with the shared bundle's maintainer.
+
 ## Import and patch a plugin
 
 An adapted bundle pins a Git repository's skills subtree and keeps local changes as reviewable per-file patches. Initialize PSTACK, optionally choosing the editable workspace path:
@@ -123,7 +149,7 @@ skillbox patch init pstack \
   --ref 3dbd22ff12742fb28c9700b9760baa29ed41dc13 --update-ref main
 ```
 
-Init registers the bundle and immediately returns `data.workspace` and `data.editable`; it does **not** install skills. Without `--output`, the workspace is `.skillbox-prepare-pstack`. Edit only files under `<workspace>/edited/skills/`. For an existing bundle, `skillbox patch prepare pstack` recreates the same kind of workspace, including a previously captured draft.
+Init registers the bundle and immediately returns `data.workspace` and `data.editable`; it does **not** install skills. Without `--output`, the workspace is `.skillbox-prepare-pstack`. Edit only files under `<workspace>/edited/skills/`. For an existing adapted bundle, `skillbox patch prepare pstack` recreates the same kind of workspace, including a previously captured draft.
 
 Capture additions, edits, deletions, binary content, and executable mode changes as ordered per-file diffs:
 
@@ -143,20 +169,22 @@ Run sync only after every intent is nonblank:
 skillbox sync
 ```
 
-Otherwise sync returns `INTENT_REQUIRED` without changing the installation. Sync validates the adapted source and patch hashes before publishing and still rejects native source content that differs from its locked hash. Capture verifies that replay reproduces the edited tree. The bundle lock records the source identity, exact revision, and source and patch hashes; each patch record contains only its target and diff path. File intent is explanatory and may be edited directly; integrity hashes protect source identity, patch targets and paths, and diff payloads.
+Otherwise sync returns `INTENT_REQUIRED` without changing the installation. Sync validates the adapted source and patch hashes before publishing and still rejects native source content that differs from its locked hash. Capture verifies that replay reproduces the edited tree. The bundle lock records the source identity, exact source pin, and source and patch hashes; each patch record contains only its target and diff path. File intent is explanatory and may be edited directly; integrity hashes protect source identity, patch targets and paths, and diff payloads.
 
-Source snapshots are cached outside the project under the XDG cache directory (override with `SKILLBOX_CACHE_DIR`). A verified cached revision can be restored offline; a cold cache needs access to the pinned Git revision.
+Source snapshots are cached outside the project under the XDG cache directory (override with `SKILLBOX_CACHE_DIR`). Verified cached sources can be restored offline. A cold cache needs access to every pinned Git revision in the adaptation chain. A local producer snapshot needs its matching cached content or unchanged local source; an unavailable snapshot fails rather than accepting changed content.
 
 Request upstream changes explicitly:
 
 ```sh
-skillbox update pstack                 # resolve the configured update_ref
-skillbox update pstack --ref <commit>  # choose a particular revision
+skillbox update pstack                # Git update_ref or current local producer
+skillbox update pstack --ref <commit> # choose a Git revision
 ```
 
-Update always stages the exact resolved candidate. It does not change a tracked pin or install skills. The JSON result returns `source`, `from`, `to`, `workspace`, `pristine`, and `editable`. A clean replay has status `prepared` and an empty `conflicts` array. `UPDATE_CONFLICT` returns nonzero with the same paths, status `conflicted`, and the failed skill, target, patch, and reason. The pristine tree is the new source. The editable tree is the new source plus successful replays, and it can be partial after a conflict. Later patches for a failed target are skipped.
+`--ref` selects a Git revision. Local producers reject `--ref`; update snapshots their current worktree.
 
-Review the upstream Git log and diff from the old pin to the exact candidate pin, scoped to the descriptor root. Read broad changes, including new files, runtime assumptions, renames, deletions, scripts, and executable modes. Compare those changes with each per-file intent and the current adapted result. A clean replay can still hide a semantic conflict or an upstream change that has absorbed a local patch.
+Update always stages the exact resolved candidate. It does not change a tracked pin or install skills. The JSON result returns `source`, `from`, `to`, `workspace`, `pristine`, and `editable`. `from` and `to` are pin objects: Git pins contain `type: "git"`, `revision`, and `tree`; local producer pins contain `type: "local"` and `digest`. A clean replay has status `prepared` and an empty `conflicts` array. `UPDATE_CONFLICT` returns nonzero with the same paths, status `conflicted`, and the failed skill, target, patch, and reason. The pristine tree is the new baseline: raw plugin source for a direct import, or the producer's adapted output for an imported bundle. The editable tree adds your successful patch replays and can be partial after a conflict. Later patches for a failed target are skipped.
+
+For Git sources, review the source log and diff from the old pin to the exact candidate pin, scoped to the descriptor root. For an imported adaptation, include the producer's pack and original-source pin changes; compare the old and candidate materialized trees as well. For local producer snapshots, compare those trees and the producer's available history. Read broad changes, including new files, runtime assumptions, renames, deletions, scripts, and executable modes. Compare those changes with each per-file intent and the current adapted result. A clean replay can still hide a semantic conflict or an upstream change that has absorbed a local patch.
 
 Edit the returned workspace and capture the candidate:
 

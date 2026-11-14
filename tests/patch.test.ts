@@ -69,10 +69,13 @@ test("init pins and registers a bundle, creates an editable workspace, and does 
 	});
 
 	const lock = await json(join(f.client, "skillbox/patches/pstack/lock.json"));
-	expect(lock.revision).toBe(f.revision);
+	expect(lock.pin).toMatchObject({
+		type: "git",
+		revision: f.revision,
+		tree: expect.any(String),
+	});
 	expect(lock.source).toBe(pathToFileURL(f.remote).href);
 	expect(lock.root).toBe("plugin");
-	expect(lock.tree).toEqual(expect.any(String));
 	expect(lock.sourceHash).toEqual(expect.any(String));
 	expect(lock.patchHash).toEqual(expect.any(String));
 	expect(await exists(join(f.client, ".agents/skills/alpha"))).toBe(false);
@@ -398,8 +401,8 @@ test("update stages a clean review candidate and capture pins that exact source 
 		status: "prepared",
 		bundle: "pstack",
 		source: pathToFileURL(f.remote).href,
-		from: f.revision,
-		to: next,
+		from: { type: "git", revision: f.revision },
+		to: { type: "git", revision: next },
 		conflicts: [],
 	});
 	const workspace = requiredPath(prepared, "workspace");
@@ -422,7 +425,10 @@ test("update stages a clean review candidate and capture pins that exact source 
 	await put(editable, "skills/alpha/references/new.md", "Candidate-only guidance.\n");
 	const captured = expectSuccess(await run(f, "patch", "capture", "pstack", "--from", workspace));
 	expect(captured.pendingIntents).toBe(1);
-	expect((await json(join(f.client, "skillbox/patches/pstack/lock.json"))).revision).toBe(next);
+	expect((await json(join(f.client, "skillbox/patches/pstack/lock.json"))).pin).toMatchObject({
+		type: "git",
+		revision: next,
+	});
 	expect(await optionalSnapshot(join(f.client, ".agents/skills"))).toEqual(before.installed);
 	const manifestPath = join(f.client, "skillbox/patches/pstack/alpha/patch.toml");
 	const manifest = await readFile(manifestPath, "utf8");
@@ -480,8 +486,8 @@ test("update reports a mechanical rename conflict and capture maps the reviewed 
 	expect(conflict.response.data).toMatchObject({
 		status: "conflicted",
 		bundle: "pstack",
-		from: f.revision,
-		to: next,
+		from: { type: "git", revision: f.revision },
+		to: { type: "git", revision: next },
 		conflicts: [
 			{
 				skill: "alpha",
@@ -518,7 +524,10 @@ test("update reports a mechanical rename conflict and capture maps the reviewed 
 		),
 	);
 	expect(captured.pendingIntents).toBe(1);
-	expect((await json(join(f.client, "skillbox/patches/pstack/lock.json"))).revision).toBe(next);
+	expect((await json(join(f.client, "skillbox/patches/pstack/lock.json"))).pin).toMatchObject({
+		type: "git",
+		revision: next,
+	});
 	expect(await optionalSnapshot(join(f.client, ".agents/skills"))).toEqual(before.installed);
 	const manifestPath = join(f.client, "skillbox/patches/pstack/alpha/patch.toml");
 	const manifest = await readFile(manifestPath, "utf8");
@@ -577,7 +586,7 @@ test("update skips later patches on a conflicted target while replaying independ
 	const data = conflict.response.data!;
 	expect(data).toMatchObject({
 		status: "conflicted",
-		to: next,
+		to: { type: "git", revision: next },
 		conflicts: [
 			{
 				skill: "alpha",
@@ -641,7 +650,10 @@ test("capture can retire a local diff that upstream already incorporated", async
 		await run(f, "patch", "capture", "pstack", "--from", requiredPath(data, "workspace")),
 	);
 	expect(captured.pendingIntents).toBe(0);
-	expect((await json(join(f.client, "skillbox/patches/pstack/lock.json"))).revision).toBe(next);
+	expect((await json(join(f.client, "skillbox/patches/pstack/lock.json"))).pin).toMatchObject({
+		type: "git",
+		revision: next,
+	});
 	expectSuccess(await run(f, "sync"));
 	expect(
 		await readFile(join(f.client, ".agents/skills/alpha/references/choice.md"), "utf8"),

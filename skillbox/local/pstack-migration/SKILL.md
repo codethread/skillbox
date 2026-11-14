@@ -3,9 +3,9 @@ name: pstack-migration
 description: Adapt or review this repository's PSTACK patches for CT-configured Botlake agents while preserving upstream workflows and minimizing the diff.
 ---
 
-# Maintain the local PSTACK adaptation
+# Maintain the shared PSTACK adaptation
 
-The audience is agents running with this lake's CT configuration. Preserve PSTACK's engineering intent and voice; change the assumptions that prevent those agents from using it. This policy belongs to the local bundle. Each changed file still needs its own specific intent in the patch pack.
+This repository produces a shared adaptation for consuming projects whose agents run with CT-configured Botlake. Preserve PSTACK's engineering intent and voice; change the assumptions that prevent those agents from using it. This maintainer policy belongs to the producer's local bundle, not the distributed PSTACK skills. Each changed file still needs its own specific intent in the patch pack.
 
 ## Establish the audience
 
@@ -22,7 +22,7 @@ Compare the pinned pristine source with the edited candidate, not just the previ
 - Add runtime detail only when ordinary language leaves a consequential ambiguity. A distinction between an active wait and persistent scheduling may matter; a copied command catalog does not.
 - Let the configured agent catalog and existing instructions supply model selection and lifecycle mechanics. Preserve a requirement for independent or diverse judgment without maintaining a second roster or configuration system.
 - Keep the useful supporting scripts, references, and attribution. Adapt or remove a resource only when its actual assumptions conflict with the audience, and repair its callers. Copied upstream documents need a traceable origin because a clean replay cannot detect drift in their originals.
-- Route skill authoring through the project's available guidance. Skillbox's own guidance is retrieved through `skills get`; it is not automatically an installed workspace skill.
+- Route skill authoring through the consuming project's available guidance. Skillbox's own guidance is retrieved through `skills get`; it is not automatically an installed workspace skill. Distinguish an owned local skill or optional overlay, a consumer-owned patch of an imported adapted bundle, and a shared maintainer change. Distributed instructions must work without this checkout or ownership of its patch pack. Keep personal-mode discovery and all verification creation and maintenance workflows.
 
 Use `writing-for-agents` and `agent-docs-hotpath` when available to review our added instructions. Apply them to the adaptation, without turning this task into a rewrite of upstream PSTACK style.
 

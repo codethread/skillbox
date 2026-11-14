@@ -1,0 +1,13 @@
+diff --git a/SKILL.md b/SKILL.md
+index 77e014321045349e2641eefc160c9e233cad6c0e..47b0f047d3763a8e537d6ab0e3e8172b27f36423 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -42,7 +42,7 @@ Present the synthesizer's full Accepted / Rejected / Backlog output and wait for
+ 
+ File each Backlog item to your team's devex or backlog tracker without waiting. Only the Accepted list waits for approval.
+ 
+-Before approval, show the skill's editable source destination. After approval, edit that source rather than a generated installation or plugin cache. Follow the project's skill-authoring guidance; for Skillbox-managed skills, retrieve it with `skillbox skills get skillbox-author`. Never open a PR or push.
++Before approval, show the skill's editable source destination and who owns it. Keep project-specific lessons in an owned local skill or a consumer-owned patch of an imported skill; propose shared improvements to the bundle's maintainer instead of assuming access to its source. After approval, edit the chosen source rather than a generated installation or plugin cache. Follow the project's skill-authoring guidance; for Skillbox, use `skillbox skills get skillbox-author` for owned skills or `skillbox skills get skillbox-patch` for imported ones. Never open a PR or push.
+ 
+ Follow each approved row's Routing exactly:
+ 

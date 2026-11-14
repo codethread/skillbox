@@ -1,8 +1,16 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Locate the verification skill's authored source instead of assuming a Cursor install path, using an installed copy only to find that source. Express the parallel source-reading wave as ordinary agents while retaining every-feature source/live coverage, edit scope, and outcome criteria."
+intent = "Locate the verification skill's authored source instead of assuming a Cursor install path, using an installed copy only to find that source. Route adapted-import changes through consumer-owned patches; native imports use owned source or an owner handoff. Express the parallel source-reading wave as ordinary agents while retaining every-feature source/live coverage and outcome criteria. Permit only the extra patch and tracking artifacts needed to record/install approved verification changes; exclude unrelated skills and product edits."
 
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0003-captured.patch"

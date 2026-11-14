@@ -4,7 +4,7 @@ schema = 1
 intent = "Remove Cursor-only question, plugin-agent, model-slug, authoring, control-skill, and loop assumptions. Keep the principles, autonomy limits, delegation ownership, role diversity, and playbook routing; configured agent context supplies mechanics and useful continuity."
 
 [files."./playbooks/authoring-a-skill.md"]
-intent = "Use available project authoring guidance instead of Cursor create-skill; retrieve Skillbox guidance through skills get when relevant, preserving voice, validation, and structural testing steps."
+intent = "Use available project authoring guidance instead of Cursor create-skill; retrieve Skillbox guidance through skills get when relevant. Identify the editable source and owner, distinguishing owned skills, optional complementary local skills, consumer patches of adapted imports, and shared maintainer changes. Native imports use owned source or an owner handoff. Preserve voice, validation, structural testing, and PR steps without requiring producer checkout access."
 
 [files."./playbooks/autonomous-run.md"]
 intent = "Replace Cursor /loop with event reporting and bounded active waits, explicitly distinguishing them from persistent scheduling and progress. Preserve the exit predicate, iteration evidence, side-fix autonomy, and dead-end rule."
@@ -174,3 +174,11 @@ patch = "changes/0024-captured.patch"
 [[patches]]
 target = "./scripts/worktree-audit.sh"
 patch = "changes/0025-captured.patch"
+
+[[patches]]
+target = "./playbooks/authoring-a-skill.md"
+patch = "changes/0026-captured.patch"
+
+[[patches]]
+target = "./playbooks/authoring-a-skill.md"
+patch = "changes/0027-captured.patch"

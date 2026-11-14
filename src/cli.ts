@@ -54,7 +54,13 @@ Examples:
 	.action(async (source: string, bundles: string[]) => {
 		const cwd = process.cwd();
 		const workspace = await selectedWorkspace(cwd);
-		const result = await add({ cwd, source, bundles, workspace });
+		const result = await add({
+			adapted: createAdaptedBundles(),
+			cwd,
+			source,
+			bundles,
+			workspace,
+		});
 		writeJson(
 			successResponse({
 				status: result.status,
@@ -153,10 +159,13 @@ program
 	.command("update")
 	.description("Prepare an exact-source update candidate; review and accept with patch capture.")
 	.argument("<bundle>")
-	.option("--ref <ref>", "source revision to resolve to an immutable commit")
+	.option(
+		"--ref <ref>",
+		"Git revision to resolve to an immutable commit; not for local producers",
+	)
 	.addHelpText(
 		"after",
-		"\nUses the bundle's update_ref when --ref is omitted.\nReturns source refs and editable paths; tracked files and installations stay unchanged.\nUPDATE_CONFLICT retains the candidate and reports failed patches.\nReview with Git and file intent, then accept with patch capture and install with sync.",
+		"\nGit sources use the bundle's update_ref when --ref is omitted.\nLocal producers use the current worktree and reject --ref.\nReturns source pins and editable paths; tracked files and installations stay unchanged.\nUPDATE_CONFLICT retains the candidate and reports failed patches.\nReview with Git and file intent, then accept with patch capture and install with sync.",
 	)
 	.action(async (bundle, options) => {
 		const cwd = process.cwd();

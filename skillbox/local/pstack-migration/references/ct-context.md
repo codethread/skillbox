@@ -1,6 +1,6 @@
 # CT context for the PSTACK audience
 
-This is evidence for the local adaptation policy, not another Botlake runbook. It was checked against this repository's selected CT config 0.5.1 descriptors. Recheck the installed sources when the configuration changes.
+This is evidence for the producer's local adaptation policy, not another Botlake runbook. It was checked against this repository's selected CT config 0.5.1 descriptors. Consuming projects supply their own CT-configured lake and skill sources; the paths below are evidence from this checkout, not prerequisites for consumers. Recheck the installed sources when the configuration changes.
 
 ## Selected configuration
 

@@ -1,8 +1,12 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Generate the same proven verification skill and feature map in the project's authored skill source rather than Cursor's installation directory. Discover authoring guidance through the project, retrieving Skillbox's embedded guidance with skills get when applicable; leave engineering and proof requirements intact."
+intent = "Generate the same proven verification skill and feature map in the consuming project's authored skill source rather than Cursor's installation directory or the shared PSTACK producer pack. Discover authoring guidance through the project, retrieving Skillbox's embedded guidance with skills get when applicable; leave engineering and end-to-end proof requirements intact."
 
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

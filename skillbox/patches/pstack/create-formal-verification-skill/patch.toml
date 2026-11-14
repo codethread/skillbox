@@ -1,0 +1,8 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Place generated formal verification skills in the consuming project's owned source, not the shared PSTACK bundle or generated installation, and retrieve project authoring guidance when needed. Preserve code-grounded properties, honest bounds, failure demonstrations, and proof before handoff."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"

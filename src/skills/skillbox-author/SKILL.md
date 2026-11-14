@@ -5,7 +5,7 @@ description: Author or extend a Skillbox source bundle with SKILL.md instruction
 
 # Author Skillbox bundles
 
-Extend skills in an owned source repository, not in a client's generated installation. To customize third-party plugin skills while retaining their upstream source and patch intent, load `skillbox skills get skillbox-patch`.
+Extend skills in an owned source repository, not in a client's generated installation. A consuming project can own personal modes, verification skills, or a separate skill that complements an imported bundle. These do not belong in the shared producer's patch pack. To change a skill from an imported adapted bundle while retaining its source and patch intent, load `skillbox skills get skillbox-patch`. Native imports have no consumer patch pack: edit their source if you own it, or send the change to its owner. Propose changes intended for all consumers to the shared bundle's maintainer.
 
 Use `local` as the bundle name for repository-specific maintainer skills (for example, `skillbox/local/release/SKILL.md`), rather than implying they are intended for public reuse. Select that bundle from source `"."` in the repository's own config. This is a naming convention, not access control; files in a public repository remain public.
 

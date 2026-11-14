@@ -11,6 +11,7 @@ import {
 	pendingIntents,
 	preparedSchema,
 	readAdaptedBundle,
+	samePin,
 	type AdaptedBundles,
 	type BundleDescriptor,
 	type PatchManifest,
@@ -37,6 +38,7 @@ export async function patchInit(input: {
 	const descriptor: BundleDescriptor = {
 		schema: 1,
 		bundle,
+		source_type: "git",
 		source: inferred.source,
 		upstream: input.source,
 		root: input.root ?? inferred.root ?? bundle,
@@ -88,7 +90,7 @@ export async function patchInit(input: {
 			skill: bundle,
 		});
 	const occupied = new Set(existingLock ? Object.keys(readLock(existingLock).skills) : []);
-	const source = await input.adapted.acquireSource(descriptor, requested);
+	const source = await input.adapted.acquireSource(descriptor, requested, workspace);
 	const outputs = await hashSkillOutputs(source.root, descriptor.skills_root);
 	const names = Object.keys(outputs);
 	if (!names.length)
@@ -127,8 +129,7 @@ export async function patchInit(input: {
 				schema: 1,
 				source: descriptor.source,
 				root: descriptor.root,
-				revision: source.revision,
-				tree: source.tree,
+				pin: source.pin,
 				sourceHash: source.sourceHash,
 				patchHash: await hashPatchPack(pack),
 			}),
@@ -160,7 +161,7 @@ export async function patchInit(input: {
 			status: "initialized",
 			bundle,
 			source: descriptor.source,
-			revision: source.revision,
+			pin: source.pin,
 			skills: names.length,
 			workspace: output,
 			editable: join(output, "edited"),
@@ -194,12 +195,22 @@ export async function patchUpdate(input: {
 }) {
 	const pack = await requirePack(input.workspace, input.bundle);
 	const { descriptor, lock: current } = pack;
+	if (current.pin.type === "local" && input.ref !== undefined)
+		throw responseError(
+			"REF_UNSUPPORTED",
+			"--ref is only supported for Git producer updates.",
+			{
+				source: descriptor.source,
+				skill: input.bundle,
+				input: input.ref,
+			},
+		);
 	const requested = input.ref ?? descriptor.update_ref;
 	if (!requested)
 		throw responseError("REVISION_REQUIRED", "Specify --ref or configure update_ref.", {
 			skill: input.bundle,
 		});
-	const source = await input.adapted.acquireSource(descriptor, requested);
+	const source = await input.adapted.acquireSource(descriptor, requested, input.workspace);
 	const staging = await mkdtemp(join(input.workspace, ".skillbox-update-" + input.bundle + "-"));
 	let retain = false;
 	try {
@@ -213,7 +224,7 @@ export async function patchUpdate(input: {
 				input.workspace,
 				input.bundle,
 				join(staging, "edited"),
-				source.revision,
+				source.pin,
 			);
 			await rm(materialized.canonical, { recursive: true });
 		} catch (cause) {
@@ -231,10 +242,10 @@ export async function patchUpdate(input: {
 					schema: 1,
 					bundle: input.bundle,
 					source: descriptor.source,
-					revision: source.revision,
+					pin: source.pin,
 					sourceHash: source.sourceHash,
 					patchHash: current.patchHash,
-					previous_revision: current.revision,
+					previous_pin: current.pin,
 				},
 				null,
 				2,
@@ -244,8 +255,8 @@ export async function patchUpdate(input: {
 			status: conflict ? "conflicted" : "prepared",
 			bundle: input.bundle,
 			source: descriptor.source,
-			from: current.revision,
-			to: source.revision,
+			from: current.pin,
+			to: source.pin,
 			workspace: staging,
 			pristine: join(staging, "pristine"),
 			editable: join(staging, "edited"),
@@ -263,7 +274,7 @@ export async function patchUpdate(input: {
 				[
 					{
 						code: "UPDATE_CONFLICT",
-						message: "Patches do not replay on " + source.revision,
+						message: "Patches do not replay on the requested source pin.",
 						source: descriptor.source,
 						skill: input.bundle,
 					},
@@ -293,7 +304,7 @@ export async function patchCapture(input: {
 	);
 	const live = await requirePack(input.workspace, input.bundle);
 	const { descriptor, lock } = live;
-	const updating = manifest.previous_revision !== undefined;
+	const updating = manifest.previous_pin !== undefined;
 	if (updating && input.skill)
 		throw responseError("REGEN_WORKSPACE_INVALID", "Capture the complete update candidate.", {
 			input: input.from,
@@ -303,7 +314,7 @@ export async function patchCapture(input: {
 	if (
 		manifest.bundle !== input.bundle ||
 		manifest.source !== descriptor.source ||
-		(manifest.previous_revision ?? manifest.revision) !== lock.revision ||
+		!samePin(manifest.previous_pin ?? manifest.pin, lock.pin) ||
 		manifest.patchHash !== lock.patchHash
 	) {
 		throw responseError(
@@ -312,7 +323,7 @@ export async function patchCapture(input: {
 			{ input: input.from },
 		);
 	}
-	const source = await input.adapted.acquireSource(descriptor, manifest.revision);
+	const source = await input.adapted.acquireSource(descriptor, manifest.pin, input.workspace);
 	if (
 		manifest.sourceHash !== source.sourceHash ||
 		manifest.sourceHash !== (await hashTree(join(outer, "pristine")))
@@ -419,8 +430,7 @@ export async function patchCapture(input: {
 			const patchHash = await hashPatchPack(stagedPack);
 			const nextLock = {
 				...lock,
-				revision: source.revision,
-				tree: source.tree,
+				pin: source.pin,
 				sourceHash: source.sourceHash,
 				patchHash,
 			};
@@ -436,7 +446,7 @@ export async function patchCapture(input: {
 					probeWorkspace,
 					input.bundle,
 					join(probeWorkspace, "output"),
-					manifest.revision,
+					manifest.pin,
 				)
 			).outputs;
 			const desired = await hashSkillOutputs(join(outer, "edited"), skillsRoot);
@@ -455,7 +465,7 @@ export async function patchCapture(input: {
 						schema: 1,
 						bundle: input.bundle,
 						source: descriptor.source,
-						revision: source.revision,
+						pin: source.pin,
 						sourceHash: source.sourceHash,
 						patchHash,
 					},
@@ -481,7 +491,7 @@ export async function patchCapture(input: {
 			status: changed || updating ? "captured" : "unchanged",
 			bundle: input.bundle,
 			source: manifest.source,
-			revision: manifest.revision,
+			pin: manifest.pin,
 			skills: selected.length,
 			changed,
 			pendingIntents: pending.length,

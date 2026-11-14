@@ -1,0 +1,13 @@
+diff --git a/SKILL.md b/SKILL.md
+index c9da52a80a314da28eaa1d51d803b36f88a982f6..426e896c6ba057224745d3185a9fd1b0ebd76a1f 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -6,7 +6,7 @@ disable-model-invocation: true
+ 
+ # Create a verification skill
+ 
+-Every serious project needs a scripted way to drive the real app and prove behavior: launch it, exercise a feature the way a user would, and capture evidence. This skill generates that as a project-local `verify-<app>` skill tailored to the repo. Use the project's skill-authoring guidance to locate its source directory; for Skillbox, load `skillbox skills get skillbox-author`. You write the generator's output for the next agent, not for a human: it will be read cold, mid-task, by an agent that has never seen the app.
++Every serious project needs a scripted way to drive the real app and prove behavior: launch it, exercise a feature the way a user would, and capture evidence. This skill generates that as a project-local `verify-<app>` skill tailored to the repo. Use the consuming project's own skill source for the generated skill, not the shared PSTACK bundle. Follow the project's skill-authoring guidance; for Skillbox, load `skillbox skills get skillbox-author`. You write the generator's output for the next agent, not for a human: it will be read cold, mid-task, by an agent that has never seen the app.
+ 
+ ## 1. Interview the repo, not the user
+ 

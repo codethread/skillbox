@@ -20,7 +20,7 @@
 		"automate-me": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "4e3f666032eb5c5df7e135a4f9942fb1cc5f12b81aa47146d95d25c0f17640c8",
+			"computedHash": "3a80fd8bab410c421ead9c4b37b4e6d83951892a239a257947afaddca86961ba",
 			"installMode": "copy",
 			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
 			"skillPath": "pstack/skills/automate-me/SKILL.md"
@@ -67,7 +67,7 @@
 		"create-formal-verification-skill": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "ecccfa683447517ba3ebcfbd3099e1f8b05b4b41875a0194942182564d553997",
+			"computedHash": "e0bec37e77da3c1af39e6892e9f4d5b15080bd99d3c8013f42438ddf064f8835",
 			"installMode": "copy",
 			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
 			"skillPath": "pstack/skills/create-formal-verification-skill/SKILL.md"
@@ -75,7 +75,7 @@
 		"create-verification-skill": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "a8486a5189397617befb9ade9dd3634959ccaa0a7737af1571f12b0b27996f3a",
+			"computedHash": "6a908041c75b013b6860191315c2dbd3d63a1c987cd89f436e4707e645610149",
 			"installMode": "copy",
 			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
 			"skillPath": "pstack/skills/create-verification-skill/SKILL.md"
@@ -162,7 +162,7 @@
 		"maintain-formal-verification-skill": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "a41b8cffadbd598e4e06dbe57e0ee5c4307f3252814257ccaef198363b359d6c",
+			"computedHash": "ee3b21267300fffeb7a5c719a876f2139a7a4b9fe50be83f7d747d0b674c12f0",
 			"installMode": "copy",
 			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
 			"skillPath": "pstack/skills/maintain-formal-verification-skill/SKILL.md"
@@ -170,7 +170,7 @@
 		"maintain-verification-skill": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "7d70a28dc904a9e887870115368c4b0832c7927982589f7588b24e2821b457ea",
+			"computedHash": "5269f1778f392070ff2e9cd16eea3c37fc0f55499a7ad76fc646b16ddf44705d",
 			"installMode": "copy",
 			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
 			"skillPath": "pstack/skills/maintain-verification-skill/SKILL.md"
@@ -194,7 +194,7 @@
 		"poteto-help": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "2d186fdf12a998cf46e98a609ec851429842152583fbf55798e34a84e82ed1df",
+			"computedHash": "c8ea10a3335642c502f8dc225bde516fff42aa4ecb8ddc1e5c06a03f29606809",
 			"installMode": "copy",
 			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
 			"skillPath": "pstack/skills/poteto-help/SKILL.md"
@@ -202,7 +202,7 @@
 		"poteto-mode": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "b04301796caae5cd8dc3c7ac31126ddcc65ea147eec9c8636ac298588bc4620c",
+			"computedHash": "848e46b3163c760e92b736a981669494de15fc73d5b3a3d841812260453ae44f",
 			"installMode": "copy",
 			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
 			"skillPath": "pstack/skills/poteto-mode/SKILL.md"
@@ -402,7 +402,7 @@
 		"pstack-migration": {
 			"source": "./skillbox",
 			"sourceType": "local",
-			"computedHash": "f8cebb0288c1f6ed232b4d4e5303ae4236bd6e4312a6f77a99bc4617a056318a",
+			"computedHash": "3e656409864d789095168a12ad0245b353e6472ba74cd3ccfbaf4e15c0bcec6a",
 			"installMode": "copy"
 		},
 		"purge": {
@@ -424,7 +424,7 @@
 		"reflect": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "acee968f84ac4828f92c4f3502ebe517ab9d9473ba7906b5de3c762022fdd2a1",
+			"computedHash": "0f382ae5fd670bf49b4792950ec5c898f93194cf56e3ef776cc039e1d7e92bc9",
 			"installMode": "copy",
 			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
 			"skillPath": "pstack/skills/reflect/SKILL.md"

@@ -2,8 +2,11 @@
 	"schema": 1,
 	"source": "https://github.com/cursor/plugins",
 	"root": "pstack",
-	"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
-	"tree": "4719e1c4b4c43bac85d4206a8b41dd2899769c1c",
+	"pin": {
+		"type": "git",
+		"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
+		"tree": "4719e1c4b4c43bac85d4206a8b41dd2899769c1c"
+	},
 	"sourceHash": "1567256304c5be68ec9a2a59eff11c2528dd4ac4f3ef09f0331167bf564f3fe3",
-	"patchHash": "e7600a6e942e0cccfaf333e1d7d55ddcd3c1a837e7b0ca8ae4d4399b609fcf9b"
+	"patchHash": "e8ca286385295b6d236109e7e47f95efd4910041fd7b4c20f40bb9eeecbb4d1f"
 }

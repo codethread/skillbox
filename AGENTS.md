@@ -29,6 +29,10 @@ read-only work, or implementation of AC's does not require this check.
 5. delete tests
 6. align and prune docs
 
+## Shared skill adaptations
+
+Skillbox is the tool; this repository also produces the shared CT-Botlake PSTACK adaptation. Write distributed skills for consuming projects, not only this checkout. Route edits to the owner's local skill source, a consumer-owned patch of an imported adapted bundle, or the shared maintainer as appropriate. Do not require consumers to own the producer's patches or use Skillbox checkout paths. Personal modes and local overlays are optional; retain PSTACK's verification creators and maintainers.
+
 ## Doc guidance
 
 - best docs are no docs, build on good DDD with well structured modules and folders.

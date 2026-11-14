@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Keep the help router, prompt-first handoff, skill map, and engineering advice. Route setup through existing agent configuration and installation/authoring through Skillbox's on-demand guidance; replace unavailable Cursor modes, hosted agents, loop, and bot UI claims, and link carried guide pages without a second runtime manual."
+intent = "Keep the help router, prompt-first handoff, skill map, and engineering advice. Route setup through existing agent configuration and installation/authoring through Skillbox's on-demand guidance; replace unavailable Cursor modes, hosted agents, loop, and bot UI claims, and link carried guide pages without a second runtime manual. Route personal preferences to owned source or consumer patches of adapted bundles and distinguish shared maintainer changes without requiring a producer checkout."
 
 [files."./references/prompting.md"]
 intent = "Replace the Cursor /loop handoff with the Autonomous run playbook while preserving checkable finish conditions, isolation, decision logging, and the escape hatch in away prompts."
@@ -31,7 +31,7 @@ intent = "Carry the design guide with installed-tree links and panels drawn from
 intent = "Carry the build/cleanup guide with installed-tree links and the carried Comment Sicko brief. Describe its comment-only editing scope consistently with the executable workflow. Request the original code-cleanup outcome without the external Cursor /deslop plugin, retaining independent review and prose cleanup."
 
 [files."./references/upstream/guide/06-verify-and-ship.md"]
-intent = "Carry the verification/shipping guide with installed-tree links and project-owned verification skill sources rather than .cursor/skills. Keep the behavior-proof, feature map, formal verification, benchmarking, and shipping content unchanged."
+intent = "Carry the verification/shipping guide with installed-tree links and project-owned verification skill sources rather than .cursor/skills. Keep the behavior-proof, feature map, formal verification, benchmarking, and shipping requirements. Align maintenance scope with the required patch/tracking artifacts while excluding unrelated skill or product edits."
 
 [files."./references/upstream/guide/07-overnight.md"]
 intent = "Carry the overnight guide's finish condition, trust prerequisites, audit trail, and program-coordination workflows. Replace Cursor /loop and cloud Projects with active-run semantics, isolated worktrees, and durable context; distinguish configured scheduling from active waiting and link the unsupported upstream automation pack as background rather than runnable setup."
@@ -40,7 +40,7 @@ intent = "Carry the overnight guide's finish condition, trust prerequisites, aud
 intent = "Carry the upstream principles guide with links relocated into the installed skill tree, preserving its engineering vocabulary and descriptions unchanged."
 
 [files."./references/upstream/guide/09-make-it-yours.md"]
-intent = "Carry the customization guide with installed-tree links. Use available session history, project skill sources, and on-demand authoring guidance instead of Cursor transcripts/create-skill paths; align bot UI guidance with server-side configured-agent actions while preserving personal-mode, reflection, correction, and blind-eval workflows."
+intent = "Carry the customization guide with installed-tree links. Use available session history, project skill sources, and on-demand authoring guidance instead of Cursor transcripts/create-skill paths; align bot UI guidance with server-side configured-agent actions while preserving personal-mode, reflection, correction, and blind-eval workflows. Distinguish owned local skills, optional overlays, consumer patches of adapted bundles, and shared maintainer changes. Native imports use owned source or an owner handoff; never require personal preferences to alter the producer's pack."
 
 [files."./references/upstream/guide/10-recipes-and-pitfalls.md"]
 intent = "Carry the recipes and pitfalls with installed-tree links. Replace /loop, cloud-agent, and Cursor model-alias assumptions with checkable active runs, worktree isolation, and available configured agents while preserving the original prompt recipes and engineering cautions."
@@ -111,3 +111,23 @@ patch = "changes/0015-captured.patch"
 [[patches]]
 target = "./references/upstream/guide/README.md"
 patch = "changes/0016-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0017-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/09-make-it-yours.md"
+patch = "changes/0018-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0019-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/06-verify-and-ship.md"
+patch = "changes/0020-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/09-make-it-yours.md"
+patch = "changes/0021-captured.patch"

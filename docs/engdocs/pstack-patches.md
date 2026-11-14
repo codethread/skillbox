@@ -1,6 +1,6 @@
 # PSTACK bundles and patches
 
-This working POC has two parts: the reusable Skillbox patch commands and this repository's PSTACK bundle maintained through those commands. The installed skills remain generated output, while source provenance, patch intent, and concrete diffs belong in Git under `skillbox/`.
+Skillbox provides the bundle and patch commands. This repository also produces a shared CT-Botlake adaptation of PSTACK. Consuming projects import that adaptation and own their local preferences, skills, and any patches on top of it. The installed skills remain generated output, while source provenance, patch intent, and concrete diffs belong in each owner's Git repository under `skillbox/`.
 
 The existing [acceptance criteria](PRD.md) remain the product requirements. The implementation choices below are the reviewable POC draft requested for this worktree.
 
@@ -38,7 +38,9 @@ Sibling skill links remain valid in the flat installation. The Botlake patch car
 
 ## CT-configured Botlake audience
 
-This repository selects CT config's agent, Work, priming, and Mail descriptors. Its agents already receive Botlake discovery and task guidance; coordination details are available through the configured prompts, help, and runbooks.
+The shared adaptation is for consuming projects with CT-configured Botlake agents. This producer repository selects CT config's agent, Work, priming, and Mail descriptors as its reference environment. Those agents already receive Botlake discovery and task guidance; coordination details come from each project's configured prompts, help, and runbooks.
+
+The producer's local migration policy guides shared maintenance. Distributed skills route project-specific edits to the consumer's owned source or patch pack, without requiring this checkout. A personal mode or separate local skill can complement PSTACK but is not mandatory. All verification and formal verification creators and maintainers remain available; their generated skills belong to the consuming project.
 
 The adaptation preserves PSTACK's engineering workflows, voice, role distinctions, and evidence requirements. It changes Cursor-specific assumptions and concrete conflicts with this audience. Ordinary concepts such as a task list, a delegated agent, and a worktree usually need no extra runtime explanation. The configured catalog supplies available agents; the port does not maintain a second roster or an embedded Botlake operating manual.
 
@@ -49,7 +51,8 @@ Runtime-sensitive entry points include `poteto-mode`, `setup-pstack`, investigat
 Sol and DeepSeek independently reviewed the repository and references, exchanged critiques through Botlake Mail, and agreed on the following design:
 
 - Keep the existing source/bundle config and SDK lock format. Discover adapted bundles through `skillbox/patches/<bundle>/bundle.toml`.
-- Pin the imported Git revision and subtree in a separate bundle lock. Keep full source context in a verified, ignored cache; commit provenance and diffs.
+- Pin a raw Git subtree or an exported producer adaptation in a separate bundle lock. Git sources use exact commits; local producers use content-digest snapshots. Keep source context in a verified, ignored cache; commit provenance and diffs.
+- Import an exported adaptation through `add`, creating an empty consumer-owned patch pack. Materialize the producer's own pinned adaptation before replaying consumer patches. Keep each owner's intent and diffs separate, and update only the selected source snapshot.
 - Apply patches to source before SDK installation. The SDK's hashes then describe the final installed content, rather than an unpatched intermediate tree.
 - Keep one intent note per changed file and an ordered list of concrete Git diffs in its skill's `patch.toml`. Successive captures append incremental patches for the same target, including deliberate reverts, while sharing that file note. Include additions, deletions, nested paths, binary changes, and executable modes.
 - Make sync deterministic and independent of an agent. A deliberate update resolves the moving upstream ref once, stages that exact candidate, and leaves the tracked pin and installation unchanged.
@@ -65,8 +68,8 @@ skillbox/
   config.json
   lock.json
   patches/pstack/
-    bundle.toml              # original source, subtree, update ref
-    lock.json                # source identity, exact revision, source/patch hashes
+    bundle.toml              # source type, source, subtree or producer bundle, update ref
+    lock.json                # source identity, exact pin, source/patch hashes
     <skill>/
       patch.toml             # file intents plus ordered patch records
       changes/*.patch        # incremental one-file Git diffs
@@ -74,9 +77,15 @@ skillbox/
 .claude/skills               # generated symlink, ignored
 ```
 
-The source cache is outside the project under the XDG cache directory; `SKILLBOX_CACHE_DIR` overrides it. Cached content is checked before replay. Ordinary sync fetches the exact recorded commit if the cache is empty and fails if that commit is unavailable. A warm adapted bundle cache supports offline reconstruction. The repository's native bundles keep their existing fetching behavior, so this does not promise an entirely offline sync for arbitrary mixed configurations.
+The source cache is outside the project under the XDG cache directory; `SKILLBOX_CACHE_DIR` overrides it. Cached content is checked before replay. For a Git source, ordinary sync fetches the exact recorded commit if the cache is empty and fails if that commit is unavailable. An imported adaptation replays the producer's pinned sources too. A local producer can reconstruct a missing cached snapshot only while its source still matches the recorded digest; sync rejects drift rather than adopting it. A warm adapted bundle cache supports offline reconstruction. The repository's native bundles keep their existing fetching behavior, so this does not promise an entirely offline sync for arbitrary mixed configurations.
 
-## Maintaining the local bundle
+## Consuming the shared bundle
+
+Use `skillbox add <producer-source> pstack` from the consuming project. The [README](../../README.md#consume-a-shared-adaptation) documents installation and customization. The consumer commits its own config, lock, and initially empty patch pack; it does not copy the producer's intent manifests or generated installation.
+
+`patch prepare pstack` starts from the producer's adapted output. Capture records only the consumer's additional changes and intent. `update pstack` stages a new producer snapshot and replays those consumer patches, without independently advancing the original PSTACK pin. `--ref` selects a Git revision; local producers use the current worktree and reject `--ref`. Review the producer changes and the materialized result before capture and sync. A separate local bundle can hold personal modes or project verification skills without changing the imported adaptation.
+
+## Maintaining the shared bundle
 
 The [README](../../README.md#import-and-patch-a-plugin) documents importing a new bundle. This repository already records its PSTACK selection, so restore it with:
 
@@ -84,7 +93,7 @@ The [README](../../README.md#import-and-patch-a-plugin) documents importing a ne
 bun run src/cli.ts sync
 ```
 
-To change the bundle, use the same workflow as a consumer:
+To change the shared adaptation in this producer checkout:
 
 1. Run `bun run src/cli.ts patch prepare pstack`. The optional `--output` overrides the default `.skillbox-prepare-pstack`. The result identifies the workspace and editable tree.
 2. Edit, add, or delete files only under `.skillbox-prepare-pstack/edited/skills/`, including nested references and scripts.
@@ -104,9 +113,9 @@ The bundle lock records the source identity, exact revision, and source and patc
 
 For an upstream refresh, run `bun run src/cli.ts update pstack`, with `--ref <ref>` when you need a specific revision. Update resolves the ref once and stages that exact candidate without changing any tracked pin or installing skills. A later push to the ref does not change the candidate.
 
-The clean JSON result has status `prepared`, an empty `conflicts` array, the source repository and exact `from`/`to` revisions, and `workspace`, `pristine`, and `editable` paths. `UPDATE_CONFLICT` returns nonzero with status `conflicted`, the same refs and paths, and the failed skill, target, patch, and reason. The pristine tree is the new source. The editable tree is the new source plus successful replays, and can be partial after conflicts. The replay skips later patches for a failed target.
+The clean JSON result has status `prepared`, an empty `conflicts` array, the source repository and exact `from`/`to` pin objects, and `workspace`, `pristine`, and `editable` paths. Git pins contain `type`, `revision`, and `tree`; local producer pins contain `type` and `digest`. `UPDATE_CONFLICT` returns nonzero with status `conflicted`, the same pins and paths, and the failed skill, target, patch, and reason. The pristine tree is the new source. The editable tree is the new source plus successful replays, and can be partial after conflicts. The replay skips later patches for a failed target.
 
-Before editing, inspect the upstream Git log and diff from `from` to `to`, scoped to the descriptor root. Read broad upstream changes, including new files, renames, deletions, runtime assumptions, scripts, and executable modes. Compare the upstream-authored change with each file intent and the candidate's adapted result. Use `patch prepare` and `git diff --no-index` to compare the current and candidate edited trees when useful. A clean replay can still leave a semantic conflict, duplicate an adaptation that upstream absorbed, or miss a new runtime-specific file.
+Before editing this Git-backed bundle, inspect the upstream Git log and diff from `from.revision` to `to.revision`, scoped to the descriptor root. Read broad upstream changes, including new files, renames, deletions, runtime assumptions, scripts, and executable modes. Compare the upstream-authored change with each file intent and the candidate's adapted result. Use `patch prepare` and `git diff --no-index` to compare the current and candidate edited trees when useful. A clean replay can still leave a semantic conflict, duplicate an adaptation that upstream absorbed, or miss a new runtime-specific file.
 
 Edit distributed skill files under the returned editable tree’s configured skills root. Report product or policy decisions to the user instead of inventing custom analysis commands. Then capture the candidate:
 
@@ -119,17 +128,19 @@ bun run src/cli.ts patch capture pstack --from <returned-workspace> \
 
 Capture records the exact candidate pin, regenerates diffs against its pristine source, retains per-file intent, and verifies replay. You can edit and capture repeatedly; later captures append as usual. New targets receive blank intent. Add their notes, review the candidate, then sync.
 
-`tests/patch.test.ts` exercises the public CLI with a local bare remote, an upstream author checkout, and a consumer repository. The author commits and pushes real upstream changes; the consumer reviews an exact candidate, captures it, and syncs.
+`tests/patch.test.ts` exercises the public CLI with a local bare remote, an upstream author checkout, and a consumer repository. The author commits and pushes real upstream changes; the consumer reviews an exact candidate, captures it, and syncs. `tests/consumer.test.ts` adds an intermediate producer adaptation and tests downstream import, separate consumer intent, exact producer pins, local patches and overlays, staged updates and conflicts, restoration, and atomic failure.
 
 ## Verified POC result
 
 The dogfood artifacts select all 58 PSTACK skills beside ten native skills, including the local migration policy. Running `bun run src/cli.ts sync` produces 68 skills under ignored `.agents/skills/`.
 
-- The patch pack records 67 captured changes across 19 skills: 52 modifications and 15 additions, with every upstream file retained. Each target has file-level intent, each patch points to a concrete Git diff, and the bundle lock records the exact source revision.
+- The patch pack records 84 ordered diffs across 21 skills and 69 file targets: 54 modifications and 15 additions, with every upstream file retained. Each target has file-level intent, each patch points to a concrete Git diff, and the bundle lock records the exact source revision.
 - The PSTACK installation contains 550 files, including 424 files under script directories. Its bytes and executable modes match the prepared edited source. The nine pre-existing native lock entries remain unchanged; the local migration policy adds one entry.
 - `poteto-mode/scripts/worktree-audit.sh` retains its useful Git/size/dirty/PR audit with the Cursor transcript scan removed. Its candidates require live usage checks in the playbook, and removal follows the project's worktree tooling. All six upstream executable files retain their executable modes.
-- Removing generated output and restoring with the Node build recreates all 68 skills. Repeated sync preserves file modification times. Bun source, packaged Node, and standalone binary sync all pass.
-- `bun run check` passes: 38 tests, 54 snapshots, lint, types, formatting, and changelog validation. Fifteen tests cover the patch lifecycle, including staged updates, overlapping conflicts, renamed targets, new and removed skills, upstream-incorporated changes, and exact candidate pins despite later pushes. Both packaged builds pass. The adapted `poteto-mode` scripts passed their 61 tests and typecheck in a disposable copy.
-- Three Astra authoring reviews and a fresh combined review checked the adaptation against pristine source and CT context. A fresh Astra consumer followed the adapted `how` workflow through a real explainer run using the existing delegation guidance. These checks cover the reviewed text, helpers, and that bounded workflow; they do not claim live execution of every PSTACK workflow.
+- Real consuming projects imported the local PSTACK producer through Bun source and packaged Node from cold caches. All 58 installed skills matched the prepared source's bytes and executable modes. Producer update, capture, and sync succeeded. The standalone binary restored all 58 skills, then reported 58 unchanged on repeat sync.
+- `bun run check` passes: 44 tests, 54 snapshots, 1,309 assertions, lint, types, formatting, and changelog validation. Fifteen tests cover the patch lifecycle, including staged updates, overlapping conflicts, renamed targets, new and removed skills, upstream-incorporated changes, and exact candidate pins despite later pushes. Four consumer tests cover Git and local producer snapshots, separate local patches and overlays, warm and cold restoration, staged updates, and atomic failures. Two source tests cover native GitLab URL semantics and exported-bundle cold replay.
+- The Node package and standalone builds pass. Packaged Node sync of this worktree reports all 68 skills unchanged.
+- Prior helper validation ran the adapted `poteto-mode` scripts' 61 tests and typecheck in a disposable copy.
+- Three Astra authoring reviews and a fresh combined review checked the adaptation against pristine source and CT context. A fresh consumer prose review checked native-versus-adapted source ownership and verification maintenance write scope. Prior workflow validation used a fresh Astra consumer to follow the adapted `how` workflow through a real explainer run using the existing delegation guidance. These checks cover the reviewed text, helpers, and that bounded workflow; they do not claim live execution of every PSTACK workflow.
 
 Review the [source descriptor](../../skillbox/patches/pstack/bundle.toml), [source and patch lock](../../skillbox/patches/pstack/lock.json), and [mode's per-file intents](../../skillbox/patches/pstack/poteto-mode/patch.toml). The `changes/` directory next to each intent manifest contains the replayable diffs.

@@ -17,7 +17,12 @@ import { readOptional, statOptional } from "../workspace/paths.ts";
 import { publish } from "../workspace/publish.ts";
 import { ResponseError, responseError } from "../response.ts";
 import { resolveBundleSource, sdkConfig, sdkLockPath } from "../workspace/sdk.ts";
-import { readAdaptedBundle, pendingIntents, type AdaptedBundles } from "../workspace/adapted.ts";
+import {
+	readAdaptedBundle,
+	pendingIntents,
+	type AdaptedBundles,
+	type SourcePin,
+} from "../workspace/adapted.ts";
 
 export interface SyncInput {
 	adapted: AdaptedBundles;
@@ -58,7 +63,7 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 		const acceptedNames = new Set<string>();
 		const adaptedEntries = new Map<
 			string,
-			{ source: string; revision: string; skillPath: string }
+			{ source: string; pin: SourcePin; skillPath?: string }
 		>();
 		for (const source of config.sources) {
 			for (const bundle of source.bundles) {
@@ -101,13 +106,17 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 						if (adapted && materialized)
 							adaptedEntries.set(skill.name, {
 								source: adapted.descriptor.source,
-								revision: materialized.revision,
-								skillPath: posix.join(
-									adapted.descriptor.root,
-									adapted.descriptor.skills_root,
-									skill.name,
-									"SKILL.md",
-								),
+								pin: materialized.pin,
+								...(adapted.descriptor.source_type === "git"
+									? {
+											skillPath: posix.join(
+												adapted.descriptor.root,
+												adapted.descriptor.skills_root,
+												skill.name,
+												"SKILL.md",
+											),
+										}
+									: {}),
 							});
 						if (adapted) acceptedNames.add(skill.name);
 						if (selectedNames.has(skill.name)) {
@@ -198,16 +207,25 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 
 		for (const [name, provenance] of adaptedEntries) {
 			const entry = nextSkills[name] as Record<string, unknown>;
+			const sourceType = provenance.pin.type;
+			const ref = provenance.pin.type === "git" ? provenance.pin.revision : undefined;
+			const snapshot = provenance.pin.type === "local" ? provenance.pin.digest : undefined;
 			if (
 				entry.source !== provenance.source ||
-				entry.ref !== provenance.revision ||
+				entry.sourceType !== sourceType ||
+				entry.ref !== ref ||
+				entry.snapshot !== snapshot ||
 				entry.skillPath !== provenance.skillPath
 			)
 				contentChanged = true;
 			entry.source = provenance.source;
-			entry.sourceType = "git";
-			entry.ref = provenance.revision;
-			entry.skillPath = provenance.skillPath;
+			entry.sourceType = sourceType;
+			if (provenance.skillPath === undefined) delete entry.skillPath;
+			else entry.skillPath = provenance.skillPath;
+			if (ref === undefined) delete entry.ref;
+			else entry.ref = ref;
+			if (snapshot === undefined) delete entry.snapshot;
+			else entry.snapshot = snapshot;
 		}
 		const nextLock = { ...lock, skills: nextSkills };
 		const nextLockText =

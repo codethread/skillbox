@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Replace Cursor transcript discovery, Task roles, and create-skill with workspace evidence, complementary reviewers, and retrievable project authoring guidance; preserve synthesis, approval, and source-only skill edits."
+intent = "Replace Cursor transcript discovery, Task roles, and create-skill with workspace evidence, complementary reviewers, and retrievable project authoring guidance. Preserve synthesis, approval, and no-push boundaries; identify the source owner before approval, keep project lessons in owned skills or consumer patches of adapted bundles, and route unowned native-skill edits and shared improvements to the maintainer without assuming producer checkout access."
 
 [files."./references/divergent-reviewer.md"]
 intent = "Keep contrarian review and transcript-injection boundaries while allowing available evidence tools and recognizing skills read from files or CLI guidance rather than Cursor-only paths."
@@ -34,3 +34,11 @@ patch = "changes/0004-captured.patch"
 [[patches]]
 target = "./references/tooling-reviewer.md"
 patch = "changes/0005-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0006-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0007-captured.patch"
