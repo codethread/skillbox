@@ -65,10 +65,16 @@ Examples:
 		);
 	});
 
-const patch = program.command("patch").description("Manage exact-source adapted bundle patches.");
+const patch = program
+	.command("patch")
+	.description("Edit pinned bundles and record file intent with ordered diffs.")
+	.addHelpText(
+		"after",
+		"\nWorkflow: init → edit → capture → annotate file intent → sync.\nRepeat edit/capture in the same workspace; capture preserves file notes.\nAgent guidance: skills get skillbox-patch.",
+	);
 patch
 	.command("init")
-	.description("Import a Git skills subtree as an immutable adapted bundle.")
+	.description("Pin a Git skills subtree and create an editable workspace.")
 	.argument("<bundle>")
 	.requiredOption("--source <repo>", "Git repository or GitHub tree URL")
 	.option("--root <path>", "plugin root relative to the repository; use . for its root")
@@ -78,6 +84,7 @@ patch
 	)
 	.option("--ref <ref>", "source revision to resolve to an immutable commit")
 	.option("--update-ref <ref>", "ref to resolve on a later explicit update")
+	.option("--output <dir>", "new editing directory (default: .skillbox-prepare-<bundle>)")
 	.action(async (bundle, options) => {
 		const cwd = process.cwd();
 		const workspace = await selectedWorkspace(cwd);
@@ -85,7 +92,6 @@ patch
 			successResponse(
 				await patchInit({
 					adapted: createAdaptedBundles(),
-					cwd,
 					workspace,
 					bundle,
 					source: options.source,
@@ -93,6 +99,7 @@ patch
 					skillsRoot: options.skillsRoot,
 					ref: options.ref,
 					updateRef: options.updateRef,
+					output: options.output,
 				}),
 			),
 		);
@@ -101,7 +108,7 @@ patch
 	.command("prepare")
 	.description("Create pristine and editable copies of the pinned patched source.")
 	.argument("<bundle>")
-	.requiredOption("--output <dir>", "new editing workspace directory")
+	.option("--output <dir>", "new editing directory (default: .skillbox-prepare-<bundle>)")
 	.action(async (bundle, options) => {
 		const cwd = process.cwd();
 		writeJson(
@@ -117,12 +124,10 @@ patch
 	});
 patch
 	.command("capture")
-	.description("Capture edited source files as per-file diffs with intent.")
+	.description("Append diffs for edited files; annotate new file intent before sync.")
 	.argument("<bundle>")
 	.requiredOption("--from <dir>", "prepared workspace containing manifest.json and edited/")
 	.option("--skill <name>", "capture only this skill")
-	.option("--intent <text>", "reason for the captured changes")
-	.option("--intent-file <file>", "TOML file with a reason per changed target")
 	.action(async (bundle, options) => {
 		const cwd = process.cwd();
 		writeJson(
@@ -133,8 +138,6 @@ patch
 					bundle,
 					from: options.from,
 					skill: options.skill,
-					intent: options.intent,
-					intentFile: options.intentFile,
 				}),
 			),
 		);
@@ -144,8 +147,6 @@ patch
 	.description("Adopt regenerated edits after an upstream update conflict.")
 	.argument("<bundle>")
 	.requiredOption("--from <dir>", "prepared workspace containing manifest.json and edited/")
-	.option("--intent <text>", "reason for the captured changes")
-	.option("--intent-file <file>", "TOML file with a reason per changed target")
 	.option("--map <mapping...>", "preserve intent across skill/old-path=skill/new-path renames")
 	.action(async (bundle, options) => {
 		const cwd = process.cwd();
@@ -156,8 +157,6 @@ patch
 					workspace: await selectedWorkspace(cwd),
 					bundle,
 					from: options.from,
-					intent: options.intent,
-					intentFile: options.intentFile,
 					maps: options.map,
 				}),
 			),
@@ -166,7 +165,7 @@ patch
 
 program
 	.command("update")
-	.description("Advance an adapted bundle and replay its recorded patches.")
+	.description("Advance a bundle pin and verify replay; install with sync.")
 	.argument("<bundle>")
 	.option("--ref <ref>", "source revision to resolve to an immutable commit")
 	.action(async (bundle, options) => {

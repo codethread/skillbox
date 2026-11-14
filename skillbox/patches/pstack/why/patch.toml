@@ -1,61 +1,81 @@
 schema = 1
 
-[[change]]
+[files."./SKILL.md"]
 intent = "Discover the evidence access the session actually exposes, condition GitHub use on availability, and route no-write investigators through catalog-validated configured roles or live purpose-based choices."
+
+[files."./references/source-playbook.md"]
+intent = "Describe the source playbooks as examples for whatever evidence tool the session has, not as a fixed MCP catalogue."
+
+[files."./references/sources/code-archaeology.md"]
+intent = "Condition GitHub PR access on the actual forge and authenticated gh availability while retaining the Git archaeology commands."
+
+[files."./references/sources/databricks.md"]
+intent = "Condition the Databricks operation examples and notebook caveat on the SQL access this session actually exposes."
+
+[files."./references/sources/datadog.md"]
+intent = "Condition the Datadog playbook and its example operation names on the access this session actually exposes."
+
+[files."./references/sources/linear.md"]
+intent = "Condition the Linear playbook and its example operation names on the access this session actually exposes."
+
+[files."./references/sources/notion.md"]
+intent = "Condition the Notion playbook and its example operation names on the access this session actually exposes."
+
+[files."./references/sources/sentry.md"]
+intent = "Condition the Sentry playbook and its example operation names on the access this session actually exposes."
+
+[files."./references/sources/slack.md"]
+intent = "Describe Slack tooling discovery and authentication as session-dependent instead of assuming one Slack MCP."
+
+[files."./references/synthesizer-prompt.md"]
+intent = "Use session-exposed evidence tools, not assumed MCP or GitHub access, for citation checks and coverage gaps."
+
+[[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Describe the source playbooks as examples for whatever evidence tool the session has, not as a fixed MCP catalogue."
+[[patches]]
 target = "./references/source-playbook.md"
 patch = "changes/0002-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Condition GitHub PR access on the actual forge and authenticated gh availability while retaining the Git archaeology commands."
+[[patches]]
 target = "./references/sources/code-archaeology.md"
 patch = "changes/0003-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Condition the Databricks operation examples and notebook caveat on the SQL access this session actually exposes."
+[[patches]]
 target = "./references/sources/databricks.md"
 patch = "changes/0004-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Condition the Datadog playbook and its example operation names on the access this session actually exposes."
+[[patches]]
 target = "./references/sources/datadog.md"
 patch = "changes/0005-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Condition the Linear playbook and its example operation names on the access this session actually exposes."
+[[patches]]
 target = "./references/sources/linear.md"
 patch = "changes/0006-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Condition the Notion playbook and its example operation names on the access this session actually exposes."
+[[patches]]
 target = "./references/sources/notion.md"
 patch = "changes/0007-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Condition the Sentry playbook and its example operation names on the access this session actually exposes."
+[[patches]]
 target = "./references/sources/sentry.md"
 patch = "changes/0008-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Describe Slack tooling discovery and authentication as session-dependent instead of assuming one Slack MCP."
+[[patches]]
 target = "./references/sources/slack.md"
 patch = "changes/0009-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Use session-exposed evidence tools, not assumed MCP or GitHub access, for citation checks and coverage gaps."
+[[patches]]
 target = "./references/synthesizer-prompt.md"
 patch = "changes/0010-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

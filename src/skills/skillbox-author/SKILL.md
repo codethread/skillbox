@@ -5,7 +5,7 @@ description: Author or extend a Skillbox source bundle with SKILL.md instruction
 
 # Author Skillbox bundles
 
-Extend skills in an owned source repository, not in a client's generated installation. To customize third-party plugin skills while retaining their upstream source and patch intent, load `skillbox skills file skillbox-configure references/configuration.md` and follow **Adapted bundles and patches**.
+Extend skills in an owned source repository, not in a client's generated installation. To customize third-party plugin skills while retaining their upstream source and patch intent, load `skillbox skills get skillbox-patch`.
 
 Use `local` as the bundle name for repository-specific maintainer skills (for example, `skillbox/local/release/SKILL.md`), rather than implying they are intended for public reuse. Select that bundle from source `"."` in the repository's own config. This is a naming convention, not access control; files in a public repository remain public.
 

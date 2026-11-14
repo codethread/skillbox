@@ -1,7 +1,9 @@
 schema = 1
 
-[[change]]
+[files."./SKILL.md"]
 intent = "Replace Cursor model-slug detection and the ~/.cursor rule file with the lake's agent catalog and a project-local role table, so role seats and reasoning effort are real Botlake choices instead of Cursor Task model fields."
+
+[[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

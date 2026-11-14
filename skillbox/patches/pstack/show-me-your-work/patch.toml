@@ -1,7 +1,9 @@
 schema = 1
 
-[[change]]
+[files."./SKILL.md"]
 intent = "Audit the trail against lake run records and the harness's own transcript pointer, and run the cross-model review as an agent run on another seat."
+
+[[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

@@ -62,22 +62,12 @@ export const bundleLockSchema = z.strictObject({
 });
 export const patchSchema = z.strictObject({
 	schema: z.literal(1),
-	change: z.array(
+	files: z.record(targetSchema, z.strictObject({ intent: z.string() })),
+	patches: z.array(
 		z.strictObject({
-			intent: z.string().trim().min(1),
 			target: targetSchema,
 			patch: relativePath,
 			base_revision: revisionSchema,
-			renamed_from: targetSchema.optional(),
-			history: z
-				.array(
-					z.strictObject({
-						target: targetSchema,
-						intent: z.string().min(1),
-						base_revision: revisionSchema,
-					}),
-				)
-				.optional(),
 		}),
 	),
 });
@@ -281,8 +271,9 @@ async function readCachedSource(
 
 interface RecordedPatch {
 	skill: string;
-	change: PatchManifest["change"][number];
+	change: PatchManifest["patches"][number];
 	path: string;
+	intent: string;
 }
 async function readPatches(directory: string): Promise<RecordedPatch[]> {
 	const patches: RecordedPatch[] = [];
@@ -302,7 +293,9 @@ async function readPatches(directory: string): Promise<RecordedPatch[]> {
 				parse(await readFile(join(directory, skill, "patch.toml"), "utf8")),
 			);
 			const referenced = new Set(["patch.toml"]);
-			for (const change of manifest.change) {
+			for (const change of manifest.patches) {
+				if (!Object.hasOwn(manifest.files, change.target))
+					throw new Error(`Missing file intent record for ${change.target}.`);
 				const path = posix.normalize(change.patch);
 				if (!path.startsWith("changes/") || !path.endsWith(".patch"))
 					throw new Error(
@@ -310,7 +303,12 @@ async function readPatches(directory: string): Promise<RecordedPatch[]> {
 					);
 				if (referenced.has(path)) throw new Error(`Repeated patch artifact ${path}.`);
 				referenced.add(path);
-				patches.push({ skill, change, path: join(directory, skill, path) });
+				patches.push({
+					skill,
+					change,
+					path: join(directory, skill, path),
+					intent: manifest.files[change.target]!.intent,
+				});
 			}
 			const paths = await regularTree(join(directory, skill));
 			if (paths.length !== referenced.size || paths.some((path) => !referenced.has(path)))
@@ -327,14 +325,34 @@ async function readPatches(directory: string): Promise<RecordedPatch[]> {
 	return patches;
 }
 
+export async function pendingIntents(
+	directory: string,
+): Promise<{ skill: string; target: string; manifest: string }[]> {
+	const missing: { skill: string; target: string; manifest: string }[] = [];
+	const seen = new Set<string>();
+	for (const { skill, change, intent } of await readPatches(directory)) {
+		const key = skill + "/" + change.target;
+		if (seen.has(key)) continue;
+		seen.add(key);
+		if (!intent.trim())
+			missing.push({
+				skill,
+				target: change.target,
+				manifest: join(directory, skill, "patch.toml"),
+			});
+	}
+	return missing;
+}
+
 export async function hashPatchPack(directory: string): Promise<string> {
 	const patches = await readPatches(directory);
-	const files = new Set<string>();
-	for (const patch of patches) {
-		files.add(`${patch.skill}/patch.toml`);
-		files.add(`${patch.skill}/${posix.normalize(patch.change.patch)}`);
+	const hash = createHash("sha256");
+	for (const { skill, change, path } of patches) {
+		hash.update(JSON.stringify({ skill, ...change })).update("\0");
+		const body = await readFile(path);
+		hash.update(`${body.length}\0`).update(body);
 	}
-	return hashFiles(directory, [...files].sort());
+	return hash.digest("hex");
 }
 
 async function materializeBundle(
@@ -353,7 +371,7 @@ async function materializeBundle(
 	if (patchHash !== pack.lock.patchHash)
 		throw responseError(
 			"BUNDLE_LOCK_DRIFT",
-			`Patch artifacts or intents changed for ${bundle}.`,
+			`Patch artifacts or replay metadata changed for ${bundle}.`,
 			{ skill: bundle },
 		);
 	const source = await acquireSource(pack.descriptor, revision ?? pack.lock.revision, runtime);
@@ -370,7 +388,10 @@ async function materializeBundle(
 		);
 	await cp(source.root, destination, { recursive: true, preserveTimestamps: true });
 	const conflicts: ResponseErrorItem[] = [];
+	const failedFiles = new Set<string>();
 	for (const { skill, change, path } of await readPatches(pack.directory)) {
+		const fileKey = skill + "/" + change.target;
+		if (failedFiles.has(fileKey)) continue;
 		const body = await readFile(path, "utf8");
 		for (const mode of body.matchAll(
 			/^(?:old mode|new mode|new file mode|deleted file mode) (\d+)$/gm,
@@ -393,6 +414,7 @@ async function materializeBundle(
 		try {
 			await runtime.git.applyPatch(skillRoot, path);
 		} catch (cause) {
+			failedFiles.add(fileKey);
 			conflicts.push({
 				code: "PATCH_APPLY_FAILED",
 				message: `Patch failed for ${skill}/${change.target}.`,
@@ -452,7 +474,7 @@ async function prepareBundle(
 		throw responseError("PATCH_PACK_NOT_FOUND", `Patch pack not found: ${bundle}.`, {
 			skill: bundle,
 		});
-	await mkdir(target);
+	await mkdir(target, { recursive: true });
 	try {
 		const source = await acquireSource(pack.descriptor, pack.lock.revision, runtime);
 		await cp(source.root, join(target, "pristine"), {

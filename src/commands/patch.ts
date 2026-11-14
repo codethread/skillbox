@@ -1,30 +1,28 @@
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { join, relative, resolve, sep } from "node:path";
 import { parse, stringify } from "smol-toml";
-import { z } from "zod";
-import { add } from "./add.ts";
-import { sync } from "./sync.ts";
 import {
-	bundleLockSchema,
-	descriptorSchema,
 	descriptorText,
 	hashPatchPack,
 	hashSkillOutputs,
 	hashTree,
 	lockText,
 	patchSchema,
+	pendingIntents,
 	preparedSchema,
+	readAdaptedBundle,
 	type AdaptedBundles,
 	type BundleDescriptor,
 	type PatchManifest,
 } from "../workspace/adapted.ts";
-import { bundleSchema } from "../workspace/config.ts";
+import { bundleSchema, configPath, readConfig, withBundles } from "../workspace/config.ts";
+import { lockPath, readLock } from "../workspace/lock.ts";
 import { readOptional, statOptional } from "../workspace/paths.ts";
+import { publish } from "../workspace/publish.ts";
 import { ResponseError, responseError } from "../response.ts";
 
 export async function patchInit(input: {
 	adapted: AdaptedBundles;
-	cwd: string;
 	workspace: string;
 	bundle: string;
 	source: string;
@@ -32,8 +30,9 @@ export async function patchInit(input: {
 	skillsRoot?: string;
 	ref?: string;
 	updateRef?: string;
+	output?: string;
 }) {
-	const bundle = input.bundle;
+	const bundle = bundleSchema.parse(input.bundle);
 	const inferred = inferSource(input.source);
 	const descriptor: BundleDescriptor = {
 		schema: 1,
@@ -48,43 +47,73 @@ export async function patchInit(input: {
 				? { update_ref: inferred.ref }
 				: {}),
 	};
-	const revision = input.ref ?? inferred.ref ?? descriptor.update_ref;
-	if (!revision)
-		throw responseError("REVISION_REQUIRED", "Specify --ref for an exact imported revision.", {
+	const requested = input.ref ?? inferred.ref ?? descriptor.update_ref;
+	if (!requested)
+		throw responseError("REVISION_REQUIRED", "Specify --ref for the imported revision.", {
 			source: input.source,
 		});
 	const workspace = input.workspace;
-	const livePack = join(workspace, "skillbox/patches", bundle);
-	if (await statOptional(livePack))
-		throw responseError("PATCH_PACK_EXISTS", `Patch pack already exists: ${bundle}.`, {
+	const packPath = join("skillbox/patches", bundle);
+	if (await statOptional(join(workspace, packPath)))
+		throw responseError("PATCH_PACK_EXISTS", "Patch pack already exists: " + bundle, {
 			skill: bundle,
 		});
-	const source = await input.adapted.acquireSource(descriptor, revision);
-	const temp = await mkdtemp(join(workspace, ".skillbox-init-"));
-	const packWorkspace = join(temp, "workspace");
-	const pack = join(packWorkspace, "skillbox/patches", bundle);
-	await mkdir(pack, { recursive: true });
-	await writeFile(join(pack, "bundle.toml"), descriptorText(descriptor));
-	await writeFile(
-		join(pack, "lock.json"),
-		lockText({
-			schema: 1,
-			source: descriptor.source,
-			root: descriptor.root,
-			revision: source.revision,
-			tree: source.tree,
-			sourceHash: source.sourceHash,
-			patchHash: await emptyHash(),
-			outputs: {},
-		}),
+	const output = resolveEditingDirectory(
+		workspace,
+		input.output ?? ".skillbox-prepare-" + bundle,
 	);
-	try {
-		const materialized = await input.adapted.materializeBundle(
-			packWorkspace,
-			bundle,
-			join(temp, "patched"),
-			source.revision,
+	if (await statOptional(output))
+		throw responseError("DESTINATION_EXISTS", "Editing directory already exists: " + output, {
+			input: output,
+		});
+	const config = await readConfig(workspace);
+	const existingLock = await readOptional(join(workspace, lockPath));
+	if (config && existingLock === undefined)
+		throw responseError("LOCK_MISSING", "Restore " + lockPath + " before importing a bundle.", {
+			input: lockPath,
+		});
+	if (!config) {
+		for (const path of [lockPath, ".agents/skills", ".claude/skills"]) {
+			if (await statOptional(join(workspace, path)))
+				throw responseError(
+					"MANAGED_STATE_EXISTS",
+					"Existing " + path + " requires its original Skillbox config.",
+					{ input: path },
+				);
+		}
+	}
+	const current = config ?? { sources: [] };
+	if (current.sources.some((entry) => entry.bundles.includes(bundle)))
+		throw responseError("BUNDLE_EXISTS", "Bundle name is already configured: " + bundle, {
+			skill: bundle,
+		});
+	const occupied = new Set(existingLock ? Object.keys(readLock(existingLock).skills) : []);
+	for (const entry of current.sources) {
+		for (const name of entry.bundles) {
+			const adapted = await readAdaptedBundle(workspace, name);
+			if (adapted) for (const skill of Object.keys(adapted.lock.outputs)) occupied.add(skill);
+		}
+	}
+	const source = await input.adapted.acquireSource(descriptor, requested);
+	const outputs = await hashSkillOutputs(source.root, descriptor.skills_root);
+	const names = Object.keys(outputs);
+	if (!names.length)
+		throw responseError(
+			"BUNDLE_EMPTY",
+			"No skill directories found in the selected source subtree.",
+			{ source: input.source },
 		);
+	for (const skill of names)
+		if (occupied.has(skill))
+			throw responseError("SKILL_NAME_COLLISION", "Skill name collision: " + skill, {
+				skill,
+			});
+	const staging = await mkdtemp(join(workspace, ".skillbox-init-"));
+	let retain = false;
+	try {
+		const pack = join(staging, packPath);
+		await mkdir(pack, { recursive: true });
+		await writeFile(join(pack, "bundle.toml"), descriptorText(descriptor));
 		await writeFile(
 			join(pack, "lock.json"),
 			lockText({
@@ -94,34 +123,44 @@ export async function patchInit(input: {
 				revision: source.revision,
 				tree: source.tree,
 				sourceHash: source.sourceHash,
-				patchHash: await emptyHash(),
-				outputs: materialized.outputs,
+				patchHash: await hashPatchPack(pack),
+				outputs,
 			}),
 		);
-		const result = await add({
-			cwd: input.cwd,
-			workspace,
-			source: materialized.canonical,
-			bundles: [bundle],
-			publication: {
-				bundle,
-				pack,
-				configuredSource: descriptor.source,
-				revision: source.revision,
-				root: descriptor.root,
-				skillsRoot: descriptor.skills_root,
-			},
-		});
+		await input.adapted.prepareBundle(staging, bundle, join(staging, "editing"));
+		await writeFile(
+			join(staging, configPath),
+			JSON.stringify(withBundles(current, descriptor.source, [bundle]), null, 2) + "\n",
+		);
+		const entries = [configPath, packPath].map((path) => ({
+			staged: join(staging, path),
+			target: join(workspace, path),
+		}));
+		if (existingLock === undefined) {
+			await writeFile(
+				join(staging, lockPath),
+				JSON.stringify({ version: 1, skills: {} }, null, 2) + "\n",
+			);
+			entries.push({ staged: join(staging, lockPath), target: join(workspace, lockPath) });
+		}
+		entries.push({ staged: join(staging, "editing"), target: output });
+		try {
+			await publish(staging, entries);
+		} catch (cause) {
+			retain = true;
+			throw publicationError(staging, cause);
+		}
 		return {
-			status: result.status,
+			status: "initialized",
 			bundle,
 			source: descriptor.source,
 			revision: source.revision,
-			skills: result.installed,
-			changed: result.installed,
+			skills: names.length,
+			workspace: output,
+			editable: join(output, "edited"),
 		};
 	} finally {
-		await rm(temp, { recursive: true, force: true });
+		if (!retain) await rm(staging, { recursive: true, force: true });
 	}
 }
 
@@ -129,9 +168,16 @@ export async function patchPrepare(input: {
 	adapted: AdaptedBundles;
 	workspace: string;
 	bundle: string;
-	output: string;
+	output?: string;
 }) {
-	return input.adapted.prepareBundle(input.workspace, input.bundle, input.output);
+	return input.adapted.prepareBundle(
+		input.workspace,
+		input.bundle,
+		resolveEditingDirectory(
+			input.workspace,
+			input.output ?? ".skillbox-prepare-" + input.bundle,
+		),
+	);
 }
 
 export async function patchUpdate(input: {
@@ -140,109 +186,113 @@ export async function patchUpdate(input: {
 	bundle: string;
 	ref?: string;
 }) {
-	bundleSchema.parse(input.bundle);
-	const pack = join(input.workspace, "skillbox/patches", input.bundle);
-	const descriptor = descriptorSchema.parse(
-		parse(await readFile(join(pack, "bundle.toml"), "utf8")),
-	);
-	const current = bundleLockSchema.parse(
-		JSON.parse(await readFile(join(pack, "lock.json"), "utf8")),
-	);
+	const pack = await requirePack(input.workspace, input.bundle);
+	const { descriptor, lock: current } = pack;
 	const requested = input.ref ?? descriptor.update_ref;
 	if (!requested)
 		throw responseError("REVISION_REQUIRED", "Specify --ref or configure update_ref.", {
 			skill: input.bundle,
 		});
 	const source = await input.adapted.acquireSource(descriptor, requested);
-	const temp = await mkdtemp(join(input.workspace, `.skillbox-update-${input.bundle}-`));
-	let probed: Awaited<ReturnType<AdaptedBundles["materializeBundle"]>>;
+	const staging = await mkdtemp(join(input.workspace, ".skillbox-update-" + input.bundle + "-"));
+	let retain = false;
 	try {
-		probed = await input.adapted.materializeBundle(
-			input.workspace,
-			input.bundle,
-			join(temp, "edited"),
-			source.revision,
-		);
-	} catch (cause) {
-		if (
-			!(cause instanceof ResponseError) ||
-			cause.errors.some((error) => error.code !== "PATCH_APPLY_FAILED")
-		) {
-			await rm(temp, { recursive: true, force: true });
-			throw cause;
-		}
-		const pristine = join(temp, "pristine");
-		const edited = join(temp, "edited");
-		await cp(source.root, pristine, { recursive: true, preserveTimestamps: true });
-		await writeFile(
-			join(temp, "manifest.json"),
-			`${JSON.stringify({ schema: 1, bundle: input.bundle, source: descriptor.source, revision: source.revision, sourceHash: source.sourceHash, patchHash: current.patchHash, previous_revision: current.revision }, null, 2)}\n`,
-		);
-		const conflicts = cause.errors.map((error) => ({
-			skill: error.skill,
-			target: error.target ?? error.input,
-			patch: error.patch,
-			reason: error.reason ?? error.message,
-		}));
-		throw new ResponseError(
-			[
+		let outputs: Record<string, string>;
+		try {
+			outputs = (
+				await input.adapted.materializeBundle(
+					input.workspace,
+					input.bundle,
+					join(staging, "edited"),
+					source.revision,
+				)
+			).outputs;
+		} catch (cause) {
+			if (
+				!(cause instanceof ResponseError) ||
+				cause.errors.some((error) => error.code !== "PATCH_APPLY_FAILED")
+			)
+				throw cause;
+			await cp(source.root, join(staging, "pristine"), {
+				recursive: true,
+				preserveTimestamps: true,
+			});
+			await writeFile(
+				join(staging, "manifest.json"),
+				JSON.stringify(
+					{
+						schema: 1,
+						bundle: input.bundle,
+						source: descriptor.source,
+						revision: source.revision,
+						sourceHash: source.sourceHash,
+						patchHash: current.patchHash,
+						previous_revision: current.revision,
+					},
+					null,
+					2,
+				) + "\n",
+			);
+			retain = true;
+			throw new ResponseError(
+				[
+					{
+						code: "UPDATE_CONFLICT",
+						message: "Patches do not replay on " + source.revision,
+						source: descriptor.source,
+						skill: input.bundle,
+					},
+				],
 				{
-					code: "UPDATE_CONFLICT",
-					message: `Patches do not replay on ${source.revision}.`,
-					source: descriptor.source,
-					skill: input.bundle,
+					cause,
+					data: {
+						bundle: input.bundle,
+						source: descriptor.source,
+						from: current.revision,
+						to: source.revision,
+						workspace: staging,
+						editable: join(staging, "edited"),
+						conflicts: cause.errors.map((error) => ({
+							skill: error.skill,
+							target: error.target,
+							patch: error.patch,
+							reason: error.reason,
+						})),
+					},
 				},
-			],
-			{
-				cause,
-				data: {
-					bundle: input.bundle,
-					source: descriptor.source,
-					from: current.revision,
-					to: source.revision,
-					workspace: temp,
-					editable: edited,
-					conflicts,
-				},
-			},
-		);
-	}
-	await rm(temp, { recursive: true, force: true });
-	const publication = await mkdtemp(
-		join(input.workspace, `.skillbox-update-publish-${input.bundle}-`),
-	);
-	const stagedPack = join(publication, "pack");
-	await cp(pack, stagedPack, { recursive: true, preserveTimestamps: true });
-	await writeFile(
-		join(stagedPack, "lock.json"),
-		lockText({
-			...current,
+			);
+		}
+		if (source.revision !== current.revision) {
+			const stagedPack = join(staging, "pack");
+			await cp(pack.directory, stagedPack, { recursive: true, preserveTimestamps: true });
+			await writeFile(
+				join(stagedPack, "lock.json"),
+				lockText({
+					...current,
+					revision: source.revision,
+					tree: source.tree,
+					sourceHash: source.sourceHash,
+					outputs,
+				}),
+			);
+			try {
+				await publish(staging, [{ staged: stagedPack, target: pack.directory }]);
+			} catch (cause) {
+				retain = true;
+				throw publicationError(staging, cause);
+			}
+		}
+		return {
+			status: current.revision === source.revision ? "unchanged" : "updated",
+			bundle: input.bundle,
+			source: descriptor.source,
 			revision: source.revision,
-			tree: source.tree,
-			sourceHash: source.sourceHash,
-			outputs: probed.outputs,
-		}),
-	);
-	try {
-		await sync({
-			adapted: input.adapted,
-			cwd: input.workspace,
-			workspace: input.workspace,
-			acceptContentChangesForBundle: input.bundle,
-			bundlePackOverrides: { [input.bundle]: stagedPack },
-		});
+			from: current.revision,
+			to: source.revision,
+		};
 	} finally {
-		await rm(publication, { recursive: true, force: true });
+		if (!retain) await rm(staging, { recursive: true, force: true });
 	}
-	return {
-		status: current.revision === source.revision ? "unchanged" : "updated",
-		bundle: input.bundle,
-		source: descriptor.source,
-		revision: source.revision,
-		from: current.revision,
-		to: source.revision,
-		changed: current.revision === source.revision ? 0 : 1,
-	};
 }
 
 export async function patchCapture(input: {
@@ -251,320 +301,299 @@ export async function patchCapture(input: {
 	bundle: string;
 	from: string;
 	skill?: string;
-	intent?: string;
-	intentFile?: string;
 	maps?: string[];
 }) {
 	bundleSchema.parse(input.bundle);
 	if (input.skill) bundleSchema.parse(input.skill);
-	if (input.intent !== undefined && input.intentFile !== undefined)
-		throw responseError("INTENT_INPUT_CONFLICT", "Choose --intent or --intent-file, not both.");
-	for (const mapping of input.maps ?? []) {
-		const paths = mapping.split("=");
-		if (
-			paths.length !== 2 ||
-			paths.some((path) => !path.includes("/")) ||
-			paths[0]!.split("/")[0] !== paths[1]!.split("/")[0]
-		)
-			throw responseError(
-				"RENAME_MAP_INVALID",
-				"Use --map skill/old-path=skill/new-path within one skill.",
-				{ input: mapping },
-			);
-		for (const path of paths) patchSchema.shape.change.element.shape.target.parse(`./${path}`);
-	}
+	const mappings = parseMappings(input.maps ?? []);
 	const outer = resolve(input.workspace, input.from);
 	const manifest = preparedSchema.parse(
 		JSON.parse(await readFile(join(outer, "manifest.json"), "utf8")),
 	);
-	if (manifest.bundle !== input.bundle)
-		throw responseError("REGEN_WORKSPACE_INVALID", "Workspace belongs to a different bundle.", {
+	const live = await requirePack(input.workspace, input.bundle);
+	const { descriptor, lock } = live;
+	const adopting = manifest.previous_revision !== undefined;
+	if (adopting && input.skill)
+		throw responseError("REGEN_WORKSPACE_INVALID", "Adopt the complete regenerated bundle.", {
 			input: input.from,
 		});
-	let pack = join(input.workspace, "skillbox/patches", input.bundle);
-	const intents = await readIntents(input);
-	const descriptor = descriptorSchema.parse(
-		parse(await readFile(join(pack, "bundle.toml"), "utf8")),
-	);
-	const bundleLock = bundleLockSchema.parse(
-		JSON.parse(await readFile(join(pack, "lock.json"), "utf8")),
-	);
-	const expectedLockedRevision = manifest.previous_revision ?? manifest.revision;
-	if (manifest.source !== descriptor.source || expectedLockedRevision !== bundleLock.revision)
+	if (mappings.length && !adopting)
 		throw responseError(
-			"REGEN_WORKSPACE_INVALID",
-			"Prepared workspace provenance does not match the bundle lock.",
-			{ input: input.from },
+			"RENAME_MAP_INVALID",
+			"Rename mappings apply to upstream regeneration workspaces.",
 		);
-	if (manifest.patchHash !== bundleLock.patchHash)
-		throw responseError(
-			"REGEN_WORKSPACE_INVALID",
-			"Prepared workspace patch series is stale.",
-			{ input: input.from },
-		);
-	const pinnedSource = await input.adapted.acquireSource(descriptor, manifest.revision);
 	if (
-		manifest.sourceHash !== pinnedSource.sourceHash ||
+		manifest.bundle !== input.bundle ||
+		manifest.source !== descriptor.source ||
+		(manifest.previous_revision ?? manifest.revision) !== lock.revision ||
+		manifest.patchHash !== lock.patchHash
+	) {
+		throw responseError(
+			"REGEN_WORKSPACE_INVALID",
+			"Prepared workspace provenance or patch series is stale.",
+			{ input: input.from },
+		);
+	}
+	const source = await input.adapted.acquireSource(descriptor, manifest.revision);
+	if (
+		manifest.sourceHash !== source.sourceHash ||
 		manifest.sourceHash !== (await hashTree(join(outer, "pristine")))
-	)
+	) {
 		throw responseError("REGEN_WORKSPACE_INVALID", "Prepared pristine source was modified.", {
 			input: input.from,
 		});
-	if ((await hashPatchPack(pack)) !== bundleLock.patchHash)
+	}
+	if ((await hashPatchPack(live.directory)) !== lock.patchHash)
 		throw responseError(
 			"BUNDLE_LOCK_DRIFT",
-			"The recorded patch pack was changed after preparation.",
+			"Recorded patch artifacts changed after preparation.",
 			{ skill: input.bundle },
 		);
-	const skillsRoot = descriptor.skills_root;
-	const sourceChanges = (
-		await input.adapted.diffFiles(join(outer, "pristine"), join(outer, "edited"))
-	).map(({ target }) => target);
-	const skillsPrefix = `${skillsRoot.replace(/\/$/, "")}/`;
-	const outside =
-		skillsRoot === "."
-			? undefined
-			: sourceChanges.find((path) => !path.startsWith(skillsPrefix));
-	if (outside)
-		throw responseError(
-			"CAPTURE_OUTSIDE_SKILLS",
-			`Edit outside distributable skills root: ${outside}.`,
-			{ input: outside },
-		);
-	const pristine = join(outer, "pristine", skillsRoot);
-	const edited = join(outer, "edited", skillsRoot);
-	const candidates = input.skill
-		? [input.skill]
-		: [...new Set([...(await readdir(pristine)), ...(await readdir(edited))])].sort();
-	const names: string[] = [];
-	for (const name of candidates) {
-		if (
-			(await statOptional(join(pristine, name, "SKILL.md"))) ||
-			(await statOptional(join(edited, name, "SKILL.md")))
-		)
-			names.push(name);
-	}
-	for (const path of sourceChanges) {
-		const relative = skillsRoot === "." ? path : path.slice(skillsPrefix.length);
-		const name = relative.split("/")[0]!;
-		if (!relative.includes("/") || (!input.skill && !names.includes(name)))
-			throw responseError(
-				"CAPTURE_OUTSIDE_SKILLS",
-				`Edit is not inside a distributable skill: ${path}.`,
-				{ input: path },
-			);
-	}
-	const staging = await mkdtemp(join(input.workspace, `.skillbox-capture-${input.bundle}-`));
-	await cp(pack, join(staging, "pack"), { recursive: true, preserveTimestamps: true });
-	pack = join(staging, "pack");
+	const staging = await mkdtemp(join(input.workspace, ".skillbox-capture-" + input.bundle + "-"));
+	let retain = false;
 	try {
-		let changed = 0;
-		for (const skill of names) {
-			const before = join(pristine, skill);
-			const after = join(edited, skill);
-			if (await treesEqual(before, after)) {
-				if (await statOptional(join(pack, skill))) {
-					await rm(join(pack, skill), { recursive: true, force: true });
-					changed += 1;
-				}
-				continue;
-			}
-			const prior = await priorIntents(pack, skill);
-			const mappings = (input.maps ?? []).flatMap((mapping) => {
-				const [oldPath, newPath] = mapping.split("=");
-				if (
-					!oldPath ||
-					!newPath ||
-					!oldPath.startsWith(`${skill}/`) ||
-					!newPath.startsWith(`${skill}/`)
-				)
-					return [];
-				return [
-					{
-						oldTarget: oldPath.slice(skill.length + 1),
-						newTarget: newPath.slice(skill.length + 1),
-					},
-				];
+		const stagedPack = join(staging, "pack");
+		await cp(live.directory, stagedPack, { recursive: true, preserveTimestamps: true });
+		const baseline = adopting ? join(outer, "pristine") : join(staging, "recorded");
+		if (!adopting)
+			await input.adapted.materializeBundle(input.workspace, input.bundle, baseline);
+		const skillsRoot = descriptor.skills_root;
+		const beforeRoot = join(baseline, skillsRoot);
+		const editedRoot = join(outer, "edited", skillsRoot);
+		const candidates = [
+			...new Set([...(await readdir(beforeRoot)), ...(await readdir(editedRoot))]),
+		].sort();
+		const names: string[] = [];
+		for (const name of candidates) {
+			if (
+				(await statOptional(join(beforeRoot, name, "SKILL.md"))) ||
+				(await statOptional(join(editedRoot, name, "SKILL.md"))) ||
+				(await statOptional(join(outer, "pristine", skillsRoot, name, "SKILL.md"))) ||
+				(await statOptional(join(stagedPack, name, "patch.toml")))
+			)
+				names.push(name);
+		}
+		if (input.skill && !names.includes(input.skill))
+			throw responseError("SKILL_NOT_FOUND", "No editable skill: " + input.skill, {
+				skill: input.skill,
 			});
-			const intent = input.intent
-				? { skill, target: ".", intent: input.intent, base_revision: manifest.revision }
-				: undefined;
-			const dir = join(pack, skill, "changes");
-			await rm(join(pack, skill), { recursive: true, force: true });
-			await mkdir(dir, { recursive: true });
-			const diffs = await input.adapted.diffFiles(before, after);
-			const changes: PatchManifest["change"] = [];
-			for (const [index, { target, body }] of diffs.entries()) {
-				const patch = `changes/${String(index + 1).padStart(4, "0")}-captured.patch`;
-				await writeFile(join(pack, skill, patch), body);
-				const mapping = mappings.find((item) => item.newTarget === target);
-				const renamed = mapping
-					? prior.find((item) => item.target.replace(/^\.\//, "") === mapping.oldTarget)
-					: undefined;
-				const previous = renamed ?? prior.find((item) => item.target === `./${target}`);
-				const selected =
-					intents.find(
-						(item) =>
-							item.skill === skill && item.target.replace(/^\.\//, "") === target,
-					) ??
-					intent ??
-					previous;
-				if (!selected)
+		const differences = await input.adapted.diffFiles(baseline, join(outer, "edited"));
+		for (const { target } of differences) {
+			const prefix = skillsRoot === "." ? "" : skillsRoot + "/";
+			const local = target.startsWith(prefix) ? target.slice(prefix.length) : "";
+			if (!local.includes("/") || !names.includes(local.split("/")[0]!))
+				throw responseError(
+					"CAPTURE_OUTSIDE_SKILLS",
+					"Edit outside a distributable skill: " + target,
+					{ input: target },
+				);
+		}
+		const selected = input.skill ? [input.skill] : names;
+		let changed = 0;
+		for (const skill of selected) {
+			const old = await readManifest(stagedPack, skill);
+			const next: PatchManifest = adopting
+				? { schema: 1, files: {}, patches: [] }
+				: structuredClone(old);
+			if (adopting) await rm(join(stagedPack, skill), { recursive: true, force: true });
+			const diffs = await input.adapted.diffFiles(
+				join(beforeRoot, skill),
+				join(editedRoot, skill),
+			);
+			for (const { target, body } of diffs) {
+				const file = "./" + target;
+				const mapping = mappings.find(
+					(entry) => entry.skill === skill && entry.to === file,
+				);
+				if (mapping && !Object.hasOwn(old.files, mapping.from))
 					throw responseError(
-						"INTENT_REQUIRED",
-						`Intent required for ${skill}/${target}.`,
-						{ skill, input: target },
+						"RENAME_MAP_INVALID",
+						"No recorded file intent for " + skill + "/" + mapping.from,
+						{ skill },
 					);
-				const history = [...(previous?.history ?? [])];
-				if (
-					previous &&
-					(previous.base_revision !== manifest.revision ||
-						previous.target !== `./${target}` ||
-						previous.intent !== selected.intent)
-				)
-					history.push({
-						target: previous.target,
-						intent: previous.intent,
-						base_revision: previous.base_revision,
-					});
-				const renamedFrom =
-					renamed && mapping ? `./${mapping.oldTarget}` : previous?.renamed_from;
-				changes.push({
-					intent: selected.intent,
-					target: `./${target}`,
-					patch,
+				next.files[file] ??= old.files[mapping?.from ?? file] ?? { intent: "" };
+				const artifact =
+					"changes/" +
+					String(next.patches.length + 1).padStart(4, "0") +
+					"-captured.patch";
+				await mkdir(join(stagedPack, skill, "changes"), { recursive: true });
+				await writeFile(join(stagedPack, skill, artifact), body);
+				next.patches.push({
+					target: file,
+					patch: artifact,
 					base_revision: manifest.revision,
-					...(renamedFrom && { renamed_from: renamedFrom }),
-					...(history.length && { history }),
 				});
 			}
-			await writeFile(
-				join(pack, skill, "patch.toml"),
-				stringify(patchSchema.parse({ schema: 1, change: changes })),
-			);
-			changed += diffs.length;
+			if (diffs.length) {
+				await writeFile(
+					join(stagedPack, skill, "patch.toml"),
+					stringify(patchSchema.parse(next)),
+				);
+				changed += diffs.length;
+			}
 		}
-		if (changed > 0) {
-			const descriptor = descriptorSchema.parse(
-				parse(await readFile(join(pack, "bundle.toml"), "utf8")),
-			);
-			const current = bundleLockSchema.parse(
-				JSON.parse(await readFile(join(pack, "lock.json"), "utf8")),
-			);
-			const source = await input.adapted.acquireSource(descriptor, manifest.revision);
-			const patchHash = await hashPatchPack(pack);
-			await writeFile(
-				join(pack, "lock.json"),
-				lockText({
-					...current,
-					revision: source.revision,
-					tree: source.tree,
-					sourceHash: source.sourceHash,
-					patchHash,
-				}),
-			);
-			const probe = await mkdtemp(
-				join(input.workspace, `.skillbox-capture-probe-${input.bundle}-`),
-			);
-			const probeWorkspace = join(probe, "workspace");
+		if (adopting) {
+			for (const entry of await readdir(stagedPack, { withFileTypes: true })) {
+				if (entry.isDirectory() && !selected.includes(entry.name))
+					await rm(join(stagedPack, entry.name), { recursive: true });
+			}
+		}
+		if (changed || adopting) {
+			const patchHash = await hashPatchPack(stagedPack);
+			const nextLock = {
+				...lock,
+				revision: source.revision,
+				tree: source.tree,
+				sourceHash: source.sourceHash,
+				patchHash,
+			};
+			await writeFile(join(stagedPack, "lock.json"), lockText(nextLock));
+			const probeWorkspace = join(staging, "probe");
 			await mkdir(join(probeWorkspace, "skillbox/patches"), { recursive: true });
-			await cp(pack, join(probeWorkspace, "skillbox/patches", input.bundle), {
+			await cp(stagedPack, join(probeWorkspace, "skillbox/patches", input.bundle), {
 				recursive: true,
 				preserveTimestamps: true,
 			});
-			let outputs: Record<string, string>;
-			try {
-				outputs = (
-					await input.adapted.materializeBundle(
-						probeWorkspace,
-						input.bundle,
-						join(probe, "patched"),
-						manifest.revision,
-					)
-				).outputs;
-			} finally {
-				await rm(probe, { recursive: true, force: true });
-			}
+			const outputs = (
+				await input.adapted.materializeBundle(
+					probeWorkspace,
+					input.bundle,
+					join(probeWorkspace, "output"),
+					manifest.revision,
+				)
+			).outputs;
 			const desired = await hashSkillOutputs(join(outer, "edited"), skillsRoot);
-			for (const name of names) {
+			for (const name of selected) {
 				if (outputs[name] !== desired[name])
 					throw responseError(
 						"PATCH_CAPTURE_MISMATCH",
-						`Captured patches do not reproduce the edited skill ${name}.`,
+						"Captured patches do not reproduce edited skill " + name,
 						{ skill: name },
 					);
 			}
+			await writeFile(join(stagedPack, "lock.json"), lockText({ ...nextLock, outputs }));
 			await writeFile(
-				join(pack, "lock.json"),
-				lockText({
-					...current,
-					revision: source.revision,
-					tree: source.tree,
-					sourceHash: source.sourceHash,
-					patchHash,
-					outputs,
-				}),
+				join(staging, "manifest.json"),
+				JSON.stringify(
+					{
+						schema: 1,
+						bundle: input.bundle,
+						source: descriptor.source,
+						revision: source.revision,
+						sourceHash: source.sourceHash,
+						patchHash,
+					},
+					null,
+					2,
+				) + "\n",
 			);
-			await sync({
-				adapted: input.adapted,
-				cwd: input.workspace,
-				workspace: input.workspace,
-				acceptContentChangesForBundle: input.bundle,
-				bundlePackOverrides: { [input.bundle]: pack },
-			});
+			try {
+				await publish(staging, [
+					{ staged: stagedPack, target: live.directory },
+					{
+						staged: join(staging, "manifest.json"),
+						target: join(outer, "manifest.json"),
+					},
+				]);
+			} catch (cause) {
+				retain = true;
+				throw publicationError(staging, cause);
+			}
 		}
-		const result = {
-			status: changed ? ("captured" as const) : ("unchanged" as const),
+		const pending = await pendingIntents(live.directory);
+		return {
+			status: changed || adopting ? "captured" : "unchanged",
 			bundle: input.bundle,
 			source: manifest.source,
 			revision: manifest.revision,
-			skills: names.length,
+			skills: selected.length,
 			changed,
+			pendingIntents: pending.length,
+			intentFiles: [
+				...new Set(pending.map((item) => relative(input.workspace, item.manifest))),
+			],
 		};
-		return result;
 	} finally {
-		await rm(staging, { recursive: true, force: true });
+		if (!retain) await rm(staging, { recursive: true, force: true });
 	}
 }
 
-async function treesEqual(a: string, b: string) {
-	try {
-		const { lstat } = await import("node:fs/promises");
-		const [left, right] = await Promise.all([lstat(a), lstat(b)]);
-		if (left.isFile() && right.isFile())
-			return (
-				(await readFile(a)).equals(await readFile(b)) &&
-				(left.mode & 0o111) === (right.mode & 0o111)
-			);
-		if (left.isDirectory() && right.isDirectory())
-			return (await hashTree(a)) === (await hashTree(b));
-		return false;
-	} catch (cause) {
-		if ((cause as NodeJS.ErrnoException).code === "ENOENT") return false;
-		throw cause;
-	}
+// -----------------------------------------------------------------------------
+
+function resolveEditingDirectory(workspace: string, output: string): string {
+	const directory = resolve(workspace, output);
+	const tracking = join(workspace, "skillbox");
+	if (directory === tracking || directory.startsWith(tracking + sep))
+		throw responseError(
+			"DESTINATION_INVALID",
+			"Keep the editing directory outside skillbox/ tracking files.",
+			{
+				input: output,
+			},
+		);
+	return directory;
 }
-async function priorIntents(pack: string, skill: string): Promise<PatchManifest["change"]> {
+
+async function requirePack(workspace: string, bundle: string) {
+	const pack = await readAdaptedBundle(workspace, bundle);
+	if (!pack)
+		throw responseError("PATCH_PACK_NOT_FOUND", "Patch pack not found: " + bundle, {
+			skill: bundle,
+		});
+	return pack;
+}
+
+async function readManifest(pack: string, skill: string): Promise<PatchManifest> {
 	const text = await readOptional(join(pack, skill, "patch.toml"));
-	return text === undefined ? [] : patchSchema.parse(parse(text)).change;
+	return text === undefined
+		? { schema: 1, files: {}, patches: [] }
+		: patchSchema.parse(parse(text));
 }
-async function readIntents(input: { workspace: string; intentFile?: string }) {
-	if (!input.intentFile) return [] as { skill: string; target: string; intent: string }[];
-	const schema = z.object({
-		change: z.array(
-			patchSchema.shape.change.element
-				.pick({ target: true, intent: true })
-				.extend({ skill: bundleSchema }),
-		),
+
+function parseMappings(values: string[]) {
+	const paths = new Set<string>();
+	return values.map((value) => {
+		const parts = value.split("=");
+		const from = parts[0]?.split("/");
+		const to = parts[1]?.split("/");
+		if (
+			parts.length !== 2 ||
+			!from ||
+			!to ||
+			from.length < 2 ||
+			to.length < 2 ||
+			from[0] !== to[0]
+		) {
+			throw responseError(
+				"RENAME_MAP_INVALID",
+				"Use --map skill/old-path=skill/new-path within one skill.",
+				{ input: value },
+			);
+		}
+		const skill = bundleSchema.parse(from[0]);
+		const oldTarget = "./" + from.slice(1).join("/");
+		const newTarget = "./" + to.slice(1).join("/");
+		patchSchema.shape.patches.element.shape.target.parse(oldTarget);
+		patchSchema.shape.patches.element.shape.target.parse(newTarget);
+		if (paths.has(skill + "/" + newTarget))
+			throw responseError("RENAME_MAP_INVALID", "Repeated rename destination.", {
+				input: value,
+			});
+		paths.add(skill + "/" + newTarget);
+		return { skill, from: oldTarget, to: newTarget };
 	});
-	return schema.parse(parse(await readFile(resolve(input.workspace, input.intentFile), "utf8")))
-		.change;
 }
+
+function publicationError(staging: string, cause: unknown) {
+	return responseError(
+		"PUBLISH_FAILED",
+		"Publication failed. Recovery files retained at " + staging + ".",
+		{ input: staging },
+		cause,
+	);
+}
+
 function inferSource(source: string) {
 	const match = /^(.*?)(?:\.git)?\/tree\/([^/]+)\/(.+)$/.exec(source);
-	return match ? { source: match[1], ref: match[2], root: match[3] } : { source };
-}
-async function emptyHash() {
-	const { createHash } = await import("node:crypto");
-	return createHash("sha256").digest("hex");
+	return match ? { source: match[1]!, ref: match[2]!, root: match[3]! } : { source };
 }

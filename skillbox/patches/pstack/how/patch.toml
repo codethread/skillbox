@@ -1,19 +1,25 @@
 schema = 1
 
-[[change]]
+[files."./SKILL.md"]
 intent = "Replace Task fields and model slugs with no-write lake runs whose complete briefs use catalog-validated configured roles or live purpose-based catalog choices."
+
+[files."./references/explainer-prompt.md"]
+intent = "Make the explainer template a portable no-write agent brief without assuming Cursor's built-in file tools."
+
+[files."./references/explorer-prompt.md"]
+intent = "Describe the template as a brief for an agent run, not a subagent prompt, so the carried prompt files match the adapted how skill."
+
+[[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Make the explainer template a portable no-write agent brief without assuming Cursor's built-in file tools."
+[[patches]]
 target = "./references/explainer-prompt.md"
 patch = "changes/0002-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Describe the template as a brief for an agent run, not a subagent prompt, so the carried prompt files match the adapted how skill."
+[[patches]]
 target = "./references/explorer-prompt.md"
 patch = "changes/0003-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

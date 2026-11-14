@@ -22,13 +22,13 @@ The official source was inspected at repository commit `3dbd22ff12742fb28c9700b9
 ## Required outcome
 
 1. Select a source subtree and give all its skills the local bundle name `pstack`.
-2. Record its original repository, subtree, and exact revision.
-3. Prepare an editable copy and capture modifications, additions, and deletions, including nested files and executable modes.
-4. Commit the intent metadata and concrete diffs.
-5. Run `skillbox sync` to reproduce the patched skills in ignored `.agents/skills/`.
-6. Explicitly request source updates; preserve the previous installation and patch artifacts when replay needs agent regeneration.
+2. Record its original repository, subtree, and exact revision without installing it.
+3. Create an editable workspace immediately and capture modifications, additions, and deletions, including nested files and executable modes.
+4. Annotate every captured file with intent explaining why it differs, its required outcome, and constraints future regeneration must preserve.
+5. Commit the intent metadata and concrete diffs, then run `skillbox sync` to reproduce the patched skills in ignored `.agents/skills/`.
+6. Explicitly request source updates; preserve the previous installation and tracking state when replay needs agent regeneration.
 
-Sync applies concrete artifacts without interpreting intent or running an agent. The intent explains how an agent should regenerate a patch after upstream changes.
+Capture and update never install. Sync applies concrete artifacts without interpreting intent or running an agent, and refuses blank intent before changing the installation.
 
 ## Source and installation scope
 
@@ -55,10 +55,10 @@ Sol and DeepSeek independently reviewed the repository and references, exchanged
 - Keep the existing source/bundle config and SDK lock format. Discover adapted bundles through `skillbox/patches/<bundle>/bundle.toml`.
 - Pin the imported Git revision and subtree in a separate bundle lock. Keep full source context in a verified, ignored cache; commit provenance and diffs.
 - Apply patches to source before SDK installation. The SDK's hashes then describe the final installed content, rather than an unpatched intermediate tree.
-- Give each changed file its own concrete Git diff and an explicit reason in its skill's `patch.toml`. Include additions, deletions, nested paths, binary changes, and executable modes.
+- Keep one intent note per changed file and an ordered list of concrete Git diffs in its skill's `patch.toml`. Successive captures append incremental patches for the same target, including deliberate reverts, while sharing that file note. Include additions, deletions, nested paths, binary changes, and executable modes.
 - Make sync deterministic and independent of an agent. A deliberate update resolves the moving upstream ref and attempts replay; conflicts preserve the current installed state and return an editable regeneration workspace.
 - Preserve reasons when regenerated changes move to renamed files through an explicit mapping. The agent supplies the new implementation; the CLI validates and records it.
-- Stage installation, source pins, patch artifacts, and locks before publishing them together.
+- Write captured patch artifacts and the refreshed prepared manifest atomically. Publish installation changes only through sync.
 
 The Claude port demonstrates the maintenance problem and the value of per-file reasons. This POC uses strict patch replay and an explicit agent regeneration workflow; an automatic three-way merge engine is outside its scope.
 
@@ -72,8 +72,8 @@ skillbox/
     bundle.toml              # original source, subtree, update ref
     lock.json                # resolved revision, source/patch/output hashes
     <skill>/
-      patch.toml             # ordered targets, reasons, base revisions
-      changes/*.patch        # concrete one-file Git diffs
+      patch.toml             # file intents plus ordered patch records
+      changes/*.patch        # incremental one-file Git diffs
 .agents/skills/              # generated and ignored
 .claude/skills               # generated symlink, ignored
 ```
@@ -88,38 +88,33 @@ The [README](../../README.md#import-and-patch-a-plugin) documents importing a ne
 bun run src/cli.ts sync
 ```
 
-To change the bundle, use the same workflow as a consumer in any repository:
+To change the bundle, use the same workflow as a consumer:
 
-1. Run `bun run src/cli.ts patch prepare pstack --output .skillbox-prepare-pstack`, choosing a new output directory. It contains the pinned source in `pristine/` and the current patched source in `edited/`.
-2. Edit, add, or delete files under `.skillbox-prepare-pstack/edited/skills/`. You or an agent make these edits directly, including changes to nested references and scripts.
-3. Write reasons for new or revised changes in `.skillbox-prepare-pstack/intents.toml`. For example, after adding `poteto-mode/references/project-workflow.md`:
-
-    ```toml
-    [[change]]
-    skill = "poteto-mode"
-    target = "./references/project-workflow.md"
-    intent = "Document this project's Botlake verification workflow for delegates."
-    ```
-
-4. Capture the edits and verify replay:
+1. Run `bun run src/cli.ts patch prepare pstack`. The optional `--output` overrides the default `.skillbox-prepare-pstack`. The result identifies the workspace and editable tree.
+2. Edit, add, or delete files only under `.skillbox-prepare-pstack/edited/skills/`, including nested references and scripts.
+3. Capture and inspect the result:
 
     ```sh
-    bun run src/cli.ts patch capture pstack --from .skillbox-prepare-pstack \
-      --intent-file .skillbox-prepare-pstack/intents.toml
-    bun run src/cli.ts sync
+    bun run src/cli.ts patch capture pstack --from .skillbox-prepare-pstack
     ```
 
-5. Review and commit `skillbox/config.json`, `skillbox/lock.json`, and `skillbox/patches/pstack/`. Capture preserves existing per-file reasons unless you supply replacements. Repeated sync reports unchanged output.
+    Capture appends incremental per-file diffs against the last captured output, verifies strict replay, writes the pack, and refreshes the prepared manifest atomically. It does not install. Later edits and deliberate reverts add ordered patch records instead of replacing earlier artifacts.
 
-The committed intents and diffs are the maintained adaptation. Source updates use `update` and, when regeneration is needed, `patch adopt` as described in the README. Review the changed skills and run their relevant checks before adopting regenerated edits.
+4. Follow `intentFiles` and edit each reported `skillbox/patches/pstack/<skill>/patch.toml`. Replace blank file intent with the adaptation's why, required outcome, and constraints. Existing reasons are preserved and shared by every patch for that target.
+5. Continue editing and capturing in the same workspace as needed. Manual intent annotation and an intervening sync do not make the workspace single-use. Review notes as files evolve: the maintainer owns their accuracy, and capture neither rewrites nor guesses intent.
+6. Run `bun run src/cli.ts sync` only after using `intentFiles` to address the reported `pendingIntents` count. A blank intent returns `INTENT_REQUIRED` without installation mutation. Review and commit `skillbox/config.json`, `skillbox/lock.json`, and `skillbox/patches/pstack/`.
 
-`tests/patch.test.ts` exercises the public CLI with real disposable Git repositories. It covers native/adapted coexistence, exact pins, nested and binary edits, additions/deletions, executable modes, warm-cache offline reconstruction, repeated sync, successive explicit updates, conflict preservation, rename-aware adoption, malformed packs, artifact integrity, and atomic capture failures.
+File intent remains editable explanation and is excluded from integrity hashes. Source identity, patch targets and paths, base revisions, and concrete diff payloads are protected.
+
+For an upstream refresh, `bun run src/cli.ts update pstack` advances and verifies the adapted lock but leaves installation to sync. A conflict preserves the tracked and live state and returns a regeneration workspace. Edit that workspace and use `patch adopt`; pass an exact `--map skill/old-path=skill/new-path` when an upstream rename should retain the old reason. Adopt may rebuild ordered diffs against the new pristine source while preserving file notes; new targets receive blank intent.
+
+`tests/patch.test.ts` exercises the public CLI with disposable Git repositories, including native/adapted coexistence, replay integrity, reusable prepared workspaces, intent enforcement, update conflict preservation, and rename-aware adoption.
 
 ## Verified POC result
 
-The review worktree is on `feat/pstack-patches`. Its committed config selects all 58 PSTACK skills beside the nine existing native skills. Running `bun run src/cli.ts sync` produces 67 skills under ignored `.agents/skills/`.
+The review worktree is on `feat/pstack-patches`. Its committed dogfood artifacts select all 58 PSTACK skills beside the nine existing native skills. Running `bun run src/cli.ts sync` produces 67 skills under ignored `.agents/skills/`.
 
-- The patch pack records 75 file changes across 17 skills: 58 modifications, 16 additions, and one deletion. Every change has an intent, an exact base revision, and a concrete Git diff.
+- The patch pack records 75 captured changes across 17 skills: 58 modifications, 16 additions, and one deletion. Each target has file-level intent, and each patch records an exact base revision and concrete Git diff.
 - The PSTACK installation contains 550 files, including 423 files under script directories. Its bytes and executable modes match the prepared edited source. The nine native lock entries remain unchanged.
 - The deleted file is `poteto-mode/scripts/worktree-audit.sh`, whose Cursor transcript assumptions do not apply here. The corresponding playbook uses Botlake records and `wktree`; the deletion and its reason are recorded. The other five upstream executable files retain their executable modes.
 - Removing generated output and restoring with the Node build recreates all 67 skills. Repeated sync preserves file modification times. Bun source, packaged Node, and standalone binary sync all pass.

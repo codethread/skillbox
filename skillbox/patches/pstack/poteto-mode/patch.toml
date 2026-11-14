@@ -1,163 +1,217 @@
 schema = 1
 
-[[change]]
+[files."./SKILL.md"]
 intent = "Adapt the mode's hub: point at the shared adapter, replace Cursor Task/subagent defaults with catalog-backed lake runs and the role table, preserve useful agent continuity through Mail, and remove Cursor-only control, slop, authoring, and loop instructions."
+
+[files."./playbooks/authoring-a-skill.md"]
+intent = "Replace Cursor's built-in create-skill with the project's actual skill-authoring guidance and the shared runtime adapter."
+
+[files."./playbooks/autonomous-run.md"]
+intent = "Replace the Cursor /loop wake mechanism with bounded lake observations whose records distinguish timeout from progress, and replace AskQuestion with the operator conversation, so an unattended run has real evidence and no unavailable command."
+
+[files."./playbooks/autopilot-full.md"]
+intent = "Owners become worktree agent runs, audit cycles use bounded observation without treating silence as liveness proof, and uninstalled slop and control skills become project verification plus the inline slop-strip rule."
+
+[files."./playbooks/babysit.md"]
+intent = "Replace the Cursor built-in and /loop polling with forge polling re-armed on bounded waits, and name the adapter for wait mechanics."
+
+[files."./playbooks/bug-fix.md"]
+intent = "Replace subagent/model defaults and Cursor /loop with lake runs, the role table, and bounded autonomous observation."
+
+[files."./playbooks/eval.md"]
+intent = "Candidates and judges become lake runs on different seats, and chain verification reads agent records rather than assuming a Cursor transcript directory."
+
+[files."./playbooks/feature.md"]
+intent = "Delegate on the feature role seat from the Botlake role table and use run language instead of subagent/model fields."
+
+[files."./playbooks/hillclimb.md"]
+intent = "Hillclimb iterations delegate to lake runs on the role seat, with worktree isolation for parallel hypotheses."
+
+[files."./playbooks/multi-phase-plan.md"]
+intent = "Settle plan-time delegation on catalog-backed lake runs, remove the remaining hard-coded model slug, name project verification instead of Cursor control skills, and make observation cycles and installed paths real for Botlake."
+
+[files."./playbooks/opening-a-pr.md"]
+intent = "Replace Task worktree rules and the uninstalled Cursor slop skill with isolated workflow runs, one writer per branch, and the inline slop-strip rule."
+
+[files."./playbooks/orchestrate.md"]
+intent = "Run the program on lake work records and isolated agent runs instead of Task spawns, the Project store, and cloud VMs; retain authorized repository scripts and use Mail when agent context is useful."
+
+[files."./playbooks/pause-safely.md"]
+intent = "Cancel lake runs rather than Cursor subagents, and record the resume point in the work notes so a replacement run inherits it."
+
+[files."./playbooks/perf-issue.md"]
+intent = "Use the project verification skill for the baseline trace and the perf-issue role seat for implementation, instead of Cursor control skills and model slugs."
+
+[files."./playbooks/prototype.md"]
+intent = "Name the project verification skill instead of the uninstalled control skill when proving a prototype."
+
+[files."./playbooks/refactoring.md"]
+intent = "Delegate mechanical refactoring through the catalog-backed refactoring role instead of the remaining Cursor subagent model slug and speed fields, and name the project verification driver for equivalence proof."
+
+[files."./playbooks/runtime-forensics.md"]
+intent = "Name the project verification skill rather than an uninstalled control skill, and use lake run seats for artifact parsing."
+
+[files."./playbooks/session-pickup.md"]
+intent = "Read the prior trail from lake agent and work records instead of a Cursor transcript directory, while keeping the transcript as an optional harness pointer."
+
+[files."./playbooks/shipping.md"]
+intent = "Verifiers become worktree agent runs on the role seats, and the stack watcher is re-armed on bounded waits rather than a Cursor /loop."
+
+[files."./playbooks/trace-forensics.md"]
+intent = "Parse captured artifacts in lake runs with a chosen seat instead of Cursor subagent fields."
+
+[files."./playbooks/visual-parity.md"]
+intent = "Replace the Cursor /loop repetition with bounded comparison passes against the baseline and name the project verification driver instead of a generic external control skill."
+
+[files."./playbooks/worktree-cleanup.md"]
+intent = "Base in-use checks on live worktrees, lake agent records, processes, and the operator's pinned set. The deleted transcript auditor no longer supplies chat evidence; deletion follows wktree's branch safety and explicit authorization for untracked data."
+
+[files."./references/botlake-tools.md"]
+intent = "Add the shared Botlake adapter: one mapping from every runtime primitive pstack named (Task fields, cloud agents, model slugs, Project store, transcripts, loops, control skills) to the lake operation that replaces it, so each independently invoked skill points here instead of restating mechanics."
+
+[files."./references/poteto-agent.md"]
+intent = "Carry the delegate brief in the skill itself. The plugin agent is never installed, so a Botlake run needs the poteto-mode reading contract, the correct installed path, and delegate terminology rather than a Cursor plugin search or subagent identity."
+
+[files."./scripts/check-plan.mjs"]
+intent = "Update the plan checker's program markers to the adapted plan: installed skills are read from .agents/skills, and the audit policy is an active bounded observation cycle rather than a Cursor /loop cadence."
+
+[files."./scripts/check-plan.test.ts"]
+intent = "Keep the checker's fixture aligned with the adapted observation-cycle marker so the retained supporting test proves the same plan contract the prose declares."
+
+[files."./scripts/worktree-audit.sh"]
+intent = "Delete the runtime-only worktree auditor. Its delete-safety column depends on Cursor's global chat transcript store, which does not exist under Botlake; the cleanup playbook now bases in-use checks on lake agent records and live worktrees instead of a script that would silently report stale chat evidence."
+
+[[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Replace Cursor's built-in create-skill with the project's actual skill-authoring guidance and the shared runtime adapter."
+[[patches]]
 target = "./playbooks/authoring-a-skill.md"
 patch = "changes/0002-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Replace the Cursor /loop wake mechanism with bounded lake observations whose records distinguish timeout from progress, and replace AskQuestion with the operator conversation, so an unattended run has real evidence and no unavailable command."
+[[patches]]
 target = "./playbooks/autonomous-run.md"
 patch = "changes/0003-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Owners become worktree agent runs, audit cycles use bounded observation without treating silence as liveness proof, and uninstalled slop and control skills become project verification plus the inline slop-strip rule."
+[[patches]]
 target = "./playbooks/autopilot-full.md"
 patch = "changes/0004-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Replace the Cursor built-in and /loop polling with forge polling re-armed on bounded waits, and name the adapter for wait mechanics."
+[[patches]]
 target = "./playbooks/babysit.md"
 patch = "changes/0005-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Replace subagent/model defaults and Cursor /loop with lake runs, the role table, and bounded autonomous observation."
+[[patches]]
 target = "./playbooks/bug-fix.md"
 patch = "changes/0006-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Candidates and judges become lake runs on different seats, and chain verification reads agent records rather than assuming a Cursor transcript directory."
+[[patches]]
 target = "./playbooks/eval.md"
 patch = "changes/0007-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Delegate on the feature role seat from the Botlake role table and use run language instead of subagent/model fields."
+[[patches]]
 target = "./playbooks/feature.md"
 patch = "changes/0008-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Hillclimb iterations delegate to lake runs on the role seat, with worktree isolation for parallel hypotheses."
+[[patches]]
 target = "./playbooks/hillclimb.md"
 patch = "changes/0009-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Settle plan-time delegation on catalog-backed lake runs, remove the remaining hard-coded model slug, name project verification instead of Cursor control skills, and make observation cycles and installed paths real for Botlake."
+[[patches]]
 target = "./playbooks/multi-phase-plan.md"
 patch = "changes/0010-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Replace Task worktree rules and the uninstalled Cursor slop skill with isolated workflow runs, one writer per branch, and the inline slop-strip rule."
+[[patches]]
 target = "./playbooks/opening-a-pr.md"
 patch = "changes/0011-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Run the program on lake work records and isolated agent runs instead of Task spawns, the Project store, and cloud VMs; retain authorized repository scripts and use Mail when agent context is useful."
+[[patches]]
 target = "./playbooks/orchestrate.md"
 patch = "changes/0012-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Cancel lake runs rather than Cursor subagents, and record the resume point in the work notes so a replacement run inherits it."
+[[patches]]
 target = "./playbooks/pause-safely.md"
 patch = "changes/0013-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Use the project verification skill for the baseline trace and the perf-issue role seat for implementation, instead of Cursor control skills and model slugs."
+[[patches]]
 target = "./playbooks/perf-issue.md"
 patch = "changes/0014-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Name the project verification skill instead of the uninstalled control skill when proving a prototype."
+[[patches]]
 target = "./playbooks/prototype.md"
 patch = "changes/0015-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Delegate mechanical refactoring through the catalog-backed refactoring role instead of the remaining Cursor subagent model slug and speed fields, and name the project verification driver for equivalence proof."
+[[patches]]
 target = "./playbooks/refactoring.md"
 patch = "changes/0016-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Name the project verification skill rather than an uninstalled control skill, and use lake run seats for artifact parsing."
+[[patches]]
 target = "./playbooks/runtime-forensics.md"
 patch = "changes/0017-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Read the prior trail from lake agent and work records instead of a Cursor transcript directory, while keeping the transcript as an optional harness pointer."
+[[patches]]
 target = "./playbooks/session-pickup.md"
 patch = "changes/0018-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Verifiers become worktree agent runs on the role seats, and the stack watcher is re-armed on bounded waits rather than a Cursor /loop."
+[[patches]]
 target = "./playbooks/shipping.md"
 patch = "changes/0019-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Parse captured artifacts in lake runs with a chosen seat instead of Cursor subagent fields."
+[[patches]]
 target = "./playbooks/trace-forensics.md"
 patch = "changes/0020-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Replace the Cursor /loop repetition with bounded comparison passes against the baseline and name the project verification driver instead of a generic external control skill."
+[[patches]]
 target = "./playbooks/visual-parity.md"
 patch = "changes/0021-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Base in-use checks on live worktrees, lake agent records, processes, and the operator's pinned set. The deleted transcript auditor no longer supplies chat evidence; deletion follows wktree's branch safety and explicit authorization for untracked data."
+[[patches]]
 target = "./playbooks/worktree-cleanup.md"
 patch = "changes/0022-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Add the shared Botlake adapter: one mapping from every runtime primitive pstack named (Task fields, cloud agents, model slugs, Project store, transcripts, loops, control skills) to the lake operation that replaces it, so each independently invoked skill points here instead of restating mechanics."
+[[patches]]
 target = "./references/botlake-tools.md"
 patch = "changes/0023-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Carry the delegate brief in the skill itself. The plugin agent is never installed, so a Botlake run needs the poteto-mode reading contract, the correct installed path, and delegate terminology rather than a Cursor plugin search or subagent identity."
+[[patches]]
 target = "./references/poteto-agent.md"
 patch = "changes/0024-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Update the plan checker's program markers to the adapted plan: installed skills are read from .agents/skills, and the audit policy is an active bounded observation cycle rather than a Cursor /loop cadence."
+[[patches]]
 target = "./scripts/check-plan.mjs"
 patch = "changes/0025-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Keep the checker's fixture aligned with the adapted observation-cycle marker so the retained supporting test proves the same plan contract the prose declares."
+[[patches]]
 target = "./scripts/check-plan.test.ts"
 patch = "changes/0026-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Delete the runtime-only worktree auditor. Its delete-safety column depends on Cursor's global chat transcript store, which does not exist under Botlake; the cleanup playbook now bases in-use checks on lake agent records and live worktrees instead of a script that would silently report stale chat evidence."
+[[patches]]
 target = "./scripts/worktree-audit.sh"
 patch = "changes/0027-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

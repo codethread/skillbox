@@ -10,7 +10,7 @@ import {
 	symlink,
 	writeFile,
 } from "node:fs/promises";
-import { dirname, join, posix, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { installSkills, type SkillInfo } from "skills";
 import { z } from "zod";
 import { configPath, readConfig, withBundles } from "../workspace/config.ts";
@@ -25,16 +25,6 @@ const inputSchema = z.object({
 	source: z.string().min(1),
 	bundles: z.array(z.string()).default([]),
 	workspace: z.string().min(1).default("."),
-	publication: z
-		.object({
-			bundle: z.string(),
-			pack: z.string(),
-			configuredSource: z.string(),
-			revision: z.string(),
-			root: z.string(),
-			skillsRoot: z.string(),
-		})
-		.optional(),
 });
 
 export interface AddResult {
@@ -112,8 +102,7 @@ export async function add(input: z.input<typeof inputSchema>): Promise<AddResult
 				installed: 0,
 			};
 		}
-		const configuredSource = parsed.publication?.configuredSource ?? resolved.source;
-		const next = withBundles(current, configuredSource, bundles);
+		const next = withBundles(current, resolved.source, bundles);
 		const local = resolved.handle.source.type === "local";
 		const skills = resolved.skills.filter((skill) =>
 			bundles.some((bundle) => inBundle(skill, bundle, local)),
@@ -173,42 +162,24 @@ export async function add(input: z.input<typeof inputSchema>): Promise<AddResult
 
 			await mkdir(dirname(join(staging, configPath)), { recursive: true });
 			await writeFile(join(staging, configPath), `${JSON.stringify(next, null, 2)}\n`);
-			let publishedLock = readLock(
+			await writeFile(
+				join(staging, lockPath),
 				relocateLock(
 					await readFile(join(staging, sdkLockPath), "utf8"),
 					staging,
 					workspace,
 				),
 			);
-			if (parsed.publication) {
-				for (const skill of skills) {
-					const entry = publishedLock.skills[skill.name];
-					entry.source = parsed.publication.configuredSource;
-					entry.sourceType = "git";
-					entry.ref = parsed.publication.revision;
-					entry.skillPath = posix.join(
-						parsed.publication.root,
-						parsed.publication.skillsRoot,
-						skill.name,
-						"SKILL.md",
-					);
-				}
-			}
-			await writeFile(join(staging, lockPath), `${JSON.stringify(publishedLock, null, 2)}\n`);
 			await mkdir(join(staging, ".claude"));
 			await symlink("../.agents/skills", join(staging, ".claude/skills"));
-			const publishPaths = [".agents/skills", ".claude/skills", lockPath, configPath];
-			if (parsed.publication) {
-				const path = `skillbox/patches/${parsed.publication.bundle}`;
-				await mkdir(dirname(join(staging, path)), { recursive: true });
-				await cp(parsed.publication.pack, join(staging, path), {
-					recursive: true,
-					preserveTimestamps: true,
-				});
-				publishPaths.push(path);
-			}
 			try {
-				await publish(staging, workspace, publishPaths);
+				await publish(
+					staging,
+					[".agents/skills", ".claude/skills", lockPath, configPath].map((path) => ({
+						staged: join(staging, path),
+						target: join(workspace, path),
+					})),
+				);
 			} catch (cause) {
 				retainStaging = true;
 				throw responseError(

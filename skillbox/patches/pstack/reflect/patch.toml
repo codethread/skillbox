@@ -1,31 +1,41 @@
 schema = 1
 
-[[change]]
+[files."./SKILL.md"]
 intent = "Read this run's record through lake observation and the harness's own pointer, route reviewers through catalog-validated roles, and use session-exposed evidence and authoring guidance."
+
+[files."./references/divergent-reviewer.md"]
+intent = "Count a skill as used through installed skills and agent records, and restrict context lookups to session-exposed read-only evidence tools."
+
+[files."./references/judgment-reviewer.md"]
+intent = "Count a skill as used through installed skills and agent records, and restrict context lookups to session-exposed read-only evidence tools."
+
+[files."./references/synthesizer.md"]
+intent = "Use session-exposed read-only evidence and the project's skill-authoring guidance in the synthesis contract."
+
+[files."./references/tooling-reviewer.md"]
+intent = "Count a skill as used through installed skills and agent records, and restrict context lookups to session-exposed read-only evidence tools."
+
+[[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Count a skill as used through installed skills and agent records, and restrict context lookups to session-exposed read-only evidence tools."
+[[patches]]
 target = "./references/divergent-reviewer.md"
 patch = "changes/0002-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Count a skill as used through installed skills and agent records, and restrict context lookups to session-exposed read-only evidence tools."
+[[patches]]
 target = "./references/judgment-reviewer.md"
 patch = "changes/0003-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Use session-exposed read-only evidence and the project's skill-authoring guidance in the synthesis contract."
+[[patches]]
 target = "./references/synthesizer.md"
 patch = "changes/0004-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Count a skill as used through installed skills and agent records, and restrict context lookups to session-exposed read-only evidence tools."
+[[patches]]
 target = "./references/tooling-reviewer.md"
 patch = "changes/0005-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

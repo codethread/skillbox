@@ -1,7 +1,9 @@
 schema = 1
 
-[[change]]
+[files."./SKILL.md"]
 intent = "Track phases in durable Work, validate configured seats against the live catalog, and run candidates in isolated wktree-managed checkouts with independently evidenced model diversity."
+
+[[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

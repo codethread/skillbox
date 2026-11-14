@@ -1,7 +1,9 @@
 schema = 1
 
-[[change]]
+[files."./SKILL.md"]
 intent = "Mine lake run records instead of Cursor transcript directories, use the project's actual authoring guidance, and place mode skills in a real source directory rather than the generated install."
+
+[[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

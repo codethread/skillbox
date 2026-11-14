@@ -1,13 +1,17 @@
 schema = 1
 
-[[change]]
+[files."./SKILL.md"]
 intent = "Start Comment Sicko as a lake reviewer run with the carried brief instead of an uninstalled Cursor agent type."
+
+[files."./references/comment-sicko.md"]
+intent = "Carry Comment Sicko's brief in the skill. The plugin agent is never installed, so a Botlake reviewer run needs the text and the read-only scope as its prompt."
+
+[[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
-[[change]]
-intent = "Carry Comment Sicko's brief in the skill. The plugin agent is never installed, so a Botlake reviewer run needs the text and the read-only scope as its prompt."
+[[patches]]
 target = "./references/comment-sicko.md"
 patch = "changes/0002-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

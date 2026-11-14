@@ -1,7 +1,9 @@
 schema = 1
 
-[[change]]
+[files."./SKILL.md"]
 intent = "Locate the verification skill through the project's source or installed skills tree, and read feature files with lake agent runs."
+
+[[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

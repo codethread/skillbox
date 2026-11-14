@@ -1,7 +1,9 @@
 schema = 1
 
-[[change]]
+[files."./SKILL.md"]
 intent = "Replace the external Cursor webhook workflow with a real Botlake UI workflow: discover the configured UI, use task/agent views for status, build a narrow local action page over registered lake commands with validated inputs, and prove one harmless action against lake state. This keeps the skill identity and removes runnable obsolete setup."
+
+[[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
 base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

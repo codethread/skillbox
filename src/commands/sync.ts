@@ -1,5 +1,4 @@
 import {
-	cp,
 	mkdir,
 	mkdtemp,
 	readFile,
@@ -18,14 +17,12 @@ import { readOptional, statOptional } from "../workspace/paths.ts";
 import { publish } from "../workspace/publish.ts";
 import { ResponseError, responseError } from "../response.ts";
 import { resolveBundleSource, sdkConfig, sdkLockPath } from "../workspace/sdk.ts";
-import { readAdaptedBundle, type AdaptedBundles } from "../workspace/adapted.ts";
+import { readAdaptedBundle, pendingIntents, type AdaptedBundles } from "../workspace/adapted.ts";
 
 export interface SyncInput {
 	adapted: AdaptedBundles;
 	cwd: string;
 	workspace?: string;
-	acceptContentChangesForBundle?: string;
-	bundlePackOverrides?: Readonly<Record<string, string>>;
 }
 
 export interface SyncResult {
@@ -65,16 +62,7 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 		>();
 		for (const source of config.sources) {
 			for (const bundle of source.bundles) {
-				const override = input.bundlePackOverrides?.[bundle];
-				const packWorkspace = override ? join(staging, ".packs", bundle) : workspace;
-				if (override) {
-					await mkdir(join(packWorkspace, "skillbox/patches"), { recursive: true });
-					await cp(override, join(packWorkspace, "skillbox/patches", bundle), {
-						recursive: true,
-						preserveTimestamps: true,
-					});
-				}
-				const adapted = await readAdaptedBundle(packWorkspace, bundle);
+				const adapted = await readAdaptedBundle(workspace, bundle);
 				if (adapted && adapted.descriptor.source !== source.source) {
 					throw responseError(
 						"BUNDLE_SOURCE_MISMATCH",
@@ -82,9 +70,22 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 						{ source: source.source, skill: bundle },
 					);
 				}
+				if (adapted) {
+					const missing = await pendingIntents(adapted.directory);
+					if (missing.length)
+						throw new ResponseError(
+							missing.map(({ skill, target, manifest }) => ({
+								code: "INTENT_REQUIRED",
+								message: `Add intent for ${skill}/${target} in ${manifest} before syncing.`,
+								skill,
+								target,
+								input: manifest,
+							})),
+						);
+				}
 				const materialized = adapted
 					? await input.adapted.materializeBundle(
-							packWorkspace,
+							workspace,
 							bundle,
 							join(staging, `.materialized-${bundle}`),
 						)
@@ -108,8 +109,7 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 									"SKILL.md",
 								),
 							});
-						if (bundle === input.acceptContentChangesForBundle)
-							acceptedNames.add(skill.name);
+						if (adapted) acceptedNames.add(skill.name);
 						if (selectedNames.has(skill.name)) {
 							throw responseError(
 								"SKILL_NAME_COLLISION",
@@ -232,7 +232,6 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 		if (
 			!lockChanged &&
 			!contentChanged &&
-			Object.keys(input.bundlePackOverrides ?? {}).length === 0 &&
 			unchanged === expectedNames.length &&
 			claudeMatches &&
 			skillsDirectory?.isDirectory()
@@ -247,14 +246,14 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 		await mkdir(join(staging, ".claude"), { recursive: true });
 		await symlink("../.agents/skills", join(staging, ".claude/skills"));
 		const publishPaths = [".agents/skills", ".claude/skills", lockPath, configPath];
-		for (const [bundle, override] of Object.entries(input.bundlePackOverrides ?? {})) {
-			const path = `skillbox/patches/${bundle}`;
-			await mkdir(dirname(join(staging, path)), { recursive: true });
-			await cp(override, join(staging, path), { recursive: true, preserveTimestamps: true });
-			publishPaths.push(path);
-		}
 		try {
-			await publish(staging, workspace, publishPaths);
+			await publish(
+				staging,
+				publishPaths.map((path) => ({
+					staged: join(staging, path),
+					target: join(workspace, path),
+				})),
+			);
 		} catch (cause) {
 			retainStaging = true;
 			throw responseError(
