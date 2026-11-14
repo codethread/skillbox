@@ -30,7 +30,7 @@
         "@botlake/core": "0.4.0",
         "@botlake/extension-agents": "0.4.1",
         "@botlake/extension-batteries": "0.4.0",
-        "@botlake/extension-ct-config": "0.5.1",
+        "@botlake/extension-ct-config": "0.5.2",
         "@botlake/extension-flags": "0.4.0",
         "@botlake/extension-identity": "0.4.0",
         "@botlake/extension-mail": "0.4.0",
@@ -53,7 +53,7 @@
 
     "@botlake/extension-batteries": ["@botlake/extension-batteries@0.4.0", "", { "dependencies": { "@standard-schema/spec": "^1.1.0", "zod": "^4.6.7" }, "peerDependencies": { "@botlake/core": "^0.4.0" } }, "sha512-C/43wj8KZkHPSFDc/Ok59QVo/QtUMATQcexkEMkl2WkVwx8gxX+b1ntkiYZLdB5D3/ZGViCX22CVdqD3EfpvRw=="],
 
-    "@botlake/extension-ct-config": ["@botlake/extension-ct-config@0.5.1", "", { "dependencies": { "@botlake/extension-ui": "^0.1.3", "@botlake/native-session": "^0.4.0", "zod": "^4.6.7" }, "peerDependencies": { "@botlake/core": "^0.4.0", "@botlake/extension-agents": "^0.4.1", "@botlake/extension-flags": "^0.4.0", "@botlake/extension-identity": "^0.4.0", "@botlake/extension-mail": "^0.4.0", "@botlake/extension-mail-agents": "^0.4.1", "@botlake/extension-mail-identity": "^0.4.0", "@botlake/extension-references": "^0.4.0", "@botlake/extension-work": "^0.4.1", "@botlake/extension-work-agents": "^0.4.0" } }, "sha512-5I7hDrC98D2LC+//F113jaQRCiTrMdQ3O7P9I/IZ/bKCFnL3sPYNjOZ005JenrED8v0uXmOz0zyvkyGByV+AcQ=="],
+    "@botlake/extension-ct-config": ["@botlake/extension-ct-config@0.5.2", "", { "dependencies": { "@botlake/extension-ui": "^0.1.3", "@botlake/native-session": "^0.4.0", "zod": "^4.6.7" }, "peerDependencies": { "@botlake/core": "^0.4.0", "@botlake/extension-agents": "^0.4.1", "@botlake/extension-flags": "^0.4.0", "@botlake/extension-identity": "^0.4.0", "@botlake/extension-mail": "^0.4.0", "@botlake/extension-mail-agents": "^0.4.1", "@botlake/extension-mail-identity": "^0.4.0", "@botlake/extension-references": "^0.4.0", "@botlake/extension-work": "^0.4.1", "@botlake/extension-work-agents": "^0.4.0" } }, "sha512-CHJWrjabH/pn4By+Q4MSpRQJJOXeA2jQXvZ7QrUi9rQRyh6L0qZwPZFo3wEmyO2P0PecPSqKGikHStxYchyIoQ=="],
 
     "@botlake/extension-flags": ["@botlake/extension-flags@0.4.0", "", { "dependencies": { "zod": "^4.6.7" }, "peerDependencies": { "@botlake/core": "^0.4.0" } }, "sha512-/NrnGvYt/Kd8SUBgUH+uDFpHLA3oHoDf+oDBj8EiWIbS64pz/eT2soeCz1fpTimVXnTCQ8P1ekLHb2JtZpswTg=="],
 
