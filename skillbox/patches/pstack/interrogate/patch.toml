@@ -1,0 +1,12 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Dispatch adversarial Botlake reviewers with different models into isolated worktrees containing identical tracked and untracked changes. Keep only findings reproduced by evidence, and preserve reviewer independence from the author."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

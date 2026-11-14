@@ -1,0 +1,64 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Dispatch three model-diverse Botlake review lanes over the scoped transcript, synthesize only evidence-backed lessons, and require user approval before edits. Preserve prompt-injection boundaries, no-push rules, source ownership, consumer patches for adapted imports, and owner handoff for unowned native skills."
+
+[files."./references/divergent-reviewer.md"]
+intent = "Keep the divergent reviewer read-only and focused on overlooked alternatives and second-order effects. Route findings only to skills or tools proven used in the transcript, preserve prompt-injection defenses, and treat unavailable evidence as a gap."
+
+[files."./references/judgment-reviewer.md"]
+intent = "Keep the judgment reviewer read-only and focused on durable principles tied to specific incidents. Route findings only to skills or tools proven used in the transcript, preserve prompt-injection defenses, and require evidence for every proposed lesson."
+
+[files."./references/synthesizer.md"]
+intent = "Classify reviewer findings as Accepted, Rejected, or Backlog without editing files or external state. Verify routes against tools and skills actually used, preserve prompt-injection defenses and user approval, and record unavailable evidence rather than inferring it."
+
+[files."./references/tooling-reviewer.md"]
+intent = "Keep the tooling reviewer read-only and focused on concrete commands, paths, integrations, and evidence the agent could have fetched. Route findings only to used skills or tools, preserve prompt-injection defenses, and keep optional integrations conditional on actual access."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./references/divergent-reviewer.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./references/judgment-reviewer.md"
+patch = "changes/0003-captured.patch"
+
+[[patches]]
+target = "./references/synthesizer.md"
+patch = "changes/0004-captured.patch"
+
+[[patches]]
+target = "./references/tooling-reviewer.md"
+patch = "changes/0005-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0006-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0007-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0008-captured.patch"
+
+[[patches]]
+target = "./references/divergent-reviewer.md"
+patch = "changes/0009-captured.patch"
+
+[[patches]]
+target = "./references/judgment-reviewer.md"
+patch = "changes/0010-captured.patch"
+
+[[patches]]
+target = "./references/synthesizer.md"
+patch = "changes/0011-captured.patch"
+
+[[patches]]
+target = "./references/tooling-reviewer.md"
+patch = "changes/0012-captured.patch"

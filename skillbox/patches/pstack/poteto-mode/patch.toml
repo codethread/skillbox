@@ -1,0 +1,245 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Make `/poteto-mode` own the playbook, Botlake context group, and delegated runs. Track independent lanes as Botlake tasks, dispatch from the configured agent catalog, and preserve principle routing, role diversity, parent ownership, autonomy pauses, evidence requirements, and the rule that task state is not proof."
+
+[files."./playbooks/authoring-a-skill.md"]
+intent = "Use available project authoring guidance instead of Cursor create-skill; retrieve Skillbox guidance through skills get when relevant. Identify the editable source and owner, distinguishing owned skills, optional complementary local skills, consumer patches of adapted imports, and shared maintainer changes. Native imports use owned source or an owner handoff. Preserve voice, validation, structural testing, and PR steps without requiring producer checkout access."
+
+[files."./playbooks/autonomous-run.md"]
+intent = "Drive a checkable exit condition through Botlake events, agent activity, integration watches, and bounded active waits. Recheck real state after every wake, preserve iteration evidence and dead-end handling, and never treat a timeout or stopped coordinator as progress or persistent scheduling."
+
+[files."./playbooks/autopilot-full.md"]
+intent = "Give each PR one isolated owner with durable evidence in its Botlake lane task, then require independent swarm verification and explicit merge authorization. Preserve decision trails, safe force-push rules, stall detection from observable side effects, and the ban on concurrent replacement writers."
+
+[files."./playbooks/babysit.md"]
+intent = "Remove the Cursor built-in collision warning and /loop dependency. Keep the supplied forge watcher, request modes, frontier discipline, skeptical triage, and merge-ready stopping conditions."
+
+[files."./playbooks/bug-fix.md"]
+intent = "Remove the fixed Cursor implementation model and loop command; use configured delegation and the project verification driver while preserving self-reproduction, mechanism proof, minimal fixes, and red-first history."
+
+[files."./playbooks/eval.md"]
+intent = "Run blinded, model-diverse evaluations with organic prompts and independent judging. Verify actual file reads from full harness transcripts, use Botlake activity only to locate runs or inspect progress, and mark criteria unverified when transcript evidence is missing."
+
+[files."./playbooks/feature.md"]
+intent = "Keep the lead agent on design, scope, review, and verification while delegated agents implement. Track machine-checkable blockers as Botlake gates on dependent tasks, require passing results rather than closed status, and preserve data-shape, arena, throughput, and independent-review requirements."
+
+[files."./playbooks/hillclimb.md"]
+intent = "Replace fixed model/speed settings with configured agent selection; retain isolated parallel hypotheses, frozen measurement, per-attempt regression gates, and keep-or-revert discipline."
+
+[files."./playbooks/multi-phase-plan.md"]
+intent = "Produce an operator-auditable checklist with a named Botlake context group, lane tasks, explicit gates, evidence, and active audit policy. Preserve prototype-first decisions, bounded live lanes, performance checks, verification agents, operator review, and the requirement for an explicit execution go."
+
+[files."./playbooks/opening-a-pr.md"]
+intent = "Replace Task-specific worktree inheritance/reset assumptions with separate concurrent writers and reviewed handoffs. Replace unavailable deslop with the existing Comments/unslop guidance while retaining forge operations, PR structure, stacking, and babysit timing."
+
+[files."./playbooks/orchestrate.md"]
+intent = "Coordinate a standing program through a Botlake context group, tasks, mail, agent runs, and activity supervision. Preserve bounded topology, isolated writers, direct worker coordination, owner and verifier separation, integration watches, retry limits, and evidence-based completion."
+
+[files."./playbooks/perf-issue.md"]
+intent = "Use available verification drivers and configured agents instead of Cursor control skills and hard-coded model/speed settings; preserve baseline vetting, mantra order, trace comparison, and measured claims."
+
+[files."./playbooks/prototype.md"]
+intent = "Use the project's verification skill or named driver rather than an unavailable control skill; preserve throwaway scope, alternative exploration, direct observation, and the handoff to real implementation."
+
+[files."./playbooks/refactoring.md"]
+intent = "Remove fixed model/speed settings and the external control-skill dependency; preserve contract pinning, small behavior-preserving steps, caller migration, and real-artifact equivalence proof."
+
+[files."./playbooks/runtime-forensics.md"]
+intent = "Use available verification drivers and configured parsing delegates instead of Cursor control/model assumptions, retaining live instrumentation, reduced artifact findings, mechanism proof, and diagnosis-only scope."
+
+[files."./playbooks/session-pickup.md"]
+intent = "Reconstruct the resume point from Botlake task, context, agent, transcript, decision-trail, and branch evidence. Stay within the task's records, avoid repeating proven work, mark missing evidence as a gap, and verify inherited claims before continuing."
+
+[files."./playbooks/shipping.md"]
+intent = "Replace Cursor cloud verifiers/control plugins with isolated independent agents and available drivers, and rearm the supplied watcher without /loop. Preserve per-PR verdicts, patch-id validity, bottom-up landing, and the verified ceiling."
+
+[files."./playbooks/trace-forensics.md"]
+intent = "Defer parsing-agent selection to configured context instead of Cursor reasoning/speed settings, leaving the fixed-dataset query, attribution, paired-capture, and diagnosis-only method intact."
+
+[files."./playbooks/visual-parity.md"]
+intent = "Use an available verification driver and ordinary repeated comparisons instead of a Cursor control skill and /loop; preserve baseline immutability, component isolation, and zero-diff completion."
+
+[files."./playbooks/worktree-cleanup.md"]
+intent = "Audit each worktree with the project helper, Botlake agent records and activity, live processes, pins, merge state, and untracked data before removal. Treat inactive records as insufficient proof, preserve explicit authorization for data loss, and use the project's cleanup tooling instead of force removal."
+
+[files."./references/poteto-agent.md"]
+intent = "Give every delegated agent the mandatory poteto-mode reading contract using the consuming repository's `.agents/skills` path. Keep playbook and Botlake context ownership with the parent, require applicable principle leaves, and avoid runtime-origin commentary in the brief."
+
+[files."./scripts/check-plan.mjs"]
+intent = "Change only program-location/audit markers and verification-agent diagnostic text to match the adapted plan; preserve all structural, ten-lane, evidence, and prose checks."
+
+[files."./scripts/check-plan.test.ts"]
+intent = "Align only the valid fixture's location/audit markers and example agent label with the adapted plan contract, preserving upstream checker test coverage."
+
+[files."./scripts/worktree-audit.sh"]
+intent = "Preserve the executable git/size/age/dirty/PR audit while removing Cursor transcript lookup and LAST_CHAT output. Otherwise eligible trees become verify-usage candidates, never safe based on absent chat evidence; the playbook supplies live usage checks."
+
+[files."./playbooks/pause-safely.md"]
+intent = "Stop only at a safe boundary, make current work durable, and record the stopping point and next action in the Botlake context group plus an off-context resume note. Preserve the ban on irreversible pause actions and leave enough verified evidence for a cold-start agent."
+
+[files."./scripts/bun.lock"]
+intent = "Keep the helper workspace lock aligned with the native `@pstack/poteto-mode-tools` package identity. Change only the package name so dependency resolution and locked versions remain unchanged."
+
+[files."./scripts/package.json"]
+intent = "Name the private helper package `@pstack/poteto-mode-tools` so scripts use the bundle's native package identity. Preserve its private status, module type, scripts, and dependencies."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./playbooks/authoring-a-skill.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./playbooks/autonomous-run.md"
+patch = "changes/0003-captured.patch"
+
+[[patches]]
+target = "./playbooks/autopilot-full.md"
+patch = "changes/0004-captured.patch"
+
+[[patches]]
+target = "./playbooks/babysit.md"
+patch = "changes/0005-captured.patch"
+
+[[patches]]
+target = "./playbooks/bug-fix.md"
+patch = "changes/0006-captured.patch"
+
+[[patches]]
+target = "./playbooks/eval.md"
+patch = "changes/0007-captured.patch"
+
+[[patches]]
+target = "./playbooks/feature.md"
+patch = "changes/0008-captured.patch"
+
+[[patches]]
+target = "./playbooks/hillclimb.md"
+patch = "changes/0009-captured.patch"
+
+[[patches]]
+target = "./playbooks/multi-phase-plan.md"
+patch = "changes/0010-captured.patch"
+
+[[patches]]
+target = "./playbooks/opening-a-pr.md"
+patch = "changes/0011-captured.patch"
+
+[[patches]]
+target = "./playbooks/orchestrate.md"
+patch = "changes/0012-captured.patch"
+
+[[patches]]
+target = "./playbooks/perf-issue.md"
+patch = "changes/0013-captured.patch"
+
+[[patches]]
+target = "./playbooks/prototype.md"
+patch = "changes/0014-captured.patch"
+
+[[patches]]
+target = "./playbooks/refactoring.md"
+patch = "changes/0015-captured.patch"
+
+[[patches]]
+target = "./playbooks/runtime-forensics.md"
+patch = "changes/0016-captured.patch"
+
+[[patches]]
+target = "./playbooks/session-pickup.md"
+patch = "changes/0017-captured.patch"
+
+[[patches]]
+target = "./playbooks/shipping.md"
+patch = "changes/0018-captured.patch"
+
+[[patches]]
+target = "./playbooks/trace-forensics.md"
+patch = "changes/0019-captured.patch"
+
+[[patches]]
+target = "./playbooks/visual-parity.md"
+patch = "changes/0020-captured.patch"
+
+[[patches]]
+target = "./playbooks/worktree-cleanup.md"
+patch = "changes/0021-captured.patch"
+
+[[patches]]
+target = "./references/poteto-agent.md"
+patch = "changes/0022-captured.patch"
+
+[[patches]]
+target = "./scripts/check-plan.mjs"
+patch = "changes/0023-captured.patch"
+
+[[patches]]
+target = "./scripts/check-plan.test.ts"
+patch = "changes/0024-captured.patch"
+
+[[patches]]
+target = "./scripts/worktree-audit.sh"
+patch = "changes/0025-captured.patch"
+
+[[patches]]
+target = "./playbooks/authoring-a-skill.md"
+patch = "changes/0026-captured.patch"
+
+[[patches]]
+target = "./playbooks/authoring-a-skill.md"
+patch = "changes/0027-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0028-captured.patch"
+
+[[patches]]
+target = "./playbooks/autonomous-run.md"
+patch = "changes/0029-captured.patch"
+
+[[patches]]
+target = "./playbooks/autopilot-full.md"
+patch = "changes/0030-captured.patch"
+
+[[patches]]
+target = "./playbooks/eval.md"
+patch = "changes/0031-captured.patch"
+
+[[patches]]
+target = "./playbooks/feature.md"
+patch = "changes/0032-captured.patch"
+
+[[patches]]
+target = "./playbooks/multi-phase-plan.md"
+patch = "changes/0033-captured.patch"
+
+[[patches]]
+target = "./playbooks/orchestrate.md"
+patch = "changes/0034-captured.patch"
+
+[[patches]]
+target = "./playbooks/pause-safely.md"
+patch = "changes/0035-captured.patch"
+
+[[patches]]
+target = "./playbooks/session-pickup.md"
+patch = "changes/0036-captured.patch"
+
+[[patches]]
+target = "./playbooks/worktree-cleanup.md"
+patch = "changes/0037-captured.patch"
+
+[[patches]]
+target = "./references/poteto-agent.md"
+patch = "changes/0038-captured.patch"
+
+[[patches]]
+target = "./scripts/bun.lock"
+patch = "changes/0039-captured.patch"
+
+[[patches]]
+target = "./scripts/package.json"
+patch = "changes/0040-captured.patch"

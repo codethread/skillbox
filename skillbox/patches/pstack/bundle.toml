@@ -1,0 +1,8 @@
+schema = 1
+bundle = "pstack"
+source_type = "git"
+source = "https://github.com/cursor/plugins"
+upstream = "https://github.com/cursor/plugins"
+root = "pstack"
+skills_root = "skills"
+update_ref = "main"

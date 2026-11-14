@@ -1,0 +1,12 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Build a server-side page whose controls dispatch configured Botlake agent runs, with credentials kept off the client and optional Tailscale access. Require a harmless end-to-end action proof and keep invocation restricted to the user rather than inventing a viewer workflow or command layer."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

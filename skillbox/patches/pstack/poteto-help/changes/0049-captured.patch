@@ -1,0 +1,13 @@
+diff --git a/references/licenses/ATTRIBUTION.md b/references/licenses/ATTRIBUTION.md
+index 50401365e15909011bf1a9860c7f04c0b3959986..ca46a6a84bd4d0bd36bbca6caa119c45e464ffe5 100644
+--- a/references/licenses/ATTRIBUTION.md
++++ b/references/licenses/ATTRIBUTION.md
+@@ -1,7 +1,6 @@
+ # Attribution
+ 
+-Portions of the pstack guide are derived from PSTACK by Lauren Tan.
++Copyright (c) 2026 Lauren Tan.
+ 
+-- Copyright (c) 2025 Cursor, Inc.
+ - Source: https://github.com/cursor/plugins/tree/3dbd22ff12742fb28c9700b9760baa29ed41dc13/pstack
+ - License: MIT. See [`LICENSE`](LICENSE).

@@ -1,0 +1,20 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Create or revise a personal mode from workspace-scoped conversation evidence and explicit user answers. Write only to the owner's skill source or a consumer-owned patch of an adapted import, preserve approval before edits, and never treat generated installs or a shared producer pack as the customization source."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0003-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0004-captured.patch"

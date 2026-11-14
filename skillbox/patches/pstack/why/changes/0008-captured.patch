@@ -1,0 +1,13 @@
+diff --git a/references/sources/datadog.md b/references/sources/datadog.md
+index 536466ddd8ae6543836abb84bdf1efd8e43089ba..285fb45d1364df7f986acddc7a31f02fb7189bc3 100644
+--- a/references/sources/datadog.md
++++ b/references/sources/datadog.md
+@@ -14,7 +14,7 @@ Datadog holds the runtime record, what actually happened in production, as oppos
+ 
+ ## How to search it
+ 
+-Use the Datadog MCP. Start broad, then narrow.
++If Datadog access is available, use its exposed search tools. The operation names below are examples. Check the available instructions for exact names and fields. Start broad, then narrow.
+ 
+ 1. **Identify the owning service(s).**
+ 

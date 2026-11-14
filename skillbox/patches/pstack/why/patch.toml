@@ -1,0 +1,79 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Investigate rationale through one read-only Botlake lane per available evidence category, seeded with concrete Git archaeology and identifiers. Preserve complete coverage accounting, source-specific evidence, citations, model diversity, and explicit gaps when an optional source is unavailable."
+
+[files."./references/source-playbook.md"]
+intent = "Map each evidence category to a concrete source playbook while leaving exact operations to the available integration's instructions or schema. Keep one source per investigator and require an explicit gap when access is unavailable."
+
+[files."./references/sources/code-archaeology.md"]
+intent = "Allow the session's forge access for review history instead of assuming gh, while keeping Git archaeology unchanged."
+
+[files."./references/synthesizer-prompt.md"]
+intent = "Use available evidence tools for citation checks and report access gaps per source; preserve confidence separation and require Git history even when PR access is unavailable."
+
+[files."./references/sources/databricks.md"]
+intent = "Guide read-only product analytics and warehouse investigation when Databricks SQL access exists. Preserve polling for asynchronous results, query evidence and citations, and the explicit limit that SQL cannot inspect notebooks; report notebook rationale as a gap."
+
+[files."./references/sources/datadog.md"]
+intent = "Guide broad-to-narrow production telemetry investigation when Datadog access exists. Use the available search operations, preserve time bounds and cited evidence, and report unavailable access instead of inventing runtime findings."
+
+[files."./references/sources/linear.md"]
+intent = "Guide issue and project-document investigation when Linear access exists. Use the available search and retrieval operations, follow linked and parent issues for rationale, cite evidence, and report unavailable access as a gap."
+
+[files."./references/sources/notion.md"]
+intent = "Guide PRD, RFC, and decision-record investigation when Notion access exists. Use the available search and page retrieval operations, preserve document context and citations, and report unavailable access as a gap."
+
+[files."./references/sources/sentry.md"]
+intent = "Guide issue and event investigation when Sentry access exists. Use the available search and retrieval operations, preserve concrete event evidence and time context, and report unavailable access instead of inferring error history."
+
+[files."./references/sources/slack.md"]
+intent = "Guide scoped Slack searches when chat access exists, including author, PR, error-string, and thread retrieval. Preserve authentication and privacy boundaries, cite the relevant conversation evidence, and stop with an explicit gap when access fails."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./references/source-playbook.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./references/sources/code-archaeology.md"
+patch = "changes/0003-captured.patch"
+
+[[patches]]
+target = "./references/synthesizer-prompt.md"
+patch = "changes/0004-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0005-captured.patch"
+
+[[patches]]
+target = "./references/source-playbook.md"
+patch = "changes/0006-captured.patch"
+
+[[patches]]
+target = "./references/sources/databricks.md"
+patch = "changes/0007-captured.patch"
+
+[[patches]]
+target = "./references/sources/datadog.md"
+patch = "changes/0008-captured.patch"
+
+[[patches]]
+target = "./references/sources/linear.md"
+patch = "changes/0009-captured.patch"
+
+[[patches]]
+target = "./references/sources/notion.md"
+patch = "changes/0010-captured.patch"
+
+[[patches]]
+target = "./references/sources/sentry.md"
+patch = "changes/0011-captured.patch"
+
+[[patches]]
+target = "./references/sources/slack.md"
+patch = "changes/0012-captured.patch"

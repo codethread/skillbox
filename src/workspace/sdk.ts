@@ -26,6 +26,43 @@ export const sdkConfig = {
 	agents: { include: ["universal"], default: ["universal"] },
 } satisfies SkillsConfig;
 
+export type RepositorySourceInspection =
+	| { kind: "repository"; repository: string; ref: string }
+	| { kind: "other" }
+	| { kind: "empty" };
+
+/** Use the SDK's public source parser/fetcher as the first source interpretation. */
+export async function inspectRepositorySource(
+	source: string,
+	cwd: string,
+): Promise<RepositorySourceInspection> {
+	let handle: SkillSource;
+	try {
+		handle = await resolveSource(source, {
+			cwd,
+			config: sdkConfig,
+			fullDepth: true,
+			onWarning: (warning) => {
+				throw warning;
+			},
+		});
+	} catch (cause) {
+		if (isSdkDiagnostic(cause) && cause.code === "SKILLS_NO_VALID_SKILLS")
+			return { kind: "empty" };
+		throw cause;
+	}
+	try {
+		if (!["github", "gitlab", "git"].includes(handle.source.type)) return { kind: "other" };
+		return {
+			kind: "repository",
+			repository: handle.source.url,
+			ref: handle.source.ref ?? "HEAD",
+		};
+	} finally {
+		await handle.dispose();
+	}
+}
+
 export async function resolveBundleSource(input: {
 	source: string;
 	bundles: readonly string[];

@@ -1,6 +1,6 @@
 ---
 name: skillbox-configure
-description: Configure repository-local Skillbox sources and bundles, select a workspace, restore installed skills, or diagnose add/sync failures.
+description: Configure repository-local Skillbox sources and bundles, import or patch upstream skills, restore installed skills, or diagnose sync and update failures.
 ---
 
 # Configure Skillbox
@@ -62,4 +62,8 @@ For configuration fields, source examples, or a failed command, load:
 skillbox skills file skillbox-configure references/configuration.md
 ```
 
-Treat managed installed files as generated output: sync can replace edits within managed skill directories. Change an owned source instead. Immutable revision replay, shared/offline caching, explicit updates, automatic migration, and intent-backed patches are not implemented; do not invent commands or promise those guarantees.
+`add <producer-source> <bundle>` also imports a producer's committed adapted bundle. It installs the adapted output and creates an empty consumer-owned patch pack under `skillbox/patches/<bundle>/`. Commit that pack with the config and lock. Ordinary sync retains the recorded producer snapshot; it does not follow new producer commits or local edits. A source may offer native and adapted bundles, but the same bundle name cannot select both layouts.
+
+For raw third-party plugin imports or changes to an imported adaptation, load `skillbox skills get skillbox-patch`. Raw imports start with init; existing adapted bundles use prepare, capture, sync, and update. Consumer patches remain separate from the producer's diffs and intents. To add a complementary project skill instead, use `skillbox skills get skillbox-author` and select its owned local bundle. Skill names must remain distinct.
+
+Treat managed installed files as generated output: sync can replace edits within managed skill directories. Change an owned source or an adapted bundle's prepared `edited/skills/` tree instead. Commit the relevant tracking and patch files. Native bundles retain their existing hash-checking behavior; automatic migration remains separate work.

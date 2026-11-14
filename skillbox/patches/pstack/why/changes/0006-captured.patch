@@ -1,0 +1,15 @@
+diff --git a/references/source-playbook.md b/references/source-playbook.md
+index 5ed026994aaef402bebc16a463c09dd434976e89..fb616fa05bc69f90db3d5ee8057361cc3d9d0d40 100644
+--- a/references/source-playbook.md
++++ b/references/source-playbook.md
+@@ -1,8 +1,8 @@
+ # Source playbooks
+ 
+-The why skill spawns one investigator per available evidence category, each reading a single source-specific playbook below. The playbooks are concrete examples for common MCPs. Adapt them for the available tool in the same category, using its help or schema to map the example operations. Record a gap when no access is available.
++The why skill assigns one investigator per available evidence category. Each reads one source-specific playbook. These playbooks give examples for common evidence sources. Adapt them to the tools available in this environment, using their instructions or schemas for exact operations. Record a gap when a source is unavailable.
+ 
+-| Category | Playbook | Example MCP it documents |
++| Category | Playbook | Example source |
+ |---|---|---|
+ | Source control history | [`code-archaeology.md`](./sources/code-archaeology.md) | git, `gh` |
+ | Issue / ticket tracker | [`linear.md`](./sources/linear.md) | Linear (adapt for Jira, GitHub Issues, Plane, Shortcut) |

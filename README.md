@@ -1,145 +1,79 @@
 # Skillbox
 
-Repository-local skill bundles for agents.
+Give your agents reusable skills without copying them between projects. Choose bundles, restore your project's skills after cloning, and customize upstream instructions while keeping a record of **why** you changed them.
 
-## Install
+## Get started
 
-Requires Node.js 22.20+ and Git. Install the CLI in your project:
-
-```sh
-bun add --dev @codethread/skillbox
-# or: npm add --save-dev @codethread/skillbox
-```
-
-The package ships a prebuilt CLI; no postinstall build is required. npm and Bun expose the `skillbox` executable to package scripts:
-
-```json
-{
-	"scripts": {
-		"skills:sync": "skillbox sync"
-	}
-}
-```
-
-## Add bundles
+Requires **Node.js 22.20+ and Git**. Install in your project, then add your first bundles:
 
 ```sh
-bunx @codethread/skillbox add https://github.com/codethread/agents dev coding
+npm install --save-dev @codethread/skillbox
+# or: bun add --dev @codethread/skillbox
+npx skillbox add codethread/agents dev coding
 ```
 
-### Build from source
+Skills and their supporting files install into `.agents/skills/`; `.claude/skills` links to that directory.
 
-Build a standalone CLI, then add a GitHub bundle to your project—source skills do not need an npm package. For repository development, `mise run` installs the pinned tools, root Bun workspace (including Botlake), and Git hooks:
+After cloning a configured project, install dependencies and restore its skills:
 
 ```sh
-bun install --frozen-lockfile
-bun run build
-./dist/skillbox --workspace ../my-project add https://github.com/codethread/agents dev coding
+npx skillbox sync
 ```
 
-Prefer a repository URL or GitHub shorthand with explicit bundle names. Reuse the exact same source string when adding more bundles to keep them in one config entry:
+For the examples below, use `npx skillbox` in a terminal or `skillbox` in package scripts, such as `"skills:sync": "skillbox sync"`.
+
+## Let your agent handle the details
+
+**Skillbox ships offline instructions for agents** covering setup, authoring, migration, customization, and upstream updates. Ask your agent to discover and load the relevant guidance:
 
 ```sh
-skillbox add owner/repo frontend
-skillbox add owner/repo backend
-# One source entry with bundles: ["backend", "frontend"].
+skillbox skills list
+skillbox skills get skillbox-configure
 ```
 
-A tree URL pointing to `skillbox/<bundle>` is also supported and implies the bundle name:
+The instructions and supporting references are built into the CLI—no checkout or network needed. If your project already has installed skills, have your agent follow the migration guidance before the first `add`.
 
-```sh
-skillbox add https://github.com/codethread/agents/tree/main/skillbox/dev
-```
+Use `skillbox <command> --help` for options.
 
-Git source strings are retained, not canonicalized: tree URLs for `dev` and `coding` create separate entries even when they refer to the same repository and ref. A repository URL and its GitHub shorthand also remain separate if mixed. Keep the intended Git ref when choosing a source; different refs are not interchangeable. The SDK handles fetching and discovery.
+## Choose bundles
 
-Local repositories also use explicit bundle names: `skillbox add ../my-skills development`.
-
-Bundles live under `skillbox/<bundle>/<skill>/SKILL.md`. The command copies each selected skill and its supporting files into the client's `.agents/skills/` and links `.claude/skills` to it. Unmanaged skill paths and name collisions are rejected without overwriting their contents.
-
-Ignore both generated installation paths in the workspace's `.gitignore` (the Claude path is a symlink, so its rule has no trailing slash):
-
-```gitignore
-/.agents/skills/
-/.claude/skills
-```
-
-The CLI does not add these rules automatically. If either path is already tracked, use `git rm -r --cached -- <path>` to untrack it without deleting the installation.
-
-Two files record the installation; commit both:
-
-- `skillbox/config.json` records source repositories and requested bundles. Local source paths are relative to the workspace root; Git sources retain their source string.
-- `skillbox/lock.json` is Skillbox's lockfile, retaining the SDK's native format. It records per-skill source information, content hashes, copy mode, and Git refs and skill paths where available. Local source paths remain relative to the workspace root. A branch such as `main`, or a content hash by itself, is **not an immutable revision pin**.
-
-Skillbox does not read or modify the root `skills-lock.json` used by `npx skills`. SDK lock generation happens only in disposable staging directories.
-
-For example, a config selecting a sibling source repository looks like:
+`skillbox/config.json` selects remote and local sources:
 
 ```json
 {
 	"sources": [
-		{
-			"source": "../my-skills",
-			"bundles": ["development"]
-		}
+		{ "source": "codethread/agents", "bundles": ["dev", "coding"] },
+		{ "source": ".", "bundles": ["local"] }
 	]
 }
 ```
 
-Adding another source or bundle preserves existing installed skills and lock entries. Repeating an add with the same source string and already-configured bundles performs no writes. The SDK config object stays in code; there is no second SDK config file.
+For the local selection, author skills at `skillbox/local/<name>/SKILL.md`, with supporting files alongside them. No patch pack is needed. You can also select a sibling repository such as `../team-skills`; config paths resolve from your project root. Skill names must be distinct across selections.
 
-### Workspaces
+Use `add` for the first installation. Afterward, edit the config and run `sync` to install selections or remove deselected skills.
 
-```sh
-bun run src/cli.ts --workspace frontend add ../my-skills development
-bun run src/cli.ts --workspace backend add ../my-skills development
-```
+## Customize upstream skills
 
-`--workspace` selects a workspace directory, defaulting to the current directory; `skillbox/config.json` is implied. In these examples, the existing `frontend/` and `backend/` directories each get their own `.agents/skills/`, `.claude/skills` link, config, and Skillbox lockfile. Relative and absolute directory paths are supported. Source arguments are resolved from the invocation directory, then saved relative to the workspace root.
+Adapt upstream skills to your workflow with reviewable patches and a reason for each changed file. Skillbox records the source snapshot; your agent can help review updates before you adopt them.
 
-## Sync
+This repository publishes the PSTACK workflow bundle for CT-configured Botlake agents:
 
 ```sh
-skillbox sync
-skillbox --workspace frontend sync
+skillbox add codethread/skillbox pstack
 ```
 
-Edit `skillbox/config.json` to add or remove sources/bundles, then run sync. Both tracking files must already exist; use `add` for the first installation. Sync installs newly selected skills, removes deselected managed skills and their lock entries, and preserves the config's formatting. Local paths in the config resolve from the selected workspace root. Use `"sources": []` to remove all managed skills.
+Choose the producer revision you want to use. Keep project-specific customizations in your project's patch pack, separate from the shared bundle. Ask your agent to follow the built-in patch guidance.
 
-Retained skills must still match their locked content hashes; sync does not update those hashes or refs. New skills receive SDK-generated lock entries. Unmanaged skill paths and name collisions are rejected before publishing. Installed managed files are generated output and can be replaced or removed by sync.
+## What to commit
 
-The JSON result reports `installed`, `unchanged`, and `removed` skill counts. Repeating sync with matching installed contents and lock entries reports an unchanged result without rewriting them.
+Commit `skillbox/config.json`, `skillbox/lock.json`, any `skillbox/patches/` packs, and locally authored source bundles, along with dependency changes and ignore rules.
 
-Operational commands return JSON with explicit `success`, concise result data, and structured errors. Full skill contents and config/lockfile dumps are not included by default.
+Edit owned sources or prepared adaptations, not generated installations. Prepared editing workspaces and update candidates live under `skillbox/.prepare/<bundle>/`; capture wanted edits before deleting them. Add these rules yourself; Skillbox does not manage `.gitignore`:
 
-Exact revision pin creation, shared caching, automatic ignore setup in consuming projects, migration, patches, and multi-workspace orchestration are not implemented yet.
-
-## Botlake Mail
-
-The repository lake enables direct Mail, registered identity links, and automatic live-agent delivery with five-minute post-stop resumption. Agents use `bl mail` and should inspect delivery status.
-
-## Changelog
-
-Read [the changelog](CHANGELOG.md), or query the history bundled in the installed CLI without a workspace, Git checkout, or network:
-
-```sh
-skillbox changelog
-skillbox changelog --since 0.1.1
-skillbox changelog --release 0.1.1 --text
+```gitignore
+/.agents/skills/
+/.claude/skills
+/skillbox/.prepare/
 ```
 
-The default JSON response uses the `success`/`data`/`errors` envelope. History starts at 0.1.0; the default selects the newest recorded release at or below the installed version. `--since` is exclusive and cannot be combined with `--release`. Pages contain up to 20 changes by default; use `--limit` (1–100) and continue with `--offset` at `data.nextOffset` when present. `--schema` returns the JSON Schema for `data`; `--text` opts into human-readable output. Breaking changes and adoption steps are recorded explicitly.
-
-## Agent guidance
-
-The CLI bundles offline instructions for project configuration and bundle authoring. Discover metadata first, then load only the instructions or supporting resource needed:
-
-```sh
-skillbox skills list
-skillbox skills get <name>
-skillbox skills file <name> <path>
-```
-
-These commands return JSON in the same `success`/`data`/`errors` envelope. `get` returns Markdown in `data.body` without frontmatter; `file` returns a selected resource in `data.content`. This reads CLI-bundled guidance, not skills installed in a workspace. `skills list --limit <count> --offset <count>` supports paging; `data.nextOffset: null` means exhausted. Use `skills schema <list|get|file>` for response schemas.
-
-Run `skillbox --help` or `skillbox <command> --help` for command options.
+See [release history](CHANGELOG.md), also available through `skillbox changelog`.

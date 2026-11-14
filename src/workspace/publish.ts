@@ -1,17 +1,17 @@
 import { mkdir, rename, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { configPath } from "./config.ts";
-import { lockPath } from "./lock.ts";
 import { statOptional } from "./paths.ts";
 
-export async function publish(staging: string, cwd: string) {
+export async function publish(
+	staging: string,
+	entries: readonly { staged: string; target: string }[],
+) {
 	const changes: { target: string; backup?: string; installed: boolean }[] = [];
 	try {
-		for (const path of [".agents/skills", ".claude/skills", lockPath, configPath]) {
-			const target = join(cwd, path);
+		for (const [index, { staged, target }] of entries.entries()) {
 			await mkdir(dirname(target), { recursive: true });
 			const backup = (await statOptional(target))
-				? join(staging, ".previous", path)
+				? join(staging, ".previous", String(index))
 				: undefined;
 			if (backup) {
 				await mkdir(dirname(backup), { recursive: true });
@@ -19,7 +19,7 @@ export async function publish(staging: string, cwd: string) {
 			}
 			const change = { target, backup, installed: false };
 			changes.push(change);
-			await rename(join(staging, path), target);
+			await rename(staged, target);
 			change.installed = true;
 		}
 	} catch (error) {

@@ -1,0 +1,47 @@
+diff --git a/SKILL.md b/SKILL.md
+index ab2c13931bbc3423ed57e809e9db1e31b19deadb..ef4c40a16d0e90646cdbe6fd84fb999c447c7ff8 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -1,6 +1,6 @@
+ ---
+ name: reflect
+-description: Spawn three parallel review agents over the active conversation record, surface learnings, and route each to a concrete edit on an existing skill. Use when the user says reflect.
++description: Delegate three parallel review agents over the active conversation record, surface learnings, and route each to a concrete edit on an existing skill. Use when the user says reflect.
+ disable-model-invocation: true
+ ---
+ 
+@@ -12,13 +12,11 @@ Invoke when the user says "reflect" or "/reflect". Skip when the conversation is
+ 
+ ## 1. Collect the run record
+ 
+-Before fanning out, locate this conversation's transcript through the active harness. Use the current task and agent records for supporting context. Stay within this workspace; do not search unrelated private chats. If no full transcript is available, pass a tight session digest and state its coverage.
++Before fanning out, locate this conversation's transcript through the active harness. Use Botlake's task, agent, and activity records for supporting context. Stay within this workspace; do not search unrelated private chats. If no full transcript is available, pass a tight session digest and state its coverage.
+ 
+-## 2. Spawn three reviewers in parallel
++## 2. Delegate three reviewers in parallel
+ 
+-Spawn three reviewers in parallel. Their briefs forbid file edits and external mutations while allowing evidence lookups for tickets, chat threads, and observability traces named by the record.
+-
+-Choose agents suited to each lens, using different models for complementary perspectives.
++Create a Botlake task under the current context group for each reviewer lane. Choose three agents from Botlake's agent catalog and dispatch their runs in parallel, using different models for complementary perspectives. Use a Botlake shared context group when the reviewers need the same session context. Their briefs forbid file edits and external mutations while allowing evidence lookups for tickets, chat threads, and observability traces named by the record.
+ 
+ | Lens | Prompt template |
+ |---|---|
+@@ -30,7 +28,7 @@ Pass each template verbatim, substituting the transcript path or digest where ma
+ 
+ ## 3. Synthesize
+ 
+-Spawn one synthesizer with read-only access to the available evidence tools for citation checks. Pass `references/synthesizer.md` verbatim, with each reviewer's full output inlined where marked. It returns an Accepted / Rejected / Backlog list.
++Delegate one synthesizer with read-only access to the available evidence tools for citation checks. Pass `references/synthesizer.md` verbatim, with each reviewer's full output inlined where marked. It returns an Accepted / Rejected / Backlog list.
+ 
+ ## 4. Structural enforcement check
+ 
+@@ -42,7 +40,7 @@ Present the synthesizer's full Accepted / Rejected / Backlog output and wait for
+ 
+ File each Backlog item to your team's devex or backlog tracker without waiting. Only the Accepted list waits for approval.
+ 
+-Before approval, show the skill's editable source destination and who owns it. Keep project-specific lessons in an owned local skill or a consumer-owned patch of an imported adapted bundle; route changes to unowned native skills or shared improvements to the source maintainer. After approval, edit the chosen source rather than a generated installation or plugin cache. Follow the project's skill-authoring guidance; for Skillbox, use `skillbox skills get skillbox-author` for owned skills or `skillbox skills get skillbox-patch` for imported adapted bundles. Never open a PR or push.
++Before approval, show the skill's editable source and its owner. Keep project-specific lessons in a source the project owns or a consumer-owned patch of an imported adapted bundle. Route changes to native skills you do not own or shared improvements to their maintainer. Personal modes and local overlays are optional. After approval, edit the owned source, not an installed copy. Follow the project's skill-authoring guidance. In a Skillbox-managed project, retrieve `skillbox-author` for an owned skill or `skillbox-patch` for a consumer-owned patch. Never open a PR or push.
+ 
+ Follow each approved row's Routing exactly:
+ 

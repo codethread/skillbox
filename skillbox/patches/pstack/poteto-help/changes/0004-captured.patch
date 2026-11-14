@@ -1,0 +1,21 @@
+diff --git a/references/upstream/ATTRIBUTION.md b/references/upstream/ATTRIBUTION.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..47edbcb7133470442dbccb0a234687d3ae95cee4
+--- /dev/null
++++ b/references/upstream/ATTRIBUTION.md
+@@ -0,0 +1,15 @@
++# Upstream attribution
++
++The guide pages and licence in this directory are copied from **PSTACK**, the official Cursor plugin by Lauren Tan.
++
++- Source: `https://github.com/cursor/plugins/tree/3dbd22ff12742fb28c9700b9760baa29ed41dc13/pstack`
++- Repository commit: `3dbd22ff12742fb28c9700b9760baa29ed41dc13`
++- PSTACK subtree: `4719e1c4b4c43bac85d4206a8b41dd2899769c1c`
++- Skills subtree: `8ffe53092c34afd8010a17d230681605ae16174b`
++- Licence: MIT, see [`LICENSE`](LICENSE)
++
++Adaptations made by this bundle:
++
++- Cursor installation, model rules, persistent modes, hosted execution, and built-in authoring instructions are adapted to the project's configured agents, tools, and skill sources. Cursor-only automation capabilities are identified rather than implied to exist here.
++- Images and the Cursor/Claude Code adapter pages are omitted; links to them are removed. Every retained guide page is linked from [`poteto-help`](../../SKILL.md).
++- The engineering principles and domain workflows are unchanged.

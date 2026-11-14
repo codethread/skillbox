@@ -20,6 +20,8 @@ import {
 } from "./skills/catalog.ts";
 import { failureResponse, responseError, successResponse } from "./response.ts";
 import { sync } from "./commands/sync.ts";
+import { patchCapture, patchInit, patchPrepare, patchUpdate } from "./commands/patch.ts";
+import { createAdaptedBundles } from "./workspace/adapted.ts";
 
 const program = new Command()
 	.name("skillbox")
@@ -52,7 +54,13 @@ Examples:
 	.action(async (source: string, bundles: string[]) => {
 		const cwd = process.cwd();
 		const workspace = await selectedWorkspace(cwd);
-		const result = await add({ cwd, source, bundles, workspace });
+		const result = await add({
+			adapted: createAdaptedBundles(),
+			cwd,
+			source,
+			bundles,
+			workspace,
+		});
 		writeJson(
 			successResponse({
 				status: result.status,
@@ -63,12 +71,126 @@ Examples:
 		);
 	});
 
+const patch = program
+	.command("patch")
+	.description("Edit pinned bundles and record file intent with ordered diffs.")
+	.addHelpText(
+		"after",
+		"\nWorkflow: init → edit → capture → annotate file intent → sync.\nUpdates: update → review/edit → capture → sync.\nRepeat edit/capture in the same workspace; capture preserves file notes.\nAgent guidance: skills get skillbox-patch.",
+	);
+patch
+	.command("init")
+	.description("Pin a Git skills subtree and create an editable workspace.")
+	.argument("<bundle>")
+	.requiredOption("--source <repo>", "Git repository or GitHub tree URL")
+	.option("--root <path>", "plugin root relative to the repository; use . for its root")
+	.option(
+		"--skills-root <path>",
+		"skills directory relative to the plugin root (default: skills)",
+	)
+	.option("--ref <ref>", "source revision to resolve to an immutable commit")
+	.option("--update-ref <ref>", "ref to resolve on a later explicit update")
+	.option("--output <dir>", "new editing directory (default: skillbox/.prepare/<bundle>/edit)")
+	.action(async (bundle, options) => {
+		const cwd = process.cwd();
+		const workspace = await selectedWorkspace(cwd);
+		writeJson(
+			successResponse(
+				await patchInit({
+					adapted: createAdaptedBundles(),
+					workspace,
+					bundle,
+					source: options.source,
+					root: options.root,
+					skillsRoot: options.skillsRoot,
+					ref: options.ref,
+					updateRef: options.updateRef,
+					output: options.output,
+				}),
+			),
+		);
+	});
+patch
+	.command("prepare")
+	.description("Create pristine and editable copies of the pinned patched source.")
+	.argument("<bundle>")
+	.option("--output <dir>", "new editing directory (default: skillbox/.prepare/<bundle>/edit)")
+	.action(async (bundle, options) => {
+		const cwd = process.cwd();
+		writeJson(
+			successResponse(
+				await patchPrepare({
+					adapted: createAdaptedBundles(),
+					workspace: await selectedWorkspace(cwd),
+					bundle,
+					output: options.output,
+				}),
+			),
+		);
+	});
+patch
+	.command("capture")
+	.description(
+		"Record edited files or accept an update candidate; annotate new file intent before sync.",
+	)
+	.argument("<bundle>")
+	.requiredOption("--from <dir>", "prepared workspace containing manifest.json and edited/")
+	.option("--skill <name>", "capture only this skill")
+	.option(
+		"--map <mapping...>",
+		"preserve intent across skill/old-path=skill/new-path renames in an update",
+	)
+	.action(async (bundle, options) => {
+		const cwd = process.cwd();
+		writeJson(
+			successResponse(
+				await patchCapture({
+					adapted: createAdaptedBundles(),
+					workspace: await selectedWorkspace(cwd),
+					bundle,
+					from: options.from,
+					skill: options.skill,
+					maps: options.map,
+				}),
+			),
+		);
+	});
+program
+	.command("update")
+	.description("Prepare an exact-source update candidate; review and accept with patch capture.")
+	.argument("<bundle>")
+	.option(
+		"--ref <ref>",
+		"Git revision to resolve to an immutable commit; not for local producers",
+	)
+	.addHelpText(
+		"after",
+		"\nGit sources use the bundle's update_ref when --ref is omitted.\nLocal producers use the current worktree and reject --ref.\nReturns source pins and editable paths; tracked files and installations stay unchanged.\nUPDATE_CONFLICT retains the candidate and reports failed patches.\nReview with Git and file intent, then accept with patch capture and install with sync.",
+	)
+	.action(async (bundle, options) => {
+		const cwd = process.cwd();
+		writeJson(
+			successResponse(
+				await patchUpdate({
+					adapted: createAdaptedBundles(),
+					workspace: await selectedWorkspace(cwd),
+					bundle,
+					ref: options.ref,
+				}),
+			),
+		);
+	});
+
 program
 	.command("sync")
-	.description("Reconcile configured skills while preserving retained content hashes.")
+	.description("Install configured skills from recorded sources and patches.")
 	.action(async () => {
 		const cwd = process.cwd();
-		const result = await sync({ cwd, workspace: await selectedWorkspace(cwd) });
+		const result = await sync({
+			adapted: createAdaptedBundles(),
+			cwd,
+			workspace: await selectedWorkspace(cwd),
+		});
 		writeJson(successResponse(result));
 	});
 

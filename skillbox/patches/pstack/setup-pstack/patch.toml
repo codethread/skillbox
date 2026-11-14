@@ -1,0 +1,12 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Configure pstack roles from Botlake's supported agent catalog and reasoning budgets, validate every choice, and confirm before persistence. Use the project's supported local overrides, explain their scope, preserve optional verification offers, and never create a parallel roster or mutate a shared preset implicitly."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

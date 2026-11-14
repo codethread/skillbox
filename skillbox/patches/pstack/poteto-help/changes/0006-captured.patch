@@ -1,0 +1,61 @@
+diff --git a/references/upstream/guide/01-setup.md b/references/upstream/guide/01-setup.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..5e09ebb5b2a4d152403467ef630d69dee6cbf2a8
+--- /dev/null
++++ b/references/upstream/guide/01-setup.md
+@@ -0,0 +1,55 @@
++# Set up pstack
++
++In this page you install the bundle, pick which agents pstack uses, and run your first task. Setup is one command plus a short conversation.
++
++## Install the bundle
++
++Install the pstack bundle with the project's Skillbox configuration. For installation questions, load `skillbox skills get skillbox-configure`.
++
++## Pick your agents
++
++Run:
++
++```text
++/setup-pstack
++```
++
++[`/setup-pstack`](../../../../setup-pstack/SKILL.md) reads the configured agent catalog, asks for a reasoning budget, shows you each role (code delegates, judgment, the review panels), and asks what you want. Answer the questions. The existing configuration supplies the defaults; setup does not create a second pstack roster.
++
++The budget labels are `unlimited` (max reasoning), `large` (xhigh), `medium` (high), and `small` (medium). Setup maps them to supported choices rather than assuming every model has every effort level.
++
++You only override what you care about. Persistent changes use the project's existing agent configuration, with your approval of their scope: a shared agent's model change affects other workflows too. Task-specific choices, such as panel size or a model comparison, belong in the task prompt.
++
++## Accept the verification offers, or don't
++
++At the end of setup, `/setup-pstack` looks for a way to prove app behavior in your project, either a `verify-*` skill or an existing harness. If it finds neither, it offers once to generate one with [`/create-verification-skill`](../../../../create-verification-skill/SKILL.md).
++
++Say yes and it writes a project-local `verify-<app>` skill into the project's skill source directory, which teaches agents to drive your app the way a user does. It proves the skill works once before handing it over. Say no and setup moves on. You can run `/create-verification-skill` yourself any time. [Verify and ship](06-verify-and-ship.md#create-a-project-verification-skill) covers it in depth.
++
++If you're new to pstack, say yes. An agent that can check its own work keeps going until the check passes. An agent that can't hands every result back to you to check by hand. Of everything in this guide, the verification skill pays off the most.
++
++Then setup offers once to generate a formal verification skill with [`/create-formal-verification-skill`](../../../../create-formal-verification-skill/SKILL.md), unless the project already has one. Tests check the cases someone thought to write. A formal verification skill checks one key property of your code, such as "a job never runs twice at once", in every case within a stated scope. Say yes when your code has concurrency, retries, a state machine, or a parser, where a bug is costly and tests rarely reach the case that breaks. Otherwise say no, and run it later if that changes. [Verify and ship](06-verify-and-ship.md#prove-a-property-with-a-formal-verification-skill) covers it.
++
++Setup reports what changed and when the configured runtime picks it up.
++
++## Keep the cost in check
++
++pstack spends extra tokens on subagents and review panels. That's the price of the rigor. To spend fewer:
++
++- Rerun `/setup-pstack` and pick a smaller reasoning budget or cheaper models. A strong model for judgment with cheaper, faster models in the code roles is a good split.
++- Ask for fewer panelists when the task needs less scrutiny.
++- Save `/poteto-mode` for work that needs rigor. A small, obvious edit doesn't.
++
++## Run your first task
++
++Pick something real but small, and describe it the way you'd describe it to a colleague:
++
++```text
++/poteto-mode add a --json flag to this command. text output stays byte-identical. verify both.
++```
++
++Watch the todo list. Its first items are the matched playbook's steps copied in, the Feature playbook for this prompt. If `/poteto-mode` skips a step, the step stays in the list with `skip: <reason>`, so you can see what it chose not to do.
++
++From here you can type normal follow-ups. Start each new task with `/poteto-mode`, and name it again if it drops from context. Cursor's Custom Mode activation is not part of this bundle.
++
++Next: [Route work through `/poteto-mode`](02-poteto-mode.md).

@@ -1,0 +1,12 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Design an auditable hypothesis-driven playbook for work that lacks a narrower workflow. Split only at real seams, isolate writers, preserve checkable evidence, and use Botlake tasks for independently delegated lanes without duplicating Botlake operating instructions."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

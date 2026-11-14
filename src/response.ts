@@ -7,6 +7,9 @@ export interface ResponseErrorItem {
 	source?: string;
 	skill?: string;
 	input?: string;
+	target?: string;
+	patch?: string;
+	reason?: string;
 }
 
 export interface SuccessResponse<Data> {

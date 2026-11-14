@@ -7,6 +7,10 @@
 		{
 			"source": ".",
 			"bundles": ["local"]
+		},
+		{
+			"source": "https://github.com/cursor/plugins",
+			"bundles": ["pstack"]
 		}
 	]
 }

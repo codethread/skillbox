@@ -1,0 +1,12 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Rebuild current work context from the active transcript and Botlake task, agent, activity, mail, and shared context records. Bound the search, use `/why` for product history, delegate independent slices as tracked lanes, verify live state, and state transcript or evidence gaps explicitly."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

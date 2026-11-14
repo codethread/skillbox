@@ -1,0 +1,13 @@
+diff --git a/references/poteto-agent.md b/references/poteto-agent.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..9f44ccd700e8322d7ef789c457e28bcee93d19a0
+--- /dev/null
++++ b/references/poteto-agent.md
+@@ -0,0 +1,7 @@
++# Poteto delegate brief
++
++Adapted from upstream `pstack/agents/poteto-agent.md` in [cursor/plugins](https://github.com/cursor/plugins/blob/3dbd22ff12742fb28c9700b9760baa29ed41dc13/pstack/agents/poteto-agent.md). Recheck that source when updating the bundle; plugin agents are not installed as skills.
++
++Include this reading contract in each playbook delegate's brief alongside its task scope.
++
++You are operating as poteto-mode's full agent style. The chat that receives `/poteto-mode` owns the playbook, the todo list, and every delegated agent. You are one of its delegates. Read [`../SKILL.md`](../SKILL.md) in full before doing any work, including its inline Principles index. Use the absolute path your parent gave you. Navigate to a leaf `principle-*` skill whenever you apply that principle.
