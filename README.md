@@ -143,7 +143,7 @@ Run sync only after every intent is nonblank:
 skillbox sync
 ```
 
-Otherwise sync returns `INTENT_REQUIRED` without changing the installation. Sync validates the adapted source, patch, and output hashes before publishing and still rejects native source content that differs from its locked hash. File intent is explanatory and may be edited directly; integrity hashes protect source identity, patch targets and paths, base revisions, and diff payloads.
+Otherwise sync returns `INTENT_REQUIRED` without changing the installation. Sync validates the adapted source, patch, and output hashes before publishing and still rejects native source content that differs from its locked hash. The bundle lock pins the upstream revision; each patch record contains only its target and diff path. File intent is explanatory and may be edited directly; integrity hashes protect source identity, patch targets and paths, and diff payloads.
 
 Source snapshots are cached outside the project under the XDG cache directory (override with `SKILLBOX_CACHE_DIR`). A verified cached revision can be restored offline; a cold cache needs access to the pinned Git revision.
 

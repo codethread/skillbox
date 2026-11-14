@@ -6,4 +6,3 @@ intent = "Audit the trail against lake run records and the harness's own transcr
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

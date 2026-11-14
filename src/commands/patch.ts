@@ -421,7 +421,6 @@ export async function patchCapture(input: {
 				next.patches.push({
 					target: file,
 					patch: artifact,
-					base_revision: manifest.revision,
 				});
 			}
 			if (diffs.length) {

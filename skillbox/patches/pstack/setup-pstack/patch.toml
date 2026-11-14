@@ -6,4 +6,3 @@ intent = "Replace Cursor model-slug detection and the ~/.cursor rule file with t
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

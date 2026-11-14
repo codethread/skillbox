@@ -51,79 +51,63 @@ intent = "Carry the guide index with its install and model links replaced by Ski
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/prompting.md"
 patch = "changes/0002-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/recipes.md"
 patch = "changes/0003-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/upstream/ATTRIBUTION.md"
 patch = "changes/0004-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/upstream/LICENSE"
 patch = "changes/0005-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/upstream/guide/01-setup.md"
 patch = "changes/0006-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/upstream/guide/02-poteto-mode.md"
 patch = "changes/0007-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/upstream/guide/03-understand.md"
 patch = "changes/0008-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/upstream/guide/04-design.md"
 patch = "changes/0009-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/upstream/guide/05-build-and-clean.md"
 patch = "changes/0010-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/upstream/guide/06-verify-and-ship.md"
 patch = "changes/0011-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/upstream/guide/07-overnight.md"
 patch = "changes/0012-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/upstream/guide/08-principles.md"
 patch = "changes/0013-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/upstream/guide/09-make-it-yours.md"
 patch = "changes/0014-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/upstream/guide/10-recipes-and-pitfalls.md"
 patch = "changes/0015-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/upstream/guide/README.md"
 patch = "changes/0016-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

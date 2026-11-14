@@ -67,7 +67,6 @@ export const patchSchema = z.strictObject({
 		z.strictObject({
 			target: targetSchema,
 			patch: relativePath,
-			base_revision: revisionSchema,
 		}),
 	),
 });

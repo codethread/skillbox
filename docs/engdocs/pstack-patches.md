@@ -104,7 +104,7 @@ To change the bundle, use the same workflow as a consumer:
 5. Continue editing and capturing in the same workspace as needed. Manual intent annotation and an intervening sync do not make the workspace single-use. Review notes as files evolve: the maintainer owns their accuracy, and capture neither rewrites nor guesses intent.
 6. Run `bun run src/cli.ts sync` only after using `intentFiles` to address the reported `pendingIntents` count. A blank intent returns `INTENT_REQUIRED` without installation mutation. Review and commit `skillbox/config.json`, `skillbox/lock.json`, and `skillbox/patches/pstack/`.
 
-File intent remains editable explanation and is excluded from integrity hashes. Source identity, patch targets and paths, base revisions, and concrete diff payloads are protected.
+The bundle lock pins the upstream revision. Each patch record contains only its target and diff path. File intent remains editable explanation and is excluded from integrity hashes. Source identity, patch targets and paths, and concrete diff payloads are protected.
 
 For an upstream refresh, `bun run src/cli.ts update pstack` advances and verifies the adapted lock but leaves installation to sync. A conflict preserves the tracked and live state and returns a regeneration workspace. Edit that workspace and use `patch adopt`; pass an exact `--map skill/old-path=skill/new-path` when an upstream rename should retain the old reason. Adopt may rebuild ordered diffs against the new pristine source while preserving file notes; new targets receive blank intent.
 
@@ -114,7 +114,7 @@ For an upstream refresh, `bun run src/cli.ts update pstack` advances and verifie
 
 The review worktree is on `feat/pstack-patches`. Its committed dogfood artifacts select all 58 PSTACK skills beside the nine existing native skills. Running `bun run src/cli.ts sync` produces 67 skills under ignored `.agents/skills/`.
 
-- The patch pack records 75 captured changes across 17 skills: 58 modifications, 16 additions, and one deletion. Each target has file-level intent, and each patch records an exact base revision and concrete Git diff.
+- The patch pack records 75 captured changes across 17 skills: 58 modifications, 16 additions, and one deletion. Each target has file-level intent, each patch points to a concrete Git diff, and the bundle lock records the exact source revision.
 - The PSTACK installation contains 550 files, including 423 files under script directories. Its bytes and executable modes match the prepared edited source. The nine native lock entries remain unchanged.
 - The deleted file is `poteto-mode/scripts/worktree-audit.sh`, whose Cursor transcript assumptions do not apply here. The corresponding playbook uses Botlake records and `wktree`; the deletion and its reason are recorded. The other five upstream executable files retain their executable modes.
 - Removing generated output and restoring with the Node build recreates all 67 skills. Repeated sync preserves file modification times. Bun source, packaged Node, and standalone binary sync all pass.

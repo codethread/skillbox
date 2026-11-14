@@ -37,8 +37,9 @@ intent = "Explain why, the required outcome, and constraints."
 [[patches]]
 target = "./references/tools.md"
 patch = "changes/0001-captured.patch"
-base_revision = "<upstream commit>"
 ```
+
+The bundle's `lock.json` pins the upstream revision. File records hold intent; ordered patch records contain only the target and diff path.
 
 Use the result's `pendingIntents` count and workspace-relative `intentFiles` paths to find manifests requiring annotation. For every blank intent, edit `patch.toml` directly and state:
 
@@ -46,7 +47,7 @@ Use the result's `pendingIntents` count and workspace-relative `intentFiles` pat
 - **Outcome:** the behavior the adapted file must retain.
 - **Constraints:** compatibility, policy, or scope that future regeneration must preserve.
 
-Intent is explanatory: changing it does not invalidate the patch hash. Patch targets and paths, base revisions, diff payloads, and source identity remain integrity-protected.
+Intent is explanatory: changing it does not invalidate the patch hash. Patch targets and paths, diff payloads, and the bundle's source identity remain integrity-protected.
 
 The prepared workspace is reusable. After capture or manual intent annotation, make further edits in the same `edited/skills/` tree and capture again. Existing reasons remain attached and shared by every patch for that target; only new targets need annotation. The user owns the continuing accuracy of those notes as the file evolves—capture does not rewrite or guess intent.
 

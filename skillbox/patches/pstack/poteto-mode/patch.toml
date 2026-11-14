@@ -84,134 +84,107 @@ intent = "Delete the runtime-only worktree auditor. Its delete-safety column dep
 [[patches]]
 target = "./SKILL.md"
 patch = "changes/0001-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/authoring-a-skill.md"
 patch = "changes/0002-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/autonomous-run.md"
 patch = "changes/0003-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/autopilot-full.md"
 patch = "changes/0004-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/babysit.md"
 patch = "changes/0005-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/bug-fix.md"
 patch = "changes/0006-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/eval.md"
 patch = "changes/0007-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/feature.md"
 patch = "changes/0008-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/hillclimb.md"
 patch = "changes/0009-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/multi-phase-plan.md"
 patch = "changes/0010-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/opening-a-pr.md"
 patch = "changes/0011-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/orchestrate.md"
 patch = "changes/0012-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/pause-safely.md"
 patch = "changes/0013-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/perf-issue.md"
 patch = "changes/0014-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/prototype.md"
 patch = "changes/0015-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/refactoring.md"
 patch = "changes/0016-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/runtime-forensics.md"
 patch = "changes/0017-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/session-pickup.md"
 patch = "changes/0018-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/shipping.md"
 patch = "changes/0019-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/trace-forensics.md"
 patch = "changes/0020-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/visual-parity.md"
 patch = "changes/0021-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./playbooks/worktree-cleanup.md"
 patch = "changes/0022-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/botlake-tools.md"
 patch = "changes/0023-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./references/poteto-agent.md"
 patch = "changes/0024-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./scripts/check-plan.mjs"
 patch = "changes/0025-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./scripts/check-plan.test.ts"
 patch = "changes/0026-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 
 [[patches]]
 target = "./scripts/worktree-audit.sh"
 patch = "changes/0027-captured.patch"
-base_revision = "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
