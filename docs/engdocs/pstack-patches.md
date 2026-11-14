@@ -81,13 +81,13 @@ The source cache is outside the project under the XDG cache directory; `SKILLBOX
 
 ## Consuming the shared bundle
 
-Use `skillbox add <producer-source> pstack` from the consuming project. The [README](../../README.md#consume-a-shared-adaptation) documents installation and customization. The consumer commits its own config, lock, and initially empty patch pack; it does not copy the producer's intent manifests or generated installation.
+Use `skillbox add <producer-source> pstack` from the consuming project. The [README](../../README.md#customize-upstream-skills) introduces installation and customization. The consumer commits its own config, lock, and initially empty patch pack; it does not copy the producer's intent manifests or generated installation.
 
 `patch prepare pstack` starts from the producer's adapted output. Capture records only the consumer's additional changes and intent. `update pstack` stages a new producer snapshot and replays those consumer patches, without independently advancing the original PSTACK pin. `--ref` selects a Git revision; local producers use the current worktree and reject `--ref`. Review the producer changes and the materialized result before capture and sync. A separate local bundle can hold personal modes or project verification skills without changing the imported adaptation.
 
 ## Maintaining the shared bundle
 
-The [README](../../README.md#import-and-patch-a-plugin) documents importing a new bundle. This repository already records its PSTACK selection, so restore it with:
+The [README](../../README.md#let-your-agent-handle-the-details) points to bundled instructions for importing a new bundle. This repository already records its PSTACK selection, so restore it with:
 
 ```sh
 bun run src/cli.ts sync
