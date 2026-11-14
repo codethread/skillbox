@@ -112,7 +112,53 @@ The JSON result reports `installed`, `unchanged`, and `removed` skill counts. Re
 
 Operational commands return JSON with explicit `success`, concise result data, and structured errors. Full skill contents and config/lockfile dumps are not included by default.
 
-Exact revision pin creation, shared caching, automatic ignore setup in consuming projects, migration, patches, and multi-workspace orchestration are not implemented yet.
+## Import and patch a plugin
+
+An adapted bundle imports a Git repository's skills subtree, pins its exact revision, and keeps local changes as reviewable patches. For example, import all of the official PSTACK skills under the bundle name `pstack`:
+
+```sh
+skillbox patch init pstack \
+  --source https://github.com/cursor/plugins \
+  --root pstack --skills-root skills \
+  --ref 3dbd22ff12742fb28c9700b9760baa29ed41dc13 --update-ref main
+skillbox patch prepare pstack --output .skillbox-prepare-pstack
+```
+
+`init` installs the skills and records the source. `prepare` returns an editable workspace containing `pristine/`, `edited/`, and a manifest. Edit files under `edited/skills/`, including nested references and scripts. Capture those changes with their reason:
+
+```sh
+skillbox patch capture pstack --from .skillbox-prepare-pstack \
+  --intent "Use the project's Botlake seats, work records, and Mail for coordination."
+skillbox sync
+```
+
+For distinct reasons per file, pass `--intent-file intents.toml` instead of `--intent`. Each `[[change]]` entry names a `skill`, a skill-relative `target` such as `./references/tools.md`, and its `intent`. Additions, deletions, binary files, and executable mode changes are captured as concrete Git diffs. An optional `--skill` narrows capture to one skill.
+
+Commit `skillbox/config.json`, `skillbox/lock.json`, and `skillbox/patches/<bundle>/`. The patch directory contains the source descriptor, exact source revision and content hashes, and per-skill intent manifests and diffs. Keep `.agents/skills/`, `.claude/skills`, and editable workspaces ignored. Sync reconstructs installed skills from the pinned source and committed patches; it neither advances the source nor interprets the intent.
+
+Source snapshots are cached outside the project, under the XDG cache directory (override with `SKILLBOX_CACHE_DIR`). A verified cached revision can be restored offline. A cold cache needs access to the pinned Git revision; the full upstream source is not committed to the project. Existing native bundles retain their existing source-fetching behavior.
+
+Request upstream changes explicitly:
+
+```sh
+skillbox update pstack                 # resolve the configured update_ref
+skillbox update pstack --ref <commit>  # choose a particular revision
+```
+
+If a patch no longer applies, update leaves the current installation and tracking files unchanged and returns an `UPDATE_CONFLICT` with a regeneration workspace. Adapt its `edited/` files using the recorded intents, then adopt the result:
+
+```sh
+skillbox patch adopt pstack --from <returned-workspace>
+# When upstream renamed a patched file, preserve its reason explicitly:
+skillbox patch adopt pstack --from <returned-workspace> \
+  --map 'skill/references/old.md=skill/references/new.md'
+```
+
+Supply `--intent` or `--intent-file` for newly introduced changes. Capture and adopt regenerate patch artifacts through the CLI; hand-editing a committed diff does not update its lock. Re-run sync to verify the result.
+
+This repository dogfoods PSTACK adapted for Botlake. See [the POC design and verification guide](docs/engdocs/pstack-patches.md) for provenance, adaptation scope, and the authoring helper.
+
+Native bundle revision pin creation, automatic ignore setup in consuming projects, migration, and multi-workspace orchestration remain separate work.
 
 ## Botlake Mail
 

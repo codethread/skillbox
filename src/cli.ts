@@ -20,6 +20,8 @@ import {
 } from "./skills/catalog.ts";
 import { failureResponse, responseError, successResponse } from "./response.ts";
 import { sync } from "./commands/sync.ts";
+import { patchCapture, patchInit, patchPrepare, patchUpdate } from "./commands/patch.ts";
+import { createAdaptedBundles } from "./workspace/adapted.ts";
 
 const program = new Command()
 	.name("skillbox")
@@ -63,12 +65,134 @@ Examples:
 		);
 	});
 
+const patch = program.command("patch").description("Manage exact-source adapted bundle patches.");
+patch
+	.command("init")
+	.description("Import a Git skills subtree as an immutable adapted bundle.")
+	.argument("<bundle>")
+	.requiredOption("--source <repo>", "Git repository or GitHub tree URL")
+	.option("--root <path>", "plugin root relative to the repository; use . for its root")
+	.option(
+		"--skills-root <path>",
+		"skills directory relative to the plugin root (default: skills)",
+	)
+	.option("--ref <ref>", "source revision to resolve to an immutable commit")
+	.option("--update-ref <ref>", "ref to resolve on a later explicit update")
+	.action(async (bundle, options) => {
+		const cwd = process.cwd();
+		const workspace = await selectedWorkspace(cwd);
+		writeJson(
+			successResponse(
+				await patchInit({
+					adapted: createAdaptedBundles(),
+					cwd,
+					workspace,
+					bundle,
+					source: options.source,
+					root: options.root,
+					skillsRoot: options.skillsRoot,
+					ref: options.ref,
+					updateRef: options.updateRef,
+				}),
+			),
+		);
+	});
+patch
+	.command("prepare")
+	.description("Create pristine and editable copies of the pinned patched source.")
+	.argument("<bundle>")
+	.requiredOption("--output <dir>", "new editing workspace directory")
+	.action(async (bundle, options) => {
+		const cwd = process.cwd();
+		writeJson(
+			successResponse(
+				await patchPrepare({
+					adapted: createAdaptedBundles(),
+					workspace: await selectedWorkspace(cwd),
+					bundle,
+					output: options.output,
+				}),
+			),
+		);
+	});
+patch
+	.command("capture")
+	.description("Capture edited source files as per-file diffs with intent.")
+	.argument("<bundle>")
+	.requiredOption("--from <dir>", "prepared workspace containing manifest.json and edited/")
+	.option("--skill <name>", "capture only this skill")
+	.option("--intent <text>", "reason for the captured changes")
+	.option("--intent-file <file>", "TOML file with a reason per changed target")
+	.action(async (bundle, options) => {
+		const cwd = process.cwd();
+		writeJson(
+			successResponse(
+				await patchCapture({
+					adapted: createAdaptedBundles(),
+					workspace: await selectedWorkspace(cwd),
+					bundle,
+					from: options.from,
+					skill: options.skill,
+					intent: options.intent,
+					intentFile: options.intentFile,
+				}),
+			),
+		);
+	});
+patch
+	.command("adopt")
+	.description("Adopt regenerated edits after an upstream update conflict.")
+	.argument("<bundle>")
+	.requiredOption("--from <dir>", "prepared workspace containing manifest.json and edited/")
+	.option("--intent <text>", "reason for the captured changes")
+	.option("--intent-file <file>", "TOML file with a reason per changed target")
+	.option("--map <mapping...>", "preserve intent across skill/old-path=skill/new-path renames")
+	.action(async (bundle, options) => {
+		const cwd = process.cwd();
+		writeJson(
+			successResponse(
+				await patchCapture({
+					adapted: createAdaptedBundles(),
+					workspace: await selectedWorkspace(cwd),
+					bundle,
+					from: options.from,
+					intent: options.intent,
+					intentFile: options.intentFile,
+					maps: options.map,
+				}),
+			),
+		);
+	});
+
+program
+	.command("update")
+	.description("Advance an adapted bundle and replay its recorded patches.")
+	.argument("<bundle>")
+	.option("--ref <ref>", "source revision to resolve to an immutable commit")
+	.action(async (bundle, options) => {
+		const cwd = process.cwd();
+		writeJson(
+			successResponse(
+				await patchUpdate({
+					adapted: createAdaptedBundles(),
+					workspace: await selectedWorkspace(cwd),
+					bundle,
+					ref: options.ref,
+				}),
+			),
+		);
+	});
+
 program
 	.command("sync")
 	.description("Reconcile configured skills while preserving retained content hashes.")
 	.action(async () => {
 		const cwd = process.cwd();
-		const result = await sync({ cwd, workspace: await selectedWorkspace(cwd) });
+		const result = await sync({
+			adapted: createAdaptedBundles(),
+			cwd,
+			workspace: await selectedWorkspace(cwd),
+		});
 		writeJson(successResponse(result));
 	});
 

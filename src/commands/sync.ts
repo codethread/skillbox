@@ -1,4 +1,5 @@
 import {
+	cp,
 	mkdir,
 	mkdtemp,
 	readFile,
@@ -9,7 +10,7 @@ import {
 	symlink,
 	writeFile,
 } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, posix, resolve } from "node:path";
 import { installSkills } from "skills";
 import { configPath, readConfig } from "../workspace/config.ts";
 import { lockPath, readLock, relocateLock } from "../workspace/lock.ts";
@@ -17,10 +18,14 @@ import { readOptional, statOptional } from "../workspace/paths.ts";
 import { publish } from "../workspace/publish.ts";
 import { ResponseError, responseError } from "../response.ts";
 import { resolveBundleSource, sdkConfig, sdkLockPath } from "../workspace/sdk.ts";
+import { readAdaptedBundle, type AdaptedBundles } from "../workspace/adapted.ts";
 
 export interface SyncInput {
+	adapted: AdaptedBundles;
 	cwd: string;
 	workspace?: string;
+	acceptContentChangesForBundle?: string;
+	bundlePackOverrides?: Readonly<Record<string, string>>;
 }
 
 export interface SyncResult {
@@ -53,53 +58,97 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 	let retainStaging = false;
 	try {
 		const selectedNames = new Set<string>();
+		const acceptedNames = new Set<string>();
+		const adaptedEntries = new Map<
+			string,
+			{ source: string; revision: string; skillPath: string }
+		>();
 		for (const source of config.sources) {
-			const resolved = await resolveBundleSource({
-				source: source.source,
-				bundles: source.bundles,
-				cwd: workspace,
-				workspace,
-			});
-			try {
-				for (const skill of resolved.skills) {
-					if (selectedNames.has(skill.name)) {
-						throw responseError(
-							"SKILL_NAME_COLLISION",
-							`Skill name collision: ${skill.name}. No skills were changed.`,
-							{ source: resolved.source, skill: skill.name },
+			for (const bundle of source.bundles) {
+				const override = input.bundlePackOverrides?.[bundle];
+				const packWorkspace = override ? join(staging, ".packs", bundle) : workspace;
+				if (override) {
+					await mkdir(join(packWorkspace, "skillbox/patches"), { recursive: true });
+					await cp(override, join(packWorkspace, "skillbox/patches", bundle), {
+						recursive: true,
+						preserveTimestamps: true,
+					});
+				}
+				const adapted = await readAdaptedBundle(packWorkspace, bundle);
+				if (adapted && adapted.descriptor.source !== source.source) {
+					throw responseError(
+						"BUNDLE_SOURCE_MISMATCH",
+						`Patch bundle ${bundle} belongs to a different source.`,
+						{ source: source.source, skill: bundle },
+					);
+				}
+				const materialized = adapted
+					? await input.adapted.materializeBundle(
+							packWorkspace,
+							bundle,
+							join(staging, `.materialized-${bundle}`),
+						)
+					: undefined;
+				const resolved = await resolveBundleSource({
+					source: materialized?.canonical ?? source.source,
+					bundles: [bundle],
+					cwd: workspace,
+					workspace,
+				});
+				try {
+					for (const skill of resolved.skills) {
+						if (adapted && materialized)
+							adaptedEntries.set(skill.name, {
+								source: adapted.descriptor.source,
+								revision: materialized.revision,
+								skillPath: posix.join(
+									adapted.descriptor.root,
+									adapted.descriptor.skills_root,
+									skill.name,
+									"SKILL.md",
+								),
+							});
+						if (bundle === input.acceptContentChangesForBundle)
+							acceptedNames.add(skill.name);
+						if (selectedNames.has(skill.name)) {
+							throw responseError(
+								"SKILL_NAME_COLLISION",
+								`Skill name collision: ${skill.name}. No skills were changed.`,
+								{ source: resolved.source, skill: skill.name },
+							);
+						}
+						selectedNames.add(skill.name);
+					}
+
+					const result = await installSkills(resolved.handle, {
+						cwd: staging,
+						config: sdkConfig,
+						skills: resolved.skills.map((skill) => skill.name),
+						onWarning: (warning) => {
+							throw warning;
+						},
+					});
+					if (result.failed.length > 0) {
+						throw new ResponseError(
+							result.failed.map((failure) => ({
+								code: failure.code,
+								message: failure.message,
+								source: resolved.source,
+								skill: failure.skill,
+							})),
 						);
 					}
-					selectedNames.add(skill.name);
+					if (
+						result.skipped.length > 0 ||
+						result.installed.length !== resolved.skills.length
+					) {
+						throw new Error(
+							"The library did not install every selected skill. No skills were changed.",
+						);
+					}
+				} finally {
+					await resolved.handle.dispose();
 				}
-
-				const result = await installSkills(resolved.handle, {
-					cwd: staging,
-					config: sdkConfig,
-					skills: resolved.skills.map((skill) => skill.name),
-					onWarning: (warning) => {
-						throw warning;
-					},
-				});
-				if (result.failed.length > 0) {
-					throw new ResponseError(
-						result.failed.map((failure) => ({
-							code: failure.code,
-							message: failure.message,
-							source: resolved.source,
-							skill: failure.skill,
-						})),
-					);
-				}
-				if (
-					result.skipped.length > 0 ||
-					result.installed.length !== resolved.skills.length
-				) {
-					throw new Error(
-						"The library did not install every selected skill. No skills were changed.",
-					);
-				}
-			} finally {
-				await resolved.handle.dispose();
 			}
 		}
 
@@ -129,21 +178,40 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 			);
 		}
 		const nextSkills = { ...generated.skills };
+		let contentChanged = false;
 		for (const [name, skill] of Object.entries(generated.skills)) {
 			if (!Object.hasOwn(lock.skills, name)) continue;
 			const locked = lock.skills[name];
 			if (skill.computedHash !== locked.computedHash) {
-				throw responseError(
-					"LOCK_HASH_MISMATCH",
-					`Content hash mismatch for ${name}; ${lockPath} was not changed.`,
-					{ skill: name },
-				);
+				if (!acceptedNames.has(name)) {
+					throw responseError(
+						"LOCK_HASH_MISMATCH",
+						`Content hash mismatch for ${name}; ${lockPath} was not changed.`,
+						{ skill: name },
+					);
+				}
+				contentChanged = true;
+				continue;
 			}
 			nextSkills[name] = locked;
 		}
 
+		for (const [name, provenance] of adaptedEntries) {
+			const entry = nextSkills[name] as Record<string, unknown>;
+			if (
+				entry.source !== provenance.source ||
+				entry.ref !== provenance.revision ||
+				entry.skillPath !== provenance.skillPath
+			)
+				contentChanged = true;
+			entry.source = provenance.source;
+			entry.sourceType = "git";
+			entry.ref = provenance.revision;
+			entry.skillPath = provenance.skillPath;
+		}
 		const nextLock = { ...lock, skills: nextSkills };
-		const nextLockText = lockChanged ? `${JSON.stringify(nextLock, null, 2)}\n` : lockText;
+		const nextLockText =
+			lockChanged || contentChanged ? `${JSON.stringify(nextLock, null, 2)}\n` : lockText;
 
 		await rejectUnmanagedSkills(workspace, lockedNames);
 		await rejectConflictingClaudeSkills(workspace);
@@ -163,6 +231,8 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 		const skillsDirectory = await statOptional(join(workspace, ".agents/skills"));
 		if (
 			!lockChanged &&
+			!contentChanged &&
+			Object.keys(input.bundlePackOverrides ?? {}).length === 0 &&
 			unchanged === expectedNames.length &&
 			claudeMatches &&
 			skillsDirectory?.isDirectory()
@@ -176,8 +246,15 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 		await writeFile(join(staging, lockPath), nextLockText);
 		await mkdir(join(staging, ".claude"), { recursive: true });
 		await symlink("../.agents/skills", join(staging, ".claude/skills"));
+		const publishPaths = [".agents/skills", ".claude/skills", lockPath, configPath];
+		for (const [bundle, override] of Object.entries(input.bundlePackOverrides ?? {})) {
+			const path = `skillbox/patches/${bundle}`;
+			await mkdir(dirname(join(staging, path)), { recursive: true });
+			await cp(override, join(staging, path), { recursive: true, preserveTimestamps: true });
+			publishPaths.push(path);
+		}
 		try {
-			await publish(staging, workspace);
+			await publish(staging, workspace, publishPaths);
 		} catch (cause) {
 			retainStaging = true;
 			throw responseError(
@@ -263,6 +340,7 @@ async function sameTree(left: string, right: string): Promise<boolean> {
 		return leftTarget === rightTarget;
 	}
 	if (leftEntry.isFile()) {
+		if ((leftEntry.mode & 0o111) !== (rightEntry.mode & 0o111)) return false;
 		const [leftContents, rightContents] = await Promise.all([readFile(left), readFile(right)]);
 		return leftContents.equals(rightContents);
 	}

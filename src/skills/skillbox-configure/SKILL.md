@@ -1,6 +1,6 @@
 ---
 name: skillbox-configure
-description: Configure repository-local Skillbox sources and bundles, select a workspace, restore installed skills, or diagnose add/sync failures.
+description: Configure repository-local Skillbox sources and bundles, import or patch upstream skills, restore installed skills, or diagnose sync and update failures.
 ---
 
 # Configure Skillbox
@@ -62,4 +62,6 @@ For configuration fields, source examples, or a failed command, load:
 skillbox skills file skillbox-configure references/configuration.md
 ```
 
-Treat managed installed files as generated output: sync can replace edits within managed skill directories. Change an owned source instead. Immutable revision replay, shared/offline caching, explicit updates, automatic migration, and intent-backed patches are not implemented; do not invent commands or promise those guarantees.
+For third-party plugin skills, load that reference's **Adapted bundles and patches** section before using `patch init`, `patch prepare`, `patch capture`, `update`, or `patch adopt`. Adapted bundles pin a source subtree and retain intent alongside concrete diffs. Ordinary sync replays the recorded revision; an explicit update can produce a regeneration workspace when the patches conflict.
+
+Treat managed installed files as generated output: sync can replace edits within managed skill directories. Change an owned source or an adapted bundle's prepared `edited/` tree instead. Commit the relevant tracking and patch files. Native bundles retain their existing hash-checking behavior; automatic migration remains separate work.

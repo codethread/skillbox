@@ -1,13 +1,11 @@
 import { mkdir, rename, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { configPath } from "./config.ts";
-import { lockPath } from "./lock.ts";
 import { statOptional } from "./paths.ts";
 
-export async function publish(staging: string, cwd: string) {
+export async function publish(staging: string, cwd: string, paths: readonly string[]) {
 	const changes: { target: string; backup?: string; installed: boolean }[] = [];
 	try {
-		for (const path of [".agents/skills", ".claude/skills", lockPath, configPath]) {
+		for (const path of paths) {
 			const target = join(cwd, path);
 			await mkdir(dirname(target), { recursive: true });
 			const backup = (await statOptional(target))

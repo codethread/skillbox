@@ -57,6 +57,7 @@
 		"picocolors": "^1.1.1",
 		"simple-git": "^3.36.0",
 		"skills": "github:vercel-labs/skills#4a351bc302b856b58fa13a055e764d3a384b741d",
+		"smol-toml": "^1.9.1",
 		"ts-pattern": "^5.9.2",
 		"typescript": "^7.0.2",
 		"xdg-basedir": "^5.1.0",

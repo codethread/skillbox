@@ -6,3 +6,5 @@ node_modules/
 /dist/
 /.agents/skills/
 /.claude/skills
+/.skillbox-update-*/
+/.skillbox-prepare-*/

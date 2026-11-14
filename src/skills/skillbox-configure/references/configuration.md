@@ -42,9 +42,53 @@ A config selecting a local source looks like:
 
 `skillbox/config.json` accepts only `sources`, whose entries contain a nonempty `source` and a nonempty `bundles` array. Local paths resolve from the selected workspace root. Git sources retain their source string. Use `add` for the first installation. Once both tracking files exist, direct source/bundle edits can be applied with `sync`: newly selected skills receive lock entries, and deselected managed skills and their entries are removed. An empty `sources` array removes all managed skills. Config formatting and retained lock entries are preserved; retained skill contents must still match their saved hashes. Sync reports `installed`, `unchanged`, and `removed` skill counts and refuses to overwrite unmanaged skills.
 
-`skillbox/lock.json` uses the upstream SDK's format and records per-skill provenance and hashes. A moving Git ref or content hash is not an immutable revision pin. Ordinary sync resolves the configured sources again; it can fail if upstream moved rather than restoring an archived revision. Do not delete or regenerate the lock merely to silence drift errors without approval for changed contents.
+`skillbox/lock.json` uses the upstream SDK's format and records per-skill provenance and hashes. For native bundles, a moving Git ref or content hash is not an immutable revision pin: sync resolves their configured sources again and can fail if upstream moved. Adapted bundles additionally record an immutable pin under `skillbox/patches/`. Do not delete or regenerate a lock merely to silence drift errors without authorization for changed contents.
 
 Skillbox does not read or modify the root `skills-lock.json` used by `npx skills`. Do not substitute that file for the Skillbox lock. There is no separate SDK config file to maintain.
+
+## Adapted bundles and patches
+
+Import a Git source with a skills subtree into a locally named bundle:
+
+```sh
+skillbox patch init pstack --source https://github.com/cursor/plugins \
+  --root pstack --skills-root skills --ref <commit> --update-ref main
+skillbox patch prepare pstack --output .skillbox-prepare-pstack
+```
+
+`--ref` chooses the imported revision; `--update-ref` chooses what a later explicit update resolves. The resulting pin is an exact Git commit. `init` installs the skills and creates `skillbox/patches/pstack/bundle.toml` and `lock.json`. Only the selected skills subtree is distributed; other source files remain available for authoring context.
+
+`prepare` returns `data.workspace` and `data.editable`. Preserve the workspace manifest and `pristine/`; edit only distributed skill files under `edited/`. To include source documentation outside the skills subtree, copy it into a skill's supporting resources and update its links.
+
+```sh
+skillbox patch capture pstack --from .skillbox-prepare-pstack \
+  --intent "Use this project's Botlake agents and work records for coordination."
+skillbox sync
+```
+
+Use `--intent-file <file.toml>` when different files have different reasons:
+
+```toml
+[[change]]
+skill = "poteto-mode"
+target = "./references/botlake-tools.md"
+intent = "Map runtime operations to the lake's discovered capabilities."
+```
+
+Capture supports nested file edits, additions, deletions, binary content, and executable mode changes. `--skill <name>` limits capture to a skill. Commit the config, SDK lock, and entire `skillbox/patches/<bundle>/` pack. Keep generated installations and prepared workspaces ignored. Do not hand-edit a concrete diff to bypass the recorded hash; capture it through the CLI.
+
+Ordinary sync reconstructs the pinned source plus recorded diffs. It does not interpret intent, invoke an agent, or advance the pin. Verified source snapshots use the XDG cache directory or `SKILLBOX_CACHE_DIR`. A warm adapted source cache supports offline replay; a cold cache needs the exact commit from the repository. Native sources may still require network access.
+
+`skillbox update <bundle>` resolves `update_ref`; `--ref <revision>` overrides it. A clean replay publishes the refreshed installation and locks. `UPDATE_CONFLICT` preserves the existing installation and tracking files and returns `data.workspace`, `data.editable`, and conflict details. Read the current per-file intents, revise the returned edited tree for the new source, and run:
+
+```sh
+skillbox patch adopt pstack --from <returned-workspace>
+# Preserve intent across an upstream rename:
+skillbox patch adopt pstack --from <returned-workspace> \
+  --map 'skill/references/old.md=skill/references/new.md'
+```
+
+Supply intent for new changes with `--intent` or `--intent-file`. After adoption, run sync and confirm an unchanged result. Preserve the regeneration workspace until the result is verified.
 
 ## Failure decisions
 

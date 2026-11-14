@@ -5,7 +5,7 @@ description: Author or extend a Skillbox source bundle with SKILL.md instruction
 
 # Author Skillbox bundles
 
-Extend skills in an owned source repository, not in a client's generated installation. Skillbox currently has no patch or update command for customizing third-party skills while retaining upstream intent.
+Extend skills in an owned source repository, not in a client's generated installation. To customize third-party plugin skills while retaining their upstream source and patch intent, load `skillbox skills file skillbox-configure references/configuration.md` and follow **Adapted bundles and patches**.
 
 Use `local` as the bundle name for repository-specific maintainer skills (for example, `skillbox/local/release/SKILL.md`), rather than implying they are intended for public reuse. Select that bundle from source `"."` in the repository's own config. This is a naming convention, not access control; files in a public repository remain public.
 
@@ -22,6 +22,6 @@ Use `local` as the bundle name for repository-specific maintainer skills (for ex
 6. Remove only the disposable client's generated `.agents/skills` directory and `.claude/skills` link, leaving its config and lock. Run `skillbox --workspace <client-dir> sync`; require the same installed contents. Run sync again and require an unchanged outcome. Remove the disposable client when finished.
 7. Commit the source skill and resources. Source repositories do not need an npm package. Give consumers the repository source plus bundle names, or a GitHub tree URL ending in `skillbox/<bundle>`.
 
-When editing an existing source, test the changed content in a fresh disposable client. Repeating `add` in an already-configured client does not refresh it; sync rejects content that differs from saved hashes. Existing consumers need an explicitly agreed change process rather than an invented update command.
+When editing an existing native source, test the changed content in a fresh disposable client. Repeating `add` in an already-configured client does not refresh it; sync rejects content that differs from saved hashes. The `update` command advances adapted bundles with patch tracking; it does not update native bundles.
 
 For consuming-project configuration or add/sync diagnostics, use `skillbox skills get skillbox-configure`.
