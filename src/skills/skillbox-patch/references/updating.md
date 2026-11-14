@@ -15,7 +15,7 @@ For a Git source, Skillbox resolves the descriptor's configured update ref unles
 
 For an imported adaptation, the source is the producer. Update materializes the candidate producer's committed adaptation and replays your consumer patches on top. It does not independently advance the original source pinned by the producer.
 
-Update never installs and never changes a tracked pin. It returns a prepared workspace with these trees:
+Update never installs and never changes a tracked pin. It creates a fresh `skillbox/.prepare/<bundle>/update-*` workspace with these trees:
 
 - `pristine` is the candidate baseline: unmodified source for a raw plugin import, or the producer's adapted output for an imported bundle.
 - `edited` starts with the candidate source plus every patch that replayed successfully.

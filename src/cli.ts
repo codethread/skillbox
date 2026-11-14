@@ -90,7 +90,7 @@ patch
 	)
 	.option("--ref <ref>", "source revision to resolve to an immutable commit")
 	.option("--update-ref <ref>", "ref to resolve on a later explicit update")
-	.option("--output <dir>", "new editing directory (default: .skillbox-prepare-<bundle>)")
+	.option("--output <dir>", "new editing directory (default: skillbox/.prepare/<bundle>/edit)")
 	.action(async (bundle, options) => {
 		const cwd = process.cwd();
 		const workspace = await selectedWorkspace(cwd);
@@ -114,7 +114,7 @@ patch
 	.command("prepare")
 	.description("Create pristine and editable copies of the pinned patched source.")
 	.argument("<bundle>")
-	.option("--output <dir>", "new editing directory (default: .skillbox-prepare-<bundle>)")
+	.option("--output <dir>", "new editing directory (default: skillbox/.prepare/<bundle>/edit)")
 	.action(async (bundle, options) => {
 		const cwd = process.cwd();
 		writeJson(

@@ -13,7 +13,7 @@ Keep the patch command surface deliberately minimal. Use Git and worktrees to re
 
 To consume a producer's adapted bundle, run `skillbox add <producer-source> <bundle>`. Add installs the producer's output and creates an empty consumer-owned patch pack. The producer retains its own source pin, diffs, and intents; your pack records the producer snapshot and only your changes. Use prepare below to customize it, without a separate init. Importing a native bundle does not create a patch pack.
 
-To adapt a raw Git skills subtree, run `skillbox patch init <bundle> ...`. Init pins and registers the source, then creates an editing workspace; it does not install skills. `--output` is optional and defaults to `.skillbox-prepare-<bundle>`. Record `data.workspace` and `data.editable` from the result.
+To adapt a raw Git skills subtree, run `skillbox patch init <bundle> ...`. Init pins and registers the source, then creates an editing workspace; it does not install skills. `--output` is optional and defaults to `skillbox/.prepare/<bundle>/edit`. Record `data.workspace` and `data.editable` from the result.
 
 For an existing adapted bundle, run `skillbox patch prepare <bundle>`. It recreates the workspace from the recorded bundle, including a draft captured earlier. The same optional output default applies.
 
@@ -21,6 +21,7 @@ Paths have distinct ownership:
 
 - Edit only `<workspace>/edited/<skills-root>/**`. Imported adaptations use `skills/`; raw Git imports use the configured skills root (`skills/` by default).
 - Keep `<workspace>/pristine/` and its manifest as CLI-managed preparation state. For an imported adaptation, pristine means the producer's adapted output before your local patches.
+- Ignore `skillbox/.prepare/`; prepared workspaces are local editing state, not source to commit. Delete a workspace only after capturing any edits you want to retain.
 - Commit `skillbox/config.json`, `skillbox/lock.json`, and `skillbox/patches/<bundle>/`.
 - Treat `.agents/skills/` and `.claude/skills` as generated installation output.
 

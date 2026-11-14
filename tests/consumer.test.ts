@@ -534,7 +534,11 @@ async function fixture(): Promise<Fixture> {
 
 	const producer = await repository(root, "producer");
 	const producerCache = join(root, "producer-cache");
-	await put(producer.author, ".gitignore", "/.agents/\n/.claude/\n/.skillbox-*/\n");
+	await put(
+		producer.author,
+		".gitignore",
+		"/.agents/\n/.claude/\n/.skillbox-*/\n/skillbox/.prepare/\n",
+	);
 	const initialized = expectSuccess(
 		await run(
 			producer.author,
@@ -649,7 +653,11 @@ async function consumerDirectory(root: string, name: string): Promise<string> {
 	const directory = join(root, name);
 	await mkdir(directory);
 	await git(directory, "init", "--quiet", "--initial-branch=main");
-	await put(directory, ".gitignore", "/.agents/\n/.claude/\n/.skillbox-*/\n");
+	await put(
+		directory,
+		".gitignore",
+		"/.agents/\n/.claude/\n/.skillbox-*/\n/skillbox/.prepare/\n",
+	);
 	return directory;
 }
 
@@ -756,6 +764,7 @@ async function exists(path: string): Promise<boolean> {
 async function files(root: string, prefix = ""): Promise<string[]> {
 	const result: string[] = [];
 	for (const entry of await readdir(join(root, prefix), { withFileTypes: true })) {
+		if (entry.name === ".prepare") continue;
 		const path = join(prefix, entry.name);
 		if (entry.isDirectory()) result.push(...(await files(root, path)));
 		else result.push(path);

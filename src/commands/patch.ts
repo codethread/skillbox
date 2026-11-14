@@ -62,7 +62,7 @@ export async function patchInit(input: {
 		});
 	const output = resolveEditingDirectory(
 		workspace,
-		input.output ?? ".skillbox-prepare-" + bundle,
+		input.output ?? join("skillbox/.prepare", bundle, "edit"),
 	);
 	if (await statOptional(output))
 		throw responseError("DESTINATION_EXISTS", "Editing directory already exists: " + output, {
@@ -182,7 +182,7 @@ export async function patchPrepare(input: {
 		input.bundle,
 		resolveEditingDirectory(
 			input.workspace,
-			input.output ?? ".skillbox-prepare-" + input.bundle,
+			input.output ?? join("skillbox/.prepare", input.bundle, "edit"),
 		),
 	);
 }
@@ -211,7 +211,9 @@ export async function patchUpdate(input: {
 			skill: input.bundle,
 		});
 	const source = await input.adapted.acquireSource(descriptor, requested, input.workspace);
-	const staging = await mkdtemp(join(input.workspace, ".skillbox-update-" + input.bundle + "-"));
+	const preparation = join(input.workspace, "skillbox/.prepare", input.bundle);
+	await mkdir(preparation, { recursive: true });
+	const staging = await mkdtemp(join(preparation, "update-"));
 	let retain = false;
 	try {
 		await cp(source.root, join(staging, "pristine"), {
@@ -509,10 +511,14 @@ export async function patchCapture(input: {
 function resolveEditingDirectory(workspace: string, output: string): string {
 	const directory = resolve(workspace, output);
 	const tracking = join(workspace, "skillbox");
-	if (directory === tracking || directory.startsWith(tracking + sep))
+	const preparation = join(tracking, ".prepare");
+	if (
+		(directory === tracking || directory.startsWith(tracking + sep)) &&
+		!directory.startsWith(preparation + sep)
+	)
 		throw responseError(
 			"DESTINATION_INVALID",
-			"Keep the editing directory outside skillbox/ tracking files.",
+			"Use skillbox/.prepare/<bundle>/ or a directory outside skillbox/ tracking files.",
 			{
 				input: output,
 			},

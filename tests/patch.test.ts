@@ -60,7 +60,7 @@ test("init pins and registers a bundle, creates an editable workspace, and does 
 	const initialized = expectSuccess(await initialize(f));
 	const workspace = requiredPath(initialized, "workspace");
 	const editable = requiredPath(initialized, "editable");
-	expect(workspace).toBe(join(f.client, ".skillbox-prepare-pstack"));
+	expect(workspace).toBe(join(f.client, "skillbox/.prepare/pstack/edit"));
 	expect(editable).toBe(join(workspace, "edited"));
 	expect(await exists(join(editable, "skills/alpha/SKILL.md"))).toBe(true);
 	expect(await liveState(f)).toEqual({
@@ -406,6 +406,7 @@ test("update stages a clean review candidate and capture pins that exact source 
 		conflicts: [],
 	});
 	const workspace = requiredPath(prepared, "workspace");
+	expect(dirname(workspace)).toBe(join(f.client, "skillbox/.prepare/pstack"));
 	const pristine = requiredPath(prepared, "pristine");
 	const editable = requiredPath(prepared, "editable");
 	expect(await readFile(join(pristine, "skills/alpha/references/choice.md"), "utf8")).toBe(
@@ -764,17 +765,17 @@ test("capture only creates artifacts when unrelated native content drifts; sync 
 test("prepare recreates an editable workspace for a draft bundle and capture rejects edits outside skills", async () => {
 	const f = await fixture();
 	const initialized = expectSuccess(await initialize(f));
-	const invalid = await run(
-		f,
-		"patch",
-		"prepare",
-		"pstack",
-		"--output",
-		"skillbox/patches/pstack/review",
-	);
-	expect(invalid.response.errors.some((error) => error.code === "DESTINATION_INVALID")).toBe(
-		true,
-	);
+	for (const output of [
+		"skillbox",
+		"skillbox/.prepare",
+		"skillbox/.prepare-other/pstack",
+		"skillbox/.prepare/../patches/pstack/review",
+	]) {
+		const invalid = await run(f, "patch", "prepare", "pstack", "--output", output);
+		expect(invalid.response.errors.some((error) => error.code === "DESTINATION_INVALID")).toBe(
+			true,
+		);
+	}
 	expect(await exists(join(f.client, "skillbox/patches/pstack/review"))).toBe(false);
 	await put(
 		requiredPath(initialized, "editable"),
@@ -793,6 +794,15 @@ test("prepare recreates an editable workspace for a draft bundle and capture rej
 	);
 	await rm(requiredPath(initialized, "workspace"), { recursive: true });
 	const prepared = expectSuccess(await run(f, "patch", "prepare", "pstack"));
+	expect(requiredPath(prepared, "workspace")).toBe(
+		join(f.client, "skillbox/.prepare/pstack/edit"),
+	);
+	const review = expectSuccess(
+		await run(f, "patch", "prepare", "pstack", "--output", "skillbox/.prepare/pstack/review"),
+	);
+	expect(requiredPath(review, "workspace")).toBe(
+		join(f.client, "skillbox/.prepare/pstack/review"),
+	);
 	expect(
 		await readFile(
 			join(requiredPath(prepared, "editable"), "skills/alpha/references/choice.md"),
@@ -848,7 +858,11 @@ async function fixture(): Promise<Fixture> {
 	await git(source, "init", "--quiet", "--initial-branch=main");
 	await git(source, "remote", "add", "origin", remote);
 	await git(client, "init", "--quiet", "--initial-branch=main");
-	await put(client, ".gitignore", "/.agents/skills/\n/.claude/skills\n/.skillbox-*/\n");
+	await put(
+		client,
+		".gitignore",
+		"/.agents/skills/\n/.claude/skills\n/.skillbox-*/\n/skillbox/.prepare/\n",
+	);
 	await put(
 		source,
 		"plugin/skills/alpha/SKILL.md",
@@ -1053,6 +1067,7 @@ async function exists(path: string): Promise<boolean> {
 async function files(root: string, prefix = ""): Promise<string[]> {
 	const result: string[] = [];
 	for (const entry of await readdir(join(root, prefix), { withFileTypes: true })) {
+		if (entry.name === ".prepare") continue;
 		const path = join(prefix, entry.name);
 		if (entry.isDirectory()) result.push(...(await files(root, path)));
 		else result.push(path);

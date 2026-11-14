@@ -68,13 +68,12 @@ Choose a producer revision containing the adaptation. Any customizations you mak
 
 Commit `skillbox/config.json`, `skillbox/lock.json`, any `skillbox/patches/` packs, and locally authored source bundles, along with dependency changes and ignore rules.
 
-Edit owned sources or prepared adaptations, not generated installations. Add these rules yourself; Skillbox does not manage `.gitignore`:
+Edit owned sources or prepared adaptations, not generated installations. Prepared editing workspaces and update candidates live under `skillbox/.prepare/<bundle>/`; capture wanted edits before deleting them. Add these rules yourself; Skillbox does not manage `.gitignore`:
 
 ```gitignore
 /.agents/skills/
 /.claude/skills
-/.skillbox-prepare-*/
-/.skillbox-update-*/
+/skillbox/.prepare/
 ```
 
 See [release history](CHANGELOG.md), also available through `skillbox changelog`.
