@@ -156,7 +156,7 @@ skillbox patch adopt pstack --from <returned-workspace> \
 
 Supply `--intent` or `--intent-file` for newly introduced changes. Capture and adopt regenerate patch artifacts through the CLI; hand-editing a committed diff does not update its lock. Re-run sync to verify the result.
 
-This repository dogfoods PSTACK adapted for Botlake. See [the POC design and verification guide](docs/engdocs/pstack-patches.md) for provenance, adaptation scope, and the authoring helper.
+This repository uses these same commands to maintain PSTACK adapted for Botlake. Its config, source lock, per-file intents, and diffs live under `skillbox/`. See [the PSTACK bundle guide](docs/engdocs/pstack-patches.md) for provenance, adaptation scope, and the local editing workflow.
 
 Native bundle revision pin creation, automatic ignore setup in consuming projects, migration, and multi-workspace orchestration remain separate work.
 
