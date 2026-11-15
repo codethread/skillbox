@@ -16,6 +16,12 @@
 			"skillPath": "skillbox/coding/declutter/SKILL.md",
 			"installMode": "copy"
 		},
+		"deslop": {
+			"source": "./skillbox",
+			"sourceType": "local",
+			"computedHash": "0be761ddf65b41dde060856540ca8d80e4a7c548357a51d9a9498db4c24b7b1e",
+			"installMode": "copy"
+		},
 		"git-commit": {
 			"source": "codethread/agents",
 			"sourceType": "github",
