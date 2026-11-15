@@ -1,0 +1,13 @@
+diff --git a/SKILL.md b/SKILL.md
+index 608b17af689ecf2e38f67fe2b3df374b0d22e4dc..654cd394f1aa4dbb9aea936a2dcedceb7dd8d46c 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -21,7 +21,7 @@ A check can be both updated and bug: the update makes the verification describe
+ 
+ ## Edit scope
+ 
+-Edit only the verification: models, harnesses, property files, and the verify skill itself. Locate the skill's editable source rather than changing a generated installation. For an imported Skillbox skill the project does not own, load `skillbox skills get skillbox-patch` to keep the change in a consumer-owned patch. Never edit product code during a run, unless the user asks you to. When a property fails on the current code, do not weaken the property or the model to make it pass. Report the failure.
++Edit only the verification: models, harnesses, property files, and the verify skill itself, plus the patch and tracking artifacts needed to record and install those approved changes. Keep unrelated skill changes out. Locate the skill's editable source rather than changing a generated installation. For a skill from an imported adapted bundle, load `skillbox skills get skillbox-patch` to keep the change in a consumer-owned patch. Native imports have no such pack; edit an owned source or route the change to its owner. Never edit product code during a run, unless the user asks you to. When a property fails on the current code, do not weaken the property or the model to make it pass. Report the failure.
+ 
+ ## Pass
+ 

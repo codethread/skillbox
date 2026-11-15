@@ -1,0 +1,16 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Author the project's verification skill and feature map in its owned source, using project or Skillbox authoring guidance. Require user-observable end-to-end proof and keep generated installs and the shared bundle read-only."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0003-captured.patch"

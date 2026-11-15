@@ -1,0 +1,13 @@
+diff --git a/playbooks/worktree-cleanup.md b/playbooks/worktree-cleanup.md
+index 536b86d7f0308ce9381f2c7e3a120a3921a9dcec..ea316d685d6f8449300778e3870f213b70a2c0e8 100644
+--- a/playbooks/worktree-cleanup.md
++++ b/playbooks/worktree-cleanup.md
+@@ -2,7 +2,7 @@
+ 
+ 1. Snapshot and audit. Record `df -h /`, then run `scripts/worktree-audit.sh [-b <pr-base-ref>] [repo-path]` (principle-build-the-lever). Without `-b` it checks `MERGED` against `origin/HEAD`, so pass `-b origin/<branch>` when PRs target another branch. It reads paths from `git worktree list`, never hand-typed (principle-encode-lessons-in-structure). It classifies each worktree by size, age, merge state, uncommitted work, and PR state, then suggests a bucket. It does not check live usage.
+ 2. The bucket is advice, not permission. Active agents, processes, and the operator's pinned worktrees are the real artifact (principle-prove-it-works). Cross-check every candidate. The pinned set wins over a heuristic.
+-3. Verify usage before deleting. For every `verify-usage` row, or anything you doubt, inspect agent records and live processes and report which worktrees they use. Include arena and repro trees in sibling worktrees, not just the agent's main checkout. Delegate bulk inspection (principle-guard-the-context-window).
++3. Verify usage before deleting. For every `verify-usage` row, or anything you doubt, use Botlake agent records and activity to locate workers. Inspect live processes and actual worktree use before reporting a tree as unused. An inactive run record is not proof that a worktree is idle. Include arena and repro trees in sibling worktrees, not just the agent's main checkout. Delegate bulk inspection (principle-guard-the-context-window).
+ 4. Pause on irreversible loss. `wip:N` is N tracked uncommitted edits. Show the diff and get a decision first, since removing a clean worktree is recoverable from its branch but uncommitted work is gone. `scratch:N` is untracked data. Name the files and get permission before discarding them unless the operator already authorized that exact set. Per Autonomy, clean and merged and not-in-use proceeds. `wip`, unapproved scratch data, and in-use pause.
+ 5. Prune the confirmed set using the project's worktree tooling and cleanup policy. Preserve branch refs so no commits are lost. Confirm with `df -h /` and re-list.
+ 6. Simulators and other reclaimers. Simulators are usually the next-biggest win. `xcrun simctl --set testing delete all` (XCTestDevices clones), `xcrun simctl delete unavailable`, and `xcrun simctl runtime list` then `runtime delete <id>` for old runtimes. More when needed: Xcode `DerivedData` and `iOS DeviceSupport`, package caches (pnpm, uv, brew, yarn). Clear only caches the user has not said to keep.

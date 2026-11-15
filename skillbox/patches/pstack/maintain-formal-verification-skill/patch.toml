@@ -1,0 +1,12 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Locate the verification skill's editable source. Adapted imports use consumer-owned patches; native imports use owned source or an owner handoff, never generated output or assumed producer ownership. Preserve verification-only edits, permitting only the extra patch and tracking artifacts needed to record/install those changes. Retain code/history review, drift-versus-bug judgments, unchanged rigor, and rerun/failure evidence."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

@@ -1,0 +1,336 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Retire setup-pstack callers without recreating its unused role map or mandatory agent-selection interview. Route configuration questions directly to Botlake only when needed, keep existing defaults ready to use, preserve task-specific choices and required independence and model diversity, and require scoped approval before persistent shared configuration changes. Remove the compulsory category menu because the user's question already determines help routing. Route changed goals by expressed intent, not a magic reset phrase. Distinguish one status report from an explicit babysit request without a named control-mode layer. Keep prompt-first help, once-per-chat optional offers for both verification creators, their evidence requirements, consuming-project source ownership, and all creator and maintainer links. Do not add an alias, stub, replacement manual, or configuration layer. Route code-cleanup requests to upstream cursor-team-kit/skills/deslop/SKILL.md from the deslop companion bundle through its installed sibling link. Keep unslop for prose and no-comments for independent comment review without requiring the full Cursor Team Kit."
+
+[files."./references/prompting.md"]
+intent = "Remove the unsupported rule that changing tasks requires a special phrase or otherwise continues the prior playbook. Keep concise context-aware follow-ups and explicit changed goals and constraints. Do not replace the phrase with another token or reset mechanism."
+
+[files."./references/recipes.md"]
+intent = "Remove the Cursor /loop command from the away recipe; keep the same goal, proof predicate, worktree, decision log, permissions, and dead-end exit."
+
+[files."./references/upstream/ATTRIBUTION.md"]
+intent = "Remove the obsolete duplicate attribution path because the canonical legal record now lives at `references/licenses/ATTRIBUTION.md`. Preserve the same pinned source provenance and license information only in that canonical location."
+
+[files."./references/upstream/LICENSE"]
+intent = "Remove the obsolete duplicate license path because the canonical MIT license now lives at `references/licenses/LICENSE`. Keep the legal text unchanged in the canonical location and avoid two copies that can drift."
+
+[files."./references/upstream/guide/01-setup.md"]
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/01-setup.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
+
+[files."./references/upstream/guide/02-poteto-mode.md"]
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/02-poteto-mode.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
+
+[files."./references/upstream/guide/03-understand.md"]
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/03-understand.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
+
+[files."./references/upstream/guide/04-design.md"]
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/04-design.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
+
+[files."./references/upstream/guide/05-build-and-clean.md"]
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/05-build-and-clean.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
+
+[files."./references/upstream/guide/06-verify-and-ship.md"]
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/06-verify-and-ship.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
+
+[files."./references/upstream/guide/07-overnight.md"]
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/07-overnight.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
+
+[files."./references/upstream/guide/08-principles.md"]
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/08-principles.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
+
+[files."./references/upstream/guide/09-make-it-yours.md"]
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/09-make-it-yours.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
+
+[files."./references/upstream/guide/10-recipes-and-pitfalls.md"]
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/10-recipes-and-pitfalls.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
+
+[files."./references/upstream/guide/README.md"]
+intent = "Remove the duplicate guide page because the canonical native page now lives at `references/guide/README.md`. Preserve the page's required workflow and safety constraints through that canonical target, with no second layout that can drift."
+
+[files."./references/guide/01-setup.md"]
+intent = "Remove the retired setup-pstack workflow and its remaining agent-choice prerequisite because Botlake already owns agent configuration. Installation can lead directly to a first task using existing defaults. Keep configuration help conditional, task-specific choices in prompts, required independence and model diversity, and scoped approval before persistent shared changes. Preserve both optional once-per-chat verification offers, prompt-first acceptance, real evidence and formal bounds, consuming-project source ownership, and creator and maintainer links. Do not restore a role interview or substitute setup skill."
+
+[files."./references/guide/02-poteto-mode.md"]
+intent = "Remove the unsupported promise that a new-task phrase resets playbook routing. A changed goal and its constraints determine the task. Keep ordinary-language examples, read-only requests, context-aware follow-ups, and reloading the skill when needed without introducing another control token."
+
+[files."./references/guide/03-understand.md"]
+intent = "Guide users through `/how`, `/why`, `/teach`, and `/recall` for code behavior, rationale, and recent context. Require available evidence sources, citations, bounded searches, and explicit gaps when evidence cannot be accessed."
+
+[files."./references/guide/04-design.md"]
+intent = "Remove the setup-pstack panel-configuration caller because Botlake's catalog and project configuration already own available agents. Keep panel adjustments in the actual task prompt and preserve Arena's model diversity, independent judging rules, and protected skill routes. Do not recreate a shared stack role map."
+
+[files."./references/guide/05-build-and-clean.md"]
+intent = "Show how to prompt build playbooks from observed symptoms. Route code cleanup to upstream cursor-team-kit/skills/deslop/SKILL.md from the deslop companion bundle and prose cleanup to pstack/skills/unslop/SKILL.md. Link the installed skills rather than inlining checklists or requiring the full Cursor Team Kit. Preserve reproduction-first debugging, behavior checks, independent comment review, Comment Sicko's comment-only scope, and no unverified cleanup claims."
+
+[files."./references/guide/06-verify-and-ship.md"]
+intent = "Remove the unsolicited daily scheduled-maintenance prescription because the verification creator permits cadence suggestions only on request. Keep the maintainer, every-feature source and live coverage, evidence and regression reporting, and all verification creator and maintainer links. Do not restore a standing schedule through onboarding guidance. Name the PR workflow's distinct code and prose cleanup steps. Link upstream cursor-team-kit/skills/deslop/SKILL.md through the deslop companion bundle's installed skill and keep unslop for prose."
+
+[files."./references/guide/07-overnight.md"]
+intent = "Define safe unattended work through a checkable exit condition, isolated writers, Botlake task and context records, decision trails, bounded active waits, and morning audit. Do not imply that task status, timeouts, or a stopped coordinator schedules or proves progress."
+
+[files."./references/guide/08-principles.md"]
+intent = "Teach users to steer work by naming the stack's principles while agents read and apply the full leaf skills. Preserve each principle's engineering meaning, trigger, and requirement to report the decision it changed."
+
+[files."./references/guide/09-make-it-yours.md"]
+intent = "Remove the implication that customizable model roles form a stack-specific configuration subsystem. Keep optional personal styles, the playbooks and routing, consuming-project source ownership, consumer-owned patches and shared-maintainer boundaries, verification creators and maintainers, and existing workflow responsibilities and protected routes."
+
+[files."./references/guide/10-recipes-and-pitfalls.md"]
+intent = "Remove the obsolete stack-role reference left by setup-pstack retirement. Keep the unavailable-model advice bound to Botlake's catalog and the setup page's conditional agent help. Do not restore a role map or change protected skill links or routes."
+
+[files."./references/guide/README.md"]
+intent = "Remove compulsory agent review from the onboarding summary because existing Botlake configuration is ready to use. Keep the guide's installation-to-first-task route and all existing navigation targets, including protected skills and verification guidance. Include deslop in the build-and-clean summary because the deslop companion bundle supplies upstream cursor-team-kit/skills/deslop/SKILL.md for code cleanup. Retain unslop and no-comments as distinct steps."
+
+[files."./references/licenses/ATTRIBUTION.md"]
+intent = "Record the canonical guide's derivation, copyright holder, pinned source revision, and MIT license. Keep attribution and the license link intact so redistribution remains traceable and compliant."
+
+[files."./references/licenses/LICENSE"]
+intent = "Carry the canonical guide's MIT license text and copyright notice unchanged. This file must preserve the legal terms required for copying, modification, and redistribution."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./references/prompting.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./references/recipes.md"
+patch = "changes/0003-captured.patch"
+
+[[patches]]
+target = "./references/upstream/ATTRIBUTION.md"
+patch = "changes/0004-captured.patch"
+
+[[patches]]
+target = "./references/upstream/LICENSE"
+patch = "changes/0005-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/01-setup.md"
+patch = "changes/0006-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/02-poteto-mode.md"
+patch = "changes/0007-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/03-understand.md"
+patch = "changes/0008-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/04-design.md"
+patch = "changes/0009-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/05-build-and-clean.md"
+patch = "changes/0010-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/06-verify-and-ship.md"
+patch = "changes/0011-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/07-overnight.md"
+patch = "changes/0012-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/08-principles.md"
+patch = "changes/0013-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/09-make-it-yours.md"
+patch = "changes/0014-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/10-recipes-and-pitfalls.md"
+patch = "changes/0015-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/README.md"
+patch = "changes/0016-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0017-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/09-make-it-yours.md"
+patch = "changes/0018-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0019-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/06-verify-and-ship.md"
+patch = "changes/0020-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/09-make-it-yours.md"
+patch = "changes/0021-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0022-captured.patch"
+
+[[patches]]
+target = "./references/guide/01-setup.md"
+patch = "changes/0023-captured.patch"
+
+[[patches]]
+target = "./references/guide/02-poteto-mode.md"
+patch = "changes/0024-captured.patch"
+
+[[patches]]
+target = "./references/guide/03-understand.md"
+patch = "changes/0025-captured.patch"
+
+[[patches]]
+target = "./references/guide/04-design.md"
+patch = "changes/0026-captured.patch"
+
+[[patches]]
+target = "./references/guide/05-build-and-clean.md"
+patch = "changes/0027-captured.patch"
+
+[[patches]]
+target = "./references/guide/06-verify-and-ship.md"
+patch = "changes/0028-captured.patch"
+
+[[patches]]
+target = "./references/guide/07-overnight.md"
+patch = "changes/0029-captured.patch"
+
+[[patches]]
+target = "./references/guide/08-principles.md"
+patch = "changes/0030-captured.patch"
+
+[[patches]]
+target = "./references/guide/09-make-it-yours.md"
+patch = "changes/0031-captured.patch"
+
+[[patches]]
+target = "./references/guide/10-recipes-and-pitfalls.md"
+patch = "changes/0032-captured.patch"
+
+[[patches]]
+target = "./references/guide/README.md"
+patch = "changes/0033-captured.patch"
+
+[[patches]]
+target = "./references/licenses/ATTRIBUTION.md"
+patch = "changes/0034-captured.patch"
+
+[[patches]]
+target = "./references/licenses/LICENSE"
+patch = "changes/0035-captured.patch"
+
+[[patches]]
+target = "./references/upstream/ATTRIBUTION.md"
+patch = "changes/0036-captured.patch"
+
+[[patches]]
+target = "./references/upstream/LICENSE"
+patch = "changes/0037-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/01-setup.md"
+patch = "changes/0038-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/02-poteto-mode.md"
+patch = "changes/0039-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/03-understand.md"
+patch = "changes/0040-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/04-design.md"
+patch = "changes/0041-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/05-build-and-clean.md"
+patch = "changes/0042-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/06-verify-and-ship.md"
+patch = "changes/0043-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/07-overnight.md"
+patch = "changes/0044-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/08-principles.md"
+patch = "changes/0045-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/09-make-it-yours.md"
+patch = "changes/0046-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/10-recipes-and-pitfalls.md"
+patch = "changes/0047-captured.patch"
+
+[[patches]]
+target = "./references/upstream/guide/README.md"
+patch = "changes/0048-captured.patch"
+
+[[patches]]
+target = "./references/licenses/ATTRIBUTION.md"
+patch = "changes/0049-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0050-captured.patch"
+
+[[patches]]
+target = "./references/guide/01-setup.md"
+patch = "changes/0051-captured.patch"
+
+[[patches]]
+target = "./references/guide/02-poteto-mode.md"
+patch = "changes/0052-captured.patch"
+
+[[patches]]
+target = "./references/guide/04-design.md"
+patch = "changes/0053-captured.patch"
+
+[[patches]]
+target = "./references/guide/06-verify-and-ship.md"
+patch = "changes/0054-captured.patch"
+
+[[patches]]
+target = "./references/guide/09-make-it-yours.md"
+patch = "changes/0055-captured.patch"
+
+[[patches]]
+target = "./references/guide/10-recipes-and-pitfalls.md"
+patch = "changes/0056-captured.patch"
+
+[[patches]]
+target = "./references/guide/README.md"
+patch = "changes/0057-captured.patch"
+
+[[patches]]
+target = "./references/prompting.md"
+patch = "changes/0058-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0059-captured.patch"
+
+[[patches]]
+target = "./references/guide/05-build-and-clean.md"
+patch = "changes/0060-captured.patch"
+
+[[patches]]
+target = "./references/guide/06-verify-and-ship.md"
+patch = "changes/0061-captured.patch"
+
+[[patches]]
+target = "./references/guide/README.md"
+patch = "changes/0062-captured.patch"

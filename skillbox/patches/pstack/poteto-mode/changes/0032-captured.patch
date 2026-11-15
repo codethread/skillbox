@@ -1,0 +1,13 @@
+diff --git a/playbooks/feature.md b/playbooks/feature.md
+index e92181bc3f5df217c462dedcefe1e8517c7fafc6..5babd015bf0eaa640002f69369850ba25851d3dd 100644
+--- a/playbooks/feature.md
++++ b/playbooks/feature.md
+@@ -5,7 +5,7 @@
+ 1. `how` over the affected subsystem.
+ 2. `architect` for parallel design exploration.
+ 3. Write the throughput checkpoint as four todo items. A dimension that genuinely does not apply (single file, no fan-out) keeps its item with `n/a: <reason>` rather than being dropped:
+-   - **Blocking first steps.** Gates run before fan-out.
++   - **Blocking first steps.** Track machine-checkable blockers as Botlake gates on the dependent tasks. Run the checks before fan-out and proceed only when their results permit the dependent work. A closed gate alone is not a passing result.
+    - **Independent workstreams.** Disjoint files, services, or layers parallelize. Shared writes serialize.
+    - **Shared mutable state.** Default to splitting the target (the **separate-before-serializing-shared-state** principle skill). Serialize only for real invariants.
+    - **Smallest safe decomposition.** If one worker is best, name why.

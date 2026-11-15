@@ -1,0 +1,16 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Remove repeated catalog, dispatch, and optional second shared-group mechanics because Botlake supplies them. Keep one direct execution binding and per-independent-lane tasks, findings, and integration status. Preserve risk-first phase design, bounded fan-out across real seams, isolated writers, judges, artifact-based hypothesis tests, approval checkpoints, and an auditable decision trail. Do not replace the bespoke workflow with runtime instructions."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0003-captured.patch"

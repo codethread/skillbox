@@ -1,0 +1,69 @@
+diff --git a/SKILL.md b/SKILL.md
+deleted file mode 100644
+index 022a6ebf3533ade582a2ff7976f157fba97091ca..0000000000000000000000000000000000000000
+--- a/SKILL.md
++++ /dev/null
+@@ -1,63 +0,0 @@
+----
+-name: setup-pstack
+-description: Configure which agents pstack uses per role and at what reasoning budget, using the project's existing agent configuration. Use for /setup-pstack, "configure pstack models", "pstack budget", or changing pstack's model choices.
+----
+-
+-# Setup pstack
+-
+-Choose agents and reasoning budgets for pstack's roles from Botlake's agent catalog. Put persistent choices in the project's Botlake agent configuration.
+-
+-## Steps
+-
+-### 1. Detect available agents
+-
+-Read Botlake's agent catalog for each agent's purpose, model, and supported reasoning effort. Never propose a model or effort you have not confirmed.
+-
+-### 2. Load current state
+-
+-Read the project's Botlake agent configuration and instructions for current role assignments. Follow Botlake's configuration guidance for supported overrides before proposing a persistent change.
+-
+-### 3. Budget, map, and confirm
+-
+-**(a) Ask for a budget.** Offer these four options, and show how they relate to the current configuration:
+-
+-- `unlimited (max reasoning)`
+-- `large (xhigh reasoning)`
+-- `medium (high reasoning)`
+-- `small (medium reasoning)`
+-
+-**(b) Apply it.** Treat these as target reasoning budgets, not model-name suffixes. Keep the user's existing choices where they fit. Use the highest supported effort at or below the target; mark a role as needing a choice when the available agents cannot meet it. Never change an agent's purpose merely to force the budget.
+-
+-**(c) Show the roles and confirm.** Show the proposed agent and effort for each role:
+-
+-- feature, refactoring; bug-fix; perf-issue; hillclimb
+-- judgment and prose; hardest tasks
+-- how explorer; how explainer
+-- why investigators; why synthesizer
+-- reflect tooling; reflect judgment, divergent, synthesizer
+-- arena runners; arena cross-judge pool
+-- swarm workers
+-- architect runners
+-- interrogate reviewers
+-
+-Ask whether to accept as-is or change specific roles. Preserve independent judgment and model diversity where the skill calls for them. For panel roles (arena runners, architect runners, interrogate reviewers), one agent runs per entry, so the list length sets the count. `arena cross-judge pool` is also a list, but Arena runs one judge from a different model family. `swarm workers` is the default choice unless a race or comparison assigns another agent per arm.
+-
+-### 4. Validate
+-
+-Every chosen agent must be available, and each effort must be supported by its provider. Resolve roles still needing a choice before changing configuration.
+-
+-### 5. Apply the choices
+-
+-Use the confirmed choices for the current task. When the user wants them persisted, use the existing project configuration's supported local overrides. Explain their scope before applying them: changing a shared roster entry affects other workflows too, not just pstack. Preserve existing prompts and shared extension bindings. Make persistent changes only through supported local overrides. Put task-specific choices, such as a larger panel for one design, in that task's prompt.
+-
+-### 6. Confirm
+-
+-Tell the user what changed, where it was saved, and when the configured runtime picks it up. Re-read the catalog to confirm persistent changes resolved as intended. If the existing configuration already meets the request, report that; no file needs writing.
+-
+-### 7. Offer a verification skill (optional)
+-
+-Check whether the project has a way to drive the real app for proof (a `verify-*` skill, or an existing harness). If not, offer once: "want a project-local verification skill, so agents can drive the app the way a user does and prove changes work? I can generate one with /create-verification-skill." On yes, invoke `/create-verification-skill`. On no, move on without pushing.
+-
+-### 8. Offer a formal verification skill (optional)
+-
+-Check whether the project already has a formal verification skill (a project skill that runs a model checker, a proof, or another verifier against the code). If not, offer once: "want a formal verification skill, so agents can prove a key property of your code holds in every case in scope, not only the cases tests reach? I can generate one with /create-formal-verification-skill." On yes, invoke `/create-formal-verification-skill`. On no, move on without pushing.

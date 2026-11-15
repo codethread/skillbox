@@ -1,0 +1,65 @@
+diff --git a/SKILL.md b/SKILL.md
+index abd598770f0df4c751d6baa816bd37e060231f66..122f43045f7f8d076e9768dc63bec564023742c0 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -18,19 +18,19 @@ Operate as a **careful, cautious, and precise investigator**. Be honest about wh
+ 
+ The **target** is usually a chunk of code, a pattern, a feature, or a named design decision. The **question** is usually a design rationale, a tradeoff, a motivating edge case, an external constraint, dead code, or a broad history sweep.
+ 
+-If the target is vague ("why do we do it this way?" with no clear referent), make your best guess from conversation context (open files, recent edits, cursor location, what was just discussed). State your interpretation briefly so the user can redirect if you're off, then proceed.
++If the target is vague ("why do we do it this way?" with no clear referent), make your best guess from conversation context, such as the active file, recent edits, or what was just discussed. State your interpretation briefly so the user can redirect if needed, then proceed.
+ 
+ ## Step 2. Establish the Code Anchor
+ 
+-Before spawning investigators, build the seed context inline: file paths and line ranges, key symbols (functions, classes, constants), the last few commits touching the target, PR numbers from merge commits (pattern `(#1234)` in the subject line), and any linked ticket IDs. Run `git blame -L <start>,<end> <file>` for last-touch commits, `git log --follow -p -- <file>` for full history with patches through renames, `git log --oneline -20 -- <file>` for recent commits with PR numbers visible, and `git log -1 --format=%B <commit>` to extract PR numbers. Then pull the PR bodies and discussion for any substantive commit through the available forge access; for GitHub with authenticated `gh`, use `gh pr view <number> --json title,body,author,createdAt,mergedAt,labels,closingIssuesReferences,comments,reviews`. Record any unavailable history or PR discussion as a gap. This anchor goes to every investigator and to the synthesizer.
++Before delegating investigators, build the seed context inline: file paths and line ranges, key symbols (functions, classes, constants), the last few commits touching the target, PR numbers from merge commits (pattern `(#1234)` in the subject line), and any linked ticket IDs. Run `git blame -L <start>,<end> <file>` for last-touch commits, `git log --follow -p -- <file>` for full history with patches through renames, `git log --oneline -20 -- <file>` for recent commits with PR numbers visible, and `git log -1 --format=%B <commit>` to extract PR numbers. Then pull the PR bodies and discussion for any substantive commit through the available forge access; for GitHub with authenticated `gh`, use `gh pr view <number> --json title,body,author,createdAt,mergedAt,labels,closingIssuesReferences,comments,reviews`. Record any unavailable history or PR discussion as a gap. This anchor goes to every investigator and to the synthesizer.
+ 
+-## Step 3. Spawn Parallel Investigators
++## Step 3. Delegate investigators in parallel
+ 
+ **Default to the full parallel investigation.** The goal is a complete coverage map, not a minimal one. Document the null, don't skip the search.
+ 
+ ### Discovery
+ 
+-Before spawning investigators, inventory the evidence tools available in this environment, including CLI tools and MCP servers.
++Before choosing investigators, inventory the evidence tools and integrations available in this environment, including command-line tools and any MCP servers. Do not assume that an MCP or a product integration is available.
+ 
+ Map each available evidence tool to one evidence category:
+ 
+@@ -44,7 +44,7 @@ Map each available evidence tool to one evidence category:
+ 
+ When the target is in a Git checkout, source control is available through `git`; use `gh` only when the forge is GitHub and the command is installed and authenticated. For the other six, classify using the tool or server name, its instructions, and its operations. If a tool could fit more than one category, choose the one matching its primary evidence. Record ambiguous cases in the coverage map.
+ 
+-Spawn one investigator per available evidence category, all in parallel. Each owns one source and its tools (for example, git and forge access for source control). Don't ask one investigator to cover multiple categories.
++Create a Botlake task under the current context group for each independently delegated investigator lane. Choose one investigator from Botlake's agent catalog for each available evidence category, then dispatch the runs through Botlake in parallel. Record each lane's findings and integration status on its task. Use a Botlake shared context group when investigators need the same code anchor and question. Each investigator owns one source and its tools, such as Git and forge access for source control. Do not ask one investigator to cover multiple categories.
+ 
+ Each investigator's prompt is `references/investigator-prompt.md` filled in, plus:
+ - the category playbook `references/sources/<source>.md` for the selected tool, adapted from the examples in `references/source-playbook.md`
+@@ -56,12 +56,12 @@ Each investigator's prompt is `references/investigator-prompt.md` filled in, plu
+ Each category below is uniquely positioned to surface one shape of "why", shown after "Best at". Use it to know what to expect back, to name a gap when a category returns empty, and, only in the rare provably-irrelevant case, to justify a skip.
+ 
+ 1. **Source control** (Git history, plus forge access when exposed, code comments, tests). Always investigate it when the target is in a repository; otherwise record the gap. Best at *implementation-time rationale captured during review*.
+-2. **Issue / ticket tracker** (e.g. Linear, Jira, GitHub Issues, Plane, Shortcut MCP). Best at *the product or business forcing function*. Strongest when the why is external to engineering.
+-3. **Long-form documents** (e.g. Notion, Confluence, Google Docs, Coda MCP). Best at *long-form design rationale*, written out before it becomes code.
+-4. **Real-time team chat** (e.g. Slack, Discord, Microsoft Teams, Mattermost MCP). Best at *real-time deliberation that never reached a doc*. Especially important when the source control, ticket, and doc paper trail is thin.
+-5. **Infrastructure observability** (e.g. Datadog, New Relic, Honeycomb, Grafana, Splunk MCP). Best at *infrastructure and runtime reality that motivated the code*. Strongest when the target reacts to an infra signal (timeouts, retries, rate limits, circuit breakers).
+-6. **Error / exception tracking** (e.g. Sentry, Rollbar, Bugsnag, Airbrake MCP). Best at *the specific exceptions and error trajectories that motivated defensive or corrective code*. Strongest for catch blocks, null guards, type checks, retries, and other defenses.
+-7. **Product analytics warehouse** (e.g. Databricks, Snowflake, BigQuery, ClickHouse, dbt, Redshift MCP). Best at *product and data reality that shaped the code*. Strongest for flag-gated code, experiment-driven ships, data migrations, and "where did this number come from" questions.
++2. **Issue / ticket tracker** (for example, Linear, Jira, GitHub Issues, Plane, or Shortcut). Best at *the product or business forcing function*. Strongest when the why is external to engineering.
++3. **Long-form documents** (for example, Notion, Confluence, Google Docs, or Coda). Best at *long-form design rationale*, written out before it becomes code.
++4. **Real-time team chat** (for example, Slack, Discord, Microsoft Teams, or Mattermost). Best at *real-time deliberation that never reached a doc*. Especially important when the source control, ticket, and doc paper trail is thin.
++5. **Infrastructure observability** (for example, Datadog, New Relic, Honeycomb, Grafana, or Splunk). Best at *infrastructure and runtime reality that motivated the code*. Strongest when the target reacts to an infrastructure signal such as timeouts, retries, rate limits, or circuit breakers.
++6. **Error / exception tracking** (for example, Sentry, Rollbar, Bugsnag, or Airbrake). Best at *the specific exceptions and error trajectories that motivated defensive or corrective code*. Strongest for catch blocks, null guards, type checks, retries, and other defenses.
++7. **Product analytics warehouse** (for example, Databricks, Snowflake, BigQuery, ClickHouse, dbt, or Redshift). Best at *product and data reality that shaped the code*. Strongest for flag-gated code, experiment-driven releases, data migrations, and questions about where a number came from.
+ 
+ ### When to skip an investigator
+ 
+@@ -74,7 +74,7 @@ If your scope assessment suggests a single-commit trivial target where the PR de
+ 
+ ## Step 4. Synthesize
+ 
+-Spawn one synthesizer. It gets:
++Create a Botlake task for the synthesizer lane, then dispatch its run through Botlake. It gets:
+ 1. The investigator findings, including any null results and any categories skipped with justification
+ 2. The code anchor
+ 3. The user's original question

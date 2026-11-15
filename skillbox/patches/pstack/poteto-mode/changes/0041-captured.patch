@@ -1,0 +1,43 @@
+diff --git a/SKILL.md b/SKILL.md
+index a6a46a715ddc22bcbf13a0ebf4bff034186604ee..891e5f6b6a3393a47df95478f93946cd72b15a24 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -8,7 +8,7 @@ color: yellow
+ 
+ # Poteto mode
+ 
+-Bundled skills live at `../<name>/SKILL.md` from this file, so put this file's absolute path in every delegate's prompt.
++Bundled skills live at `../<name>/SKILL.md` from this file. Put this file's absolute path in every delegate's prompt and require the delegate to read it in full before working.
+ 
+ ## Non-negotiables
+ 
+@@ -30,7 +30,7 @@ Remaining triggers:
+ - Before review → the **no-comments** skill (`/no-comments`).
+ - Shipping UI / IDE / CLI → the matching project verification skill or named driver. When none exists, use **create-verification-skill**. For bug fixes, reproduce first on the same surface yourself. Hand to the user only under the narrow Bug fix step 1 exception.
+ - Running a benchmark, measuring perf yourself, or reporting a speedup or regression you measured → the **benchmark-checklist** skill before you report or act on the number.
+-- Any PR-status request ("babysit this", "get it green", "address the bugbot comments", and most often "check on PR X" or "anything outstanding on X") → the **Babysit** playbook (`playbooks/babysit.md`). Never triggered by merely opening a PR. Declare its mode before polling. The playbook's step 1 owns the request-to-mode mapping. Reaching for `drive` inside a phase agent stops that agent finishing its turn.
++- Any PR-status request ("babysit this", "get it green", "address the bugbot comments", "check on PR X", or "anything outstanding on X") → the **Babysit** playbook (`playbooks/babysit.md`). Match the request's scope. Answer status questions once, handle only comments for comment-only requests, and watch to merge-ready when asked to babysit. Merely opening a PR never starts a watch.
+ - Asked to land or ship a green stack → the **Shipping** playbook (`playbooks/shipping.md`). Green is not safe. Nothing gets armed before an independent per-PR verdict, and only the contiguous verified run from the root lands.
+ - Bugbot or the agentic security review commented → skeptical posture. They catch real bugs and also file non-issues and nitpicks, so assess each on its merits and dismiss noise with a concrete reason instead of churning code. Triage fix / dismiss / ask per `references/bugbot-triage.md`.
+ - Broken skill mid-task → fix it in its own PR. Don't block. Don't silently work around it.
+@@ -93,9 +93,9 @@ Read the leaf skill in full for any principle you apply. Each entry names when i
+ 
+ The agent that receives `/poteto-mode` owns the playbook, its Botlake context group, and every delegated run. Track each independently delegated lane as a Botlake task under that group, with its findings and integration status. Short-lived helpers need no separate task unless they own an independent lane. Assignment or closure alone does not prove execution or verification.
+ 
+-**Give every subagent inside a playbook step the [poteto delegate brief](references/poteto-agent.md)** (code-writing delegates, ad-hoc helpers). Never delegate the playbook itself. Routed workflow skills (`how`, `why`, `interrogate`, `reflect`, `swarm`) set their own roles for diverse-model review. Respect what the skill prescribes.
++Never delegate the playbook itself. Routed workflow skills (`how`, `why`, `interrogate`, `reflect`, `swarm`) set their own roles for diverse-model review. Respect what the skill prescribes.
+ 
+-**Match the agent to the job.** Select from Botlake's agent catalog and dispatch a Botlake agent run. The hardest changes (cross-cutting design, gnarly concurrency, subtle algorithms) need strong judgment; trivial mechanical edits need less. Preserve the distinct roles and model diversity a routed skill calls for. Give file pointers rather than inlined context.
++**Match the agent to the job.** Use Botlake for agent delegation. The hardest changes (cross-cutting design, gnarly concurrency, subtle algorithms) need strong judgment; trivial mechanical edits need less. Preserve the distinct roles and model diversity a routed skill calls for. Give file pointers rather than inlined context.
+ 
+ You own every subagent's work. Review the diff and write your own summary, don't pass through what it said. A second opinion is the same prompt against a different model. Agreement is high-signal.
+ 
+@@ -137,7 +137,7 @@ A large or cross-cutting effort (a migration across many call sites, an ambitiou
+ - **Visual parity.** Pixel-exact UI equivalence: matching two implementations or migrating a styling system.
+ - **Authoring or modifying a skill.** Writing or editing a SKILL.md. File: `playbooks/authoring-a-skill.md`.
+ - **Eval.** Testing how a skill, structure, or prompt change affects agent behavior before promoting it.
+-- **Babysit.** Driving a PR or a stack to merge-ready: conflicts, review threads, CI.
++- **Babysit.** A one-off PR status answer, review-comment work, or an explicitly requested watch to merge-ready.
+ - **Shipping.** The half after Babysit. Independently verifying a green stack, then landing the contiguous verified run bottom-up through `gh` by default or Origin when its CLI is available.
+ - **Autonomous run.** A long task to drive to completion without stopping ("run until done", "run until X").
+ - **Orchestrate.** A standing project handed to one coordinator chat: multi-day, many stacked PRs, dozens to hundreds of subagents, minimal human turns ("run this whole project", "own this migration until it lands"). Distinct from Autonomous run, which drives one task to a predicate. Work one agent could finish inside the session's budget routes there, not here, however program-shaped the phrasing sounds.

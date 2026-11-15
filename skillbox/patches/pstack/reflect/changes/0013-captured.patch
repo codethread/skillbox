@@ -1,0 +1,13 @@
+diff --git a/SKILL.md b/SKILL.md
+index ef4c40a16d0e90646cdbe6fd84fb999c447c7ff8..811c62525487243ef1ca8eeb25dff14d7925f550 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -16,7 +16,7 @@ Before fanning out, locate this conversation's transcript through the active har
+ 
+ ## 2. Delegate three reviewers in parallel
+ 
+-Create a Botlake task under the current context group for each reviewer lane. Choose three agents from Botlake's agent catalog and dispatch their runs in parallel, using different models for complementary perspectives. Use a Botlake shared context group when the reviewers need the same session context. Their briefs forbid file edits and external mutations while allowing evidence lookups for tickets, chat threads, and observability traces named by the record.
++Use Botlake to run the reviewers and the later synthesizer. Track each independent lane as a task under the current context group, with its findings and integration status. Launch three reviewers in parallel on different models for complementary perspectives. Their briefs forbid file edits and external mutations while allowing evidence lookups for tickets, chat threads, and observability traces named by the record.
+ 
+ | Lens | Prompt template |
+ |---|---|

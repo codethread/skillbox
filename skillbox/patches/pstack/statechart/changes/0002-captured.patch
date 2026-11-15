@@ -1,0 +1,11 @@
+diff --git a/scripts/package.json b/scripts/package.json
+index 16bd68507bac879f00d9efb90f6a5df689dbbd3a..a2cfe07febab113741d5b12e8847f8171ff3749d 100644
+--- a/scripts/package.json
++++ b/scripts/package.json
+@@ -1,5 +1,5 @@
+ {
+-  "name": "@cursor-skill/statechart",
++  "name": "@pstack/statechart",
+   "private": true,
+   "type": "module",
+   "scripts": {

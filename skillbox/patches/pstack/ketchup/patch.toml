@@ -1,0 +1,8 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Remove the unavailable /visualize command dependency while retaining factual charts, diagrams, and visible-change evidence in the catch-up report."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"

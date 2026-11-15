@@ -1,0 +1,23 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Dispatch Comment Sicko as an independent Botlake review, apply accepted comment deletions, and offer structural checks for constraints worth preserving. The reviewer may edit comments but must not change application code."
+
+[files."./references/comment-sicko.md"]
+intent = "Provide the independent comment-review brief used by no-comments without provenance commentary. Preserve its comment-only edit authority, application-code prohibition, refactor flags, safety checks, and evidence requirements."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./references/comment-sicko.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0003-captured.patch"
+
+[[patches]]
+target = "./references/comment-sicko.md"
+patch = "changes/0004-captured.patch"

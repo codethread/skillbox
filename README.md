@@ -75,10 +75,10 @@ Selection uses config, with no new CLI flags. Raw plugin layouts such as Cursor 
 
 Adapt upstream skills to your workflow with reviewable patches and a reason for each changed file. Skillbox records the source snapshot; your agent can help review updates before you adopt them.
 
-This repository publishes the standalone `deslop` code cleanup skill from Cursor Team Kit:
+This repository publishes the PSTACK workflow bundle for CT-configured Botlake agents:
 
 ```sh
-skillbox add codethread/skillbox deslop
+skillbox add codethread/skillbox pstack deslop
 ```
 
 Choose the producer revision you want to use. Keep project-specific customizations in your project's patch pack, separate from the shared bundle. Ask your agent to follow the built-in patch guidance.

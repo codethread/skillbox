@@ -1,0 +1,16 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Remove repeated catalog selection and optional second shared-group setup because Botlake injects its current operating process. Keep one direct Botlake execution binding and a task per independent worker lane in the current group, with findings and integration status. Preserve declared race rules, named race models, parallel execution, isolated outputs, self-contained briefs, exact SHAs and measurement methods, and explicit coverage gaps. Task state is not execution evidence."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0003-captured.patch"

@@ -1,0 +1,16 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Remove repeated catalog and dispatch instructions because Botlake owns its operating process. Keep one direct Botlake execution binding and task accountability for the independent different-family reviewer. Preserve the canonical append-only decision log, start-row attribution, full-transcript audit, bounded activity as supporting evidence only, workspace privacy, risk flags, and a blocked review when a different-family reviewer cannot run. Self-review and task state are not review evidence."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0003-captured.patch"

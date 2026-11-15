@@ -1,0 +1,13 @@
+diff --git a/references/licenses/ATTRIBUTION.md b/references/licenses/ATTRIBUTION.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..50401365e15909011bf1a9860c7f04c0b3959986
+--- /dev/null
++++ b/references/licenses/ATTRIBUTION.md
+@@ -0,0 +1,7 @@
++# Attribution
++
++Portions of the pstack guide are derived from PSTACK by Lauren Tan.
++
++- Copyright (c) 2025 Cursor, Inc.
++- Source: https://github.com/cursor/plugins/tree/3dbd22ff12742fb28c9700b9760baa29ed41dc13/pstack
++- License: MIT. See [`LICENSE`](LICENSE).

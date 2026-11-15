@@ -1,0 +1,24 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Remove repeated catalog and optional second shared-group setup because Botlake owns the current process. Keep direct Botlake execution and task accountability for independent history slices. Preserve workspace-only evidence, repeated-pattern confidence, user confirmation and feedback, existing source locations and categories, and edits to owned skill sources or consumer-owned patches rather than generated installs or the shared producer bundle."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0003-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0004-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0005-captured.patch"

@@ -1,0 +1,13 @@
+diff --git a/references/sources/notion.md b/references/sources/notion.md
+index d16230a4105fd1dacf870da0950a38faeb9381e6..10fbb1dbeb192c060de39d3c69780c010cac9ae9 100644
+--- a/references/sources/notion.md
++++ b/references/sources/notion.md
+@@ -15,7 +15,7 @@ Notion is where "why" often lives in long-form before it becomes code. A signifi
+ 
+ ## How to search it
+ 
+-Use the Notion MCP.
++If Notion access is available, use its search and page-retrieval operations. The operation names below are examples. Check the available instructions for exact names and fields.
+ 
+ 1. **Keyword searches with `notion-search`.** Try:
+    - The feature name

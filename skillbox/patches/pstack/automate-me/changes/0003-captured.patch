@@ -1,0 +1,13 @@
+diff --git a/SKILL.md b/SKILL.md
+index f071832fd0615cb4e8ec46c111bc184a4f9287f6..bf66c89089cc98f1df32008011fc7ba93a2c4c53 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -66,7 +66,7 @@ The **poteto-mode** skill shows the shape. Read it for granularity. Don't copy i
+ 
+ Use the project's skill-authoring guidance to author the skill. Placement:
+ 
+-- Path: preserve an existing mode skill's source location and category. For a new mode, use `<handle>-mode/SKILL.md` in the project's skill source directory, or the personal skill source if the user prefers. Keep an established personal category for that handle. Edit the source, not a generated installation. Personal preferences belong to the user's project or personal source, not the shared PSTACK adaptation. If the existing mode is imported through Skillbox, use `skillbox skills get skillbox-patch` for a consumer-owned patch.
++- Path: preserve an existing mode skill's source location and category. For a new mode, use `<handle>-mode/SKILL.md` in the project's skill source directory, or the personal skill source if the user prefers. Keep an established personal category for that handle. Edit the source, not a generated installation. Personal preferences belong to the user's project or personal source, not the shared PSTACK adaptation. If the existing mode comes from an imported adapted bundle, use `skillbox skills get skillbox-patch` for a consumer-owned patch. Native imports have no such pack; edit an owned source or route the change to its owner.
+ - Handle: the user's first name or chosen identifier.
+ - Frontmatter `description`: trigger on their name + `/<handle>-mode` + "work in their style", not on generic keywords like "write code" or "review PR".
+ - Frontmatter formatting: follow the skill-authoring guidance's YAML rules. Keep `description` as one YAML scalar. Quote it or use `description: >-` with indented continuation lines when punctuation or wrapping requires it.

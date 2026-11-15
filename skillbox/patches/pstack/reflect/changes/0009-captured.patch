@@ -1,0 +1,13 @@
+diff --git a/references/divergent-reviewer.md b/references/divergent-reviewer.md
+index dd72495b68f0686b162a17633314bb789478824f..84fab8e88b6725cd0b9d27a6d690c07f83a2bc3a 100644
+--- a/references/divergent-reviewer.md
++++ b/references/divergent-reviewer.md
+@@ -18,7 +18,7 @@ Scan for:
+ 
+ ## Scope to skills and tools the session actually used
+ 
+-Route findings only to skills, tools, or MCPs this transcript used. A skill counts as used when the record shows its body being read (from a file or a CLI), an agent brief naming its path, or a tool call matching its documented commands. Speculative routings to skills the parent never opened do not count.
++Route findings only to skills or tools this transcript used, including an MCP only if the record shows one was used. A skill counts as used when the record shows its body being read (from a file or a CLI), an agent brief naming its path, or a tool call matching its documented commands. Speculative routings to skills the parent never opened do not count.
+ 
+ Two finding shapes are valid:
+ - The parent invoked the skill and you found a real gap in its body. Route to the skill's relevant section.

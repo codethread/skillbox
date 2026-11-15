@@ -1,0 +1,12 @@
+diff --git a/references/guide/09-make-it-yours.md b/references/guide/09-make-it-yours.md
+index dd01ac41b34d2e30dd83b5a63c8d047d24acfd6a..7adbf9907fb5acee79bc71ae6bd4bb9cdf509cc5 100644
+--- a/references/guide/09-make-it-yours.md
++++ b/references/guide/09-make-it-yours.md
+@@ -1,6 +1,6 @@
+ # Make it yours
+ 
+-poteto-mode is one person's style. The playbooks, routing, and model roles underneath it work just as well with yours. This page covers generating a personal mode, capturing lessons from a session, fixing the repo so agents stop repeating mistakes, authoring a focused skill, and testing a skill change before you trust it.
++poteto-mode is one person's style. You can use its playbooks and routing with your own style. This page covers generating a personal mode, capturing lessons from a session, fixing the repo so agents stop repeating mistakes, authoring a focused skill, and testing a skill change before you trust it.
+ 
+ Start smaller than you think. You don't need many skills on day one, or even the whole stack. Prompt plainly, watch where agents fail, and add a skill or a check when the same failure shows up twice.
+ 

@@ -1,0 +1,12 @@
+diff --git a/references/explainer-prompt.md b/references/explainer-prompt.md
+index 805440dde616fc9ee9971ab30307f02445946d82..ec061d9fd993a5fc27a7adceebcc653950da7986 100644
+--- a/references/explainer-prompt.md
++++ b/references/explainer-prompt.md
+@@ -1,6 +1,6 @@
+ # Explainer Prompt Template
+ 
+-Build the explainer subagent's prompt from this template. Fill in the placeholders.
++Build the explainer agent's brief from this template. Fill in the placeholders.
+ 
+ ---
+ 

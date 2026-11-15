@@ -1,0 +1,33 @@
+diff --git a/SKILL.md b/SKILL.md
+index f9b12b99befb8b8f0c6ea69a718e174fbe557134..c61ab525dde9262148fadf1f86dcc0e780e49a70 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -8,24 +8,24 @@ disable-model-invocation: true
+ 
+ Explore the codebase to answer "how does X work?" questions. Produce architectural explanations at the level of a senior engineer onboarding onto a subsystem, enough to build a working mental model, not so much that it reads like annotated source code.
+ 
+-Delegate to read-only agents: explorers investigate their assigned slices, and the explainer synthesizes the findings. Include the no-edit constraint in each brief.
++Create a Botlake task under the current context group for each independently delegated explorer or explainer lane. Choose read-only agents from Botlake's agent catalog and dispatch their runs through Botlake. Record each lane's findings and integration status on its task. Use a Botlake shared context group when several agents need the same context. Explorers investigate assigned slices, and the explainer synthesizes the findings. Include the no-edit constraint in each brief.
+ 
+ ## 1. Assess complexity
+ 
+ If the scope is ambiguous, state your interpretation and explore. The user can redirect.
+ 
+-- **Simple** (a single module, a small utility, a narrow question such as "how does function X work"): no explorers. Spawn one explainer that explores and explains in one pass, built from `references/explainer-prompt.md` without the explorer-findings section. Go to step 4.
++- **Simple** (a single module, a small utility, a narrow question such as "how does function X work"): no explorers. Delegate one explainer to explore and explain in one pass, using `references/explainer-prompt.md` without the explorer-findings section. Go to step 4.
+ - **Complex** (a subsystem spanning multiple files or services, a cross-cutting feature, a full architectural overview): go to step 2.
+ 
+ When in doubt, take the simple path.
+ 
+ ## 2. Explore (complex only)
+ 
+-Decompose the question into 2 to 4 angles, each a distinct slice of the subsystem. Spawn all explorers in parallel, each with `references/explorer-prompt.md` and its angle filled in.
++Decompose the question into 2 to 4 angles, each a distinct slice of the subsystem. Delegate all explorers in parallel, each with `references/explorer-prompt.md` and its angle filled in.
+ 
+ ## 3. Synthesize (complex only)
+ 
+-Once all explorers have returned, spawn one explainer with `references/explainer-prompt.md` and every explorer's findings filled in.
++Once all explorers have returned, delegate one explainer with `references/explainer-prompt.md` and every explorer's findings filled in.
+ 
+ ## 4. Present
+ 

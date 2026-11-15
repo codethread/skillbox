@@ -1,0 +1,13 @@
+diff --git a/playbooks/orchestrate.md b/playbooks/orchestrate.md
+index c6eeec52a1a21bab4d614324833802601d99e2a6..16879335503557801d60176f8fcd2045f8a1b319 100644
+--- a/playbooks/orchestrate.md
++++ b/playbooks/orchestrate.md
+@@ -2,7 +2,7 @@
+ 
+ **You run the program, never the code. Decide which agent does each piece of work, then check what each one produces.** For a standing project handed to one coordinator chat: multi-day, many stacked PRs, dozens to hundreds of subagents, few human turns. One task driven to a predicate is Autonomous run. One ambitious run that needs a bespoke workflow is figure-it-out. Work that one agent could finish inside the session's budget is not a program.
+ 
+-Run it with your own tools. Delegate to workers and keep the program's state in shared task records. Watch each PR with PR and CI event subscriptions when your harness has them, otherwise use the Babysit watcher. Let workers coordinate directly rather than relaying their messages through the operator.
++Keep the program's tasks and shared context in its Botlake context group. Dispatch workers through Botlake and use the Autonomous run wake mechanism to supervise them. Watch PR and CI with event subscriptions when the integration provides them. Otherwise follow the active forge's watch method in Babysit. Let workers coordinate directly through Botlake mail rather than relaying their messages through the operator.
+ 
+ #### Topology
+ 

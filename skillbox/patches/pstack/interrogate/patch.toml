@@ -1,0 +1,16 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Remove repeated catalog and optional second shared-group instructions because Botlake supplies their current mechanics. Keep direct Botlake execution and task accountability for each model-diverse adversarial lane. Preserve diverse-model gap disclosure, independent reviewers, isolated snapshots of identical tracked and untracked changes, self-contained repro briefs, parent reruns, and every verified defect rather than a winning reviewer. Do not apply fixes."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0003-captured.patch"
