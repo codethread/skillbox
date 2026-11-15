@@ -17,6 +17,7 @@
         "picocolors": "^1.1.1",
         "simple-git": "^3.36.0",
         "skills": "github:vercel-labs/skills#4a351bc302b856b58fa13a055e764d3a384b741d",
+        "smol-toml": "^1.9.1",
         "ts-pattern": "^5.9.2",
         "typescript": "^7.0.2",
         "xdg-basedir": "^5.1.0",
@@ -260,6 +261,8 @@
     "skillbox-lake": ["skillbox-lake@workspace:.botlake"],
 
     "skills": ["skills@github:vercel-labs/skills#4a351bc", { "dependencies": { "nostics": "^1.3.0", "tar": "^7.5.20", "yaml": "^2.8.3" }, "bin": { "skills": "./bin/cli.mjs", "add-skill": "./bin/cli.mjs" } }, "vercel-labs-skills-4a351bc", "sha512-wiWK2a6i1Vk2Lqo2BzuAQErXfBWN/r/nenUpkJK+1CUyw3zoHDGEQD2bfr74d5fu0sfvm2SJ5dytH/5VpK/i6A=="],
+
+    "smol-toml": ["smol-toml@1.9.1", "", {}, "sha512-j7WyPdf0CJoutMzMoPLF/bVXHtKZIT9Rb4eGeEbWw8X2t5oirjPgpL+OpaENZrILYaXqYwnVH+qgUwVbl+pUJQ=="],
 
     "string-argv": ["string-argv@0.3.2", "", {}, "sha512-aqD2Q0144Z+/RqG52NeHEkZauTAUWJO8c6yTftGJKO3Tja5tUgIfmIl6kExvhtxSDP7fXB6DvzkfMpCd/F3G+Q=="],
 

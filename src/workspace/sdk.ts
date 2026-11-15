@@ -26,6 +26,47 @@ export const sdkConfig = {
 	agents: { include: ["universal"], default: ["universal"] },
 } satisfies SkillsConfig;
 
+export type RepositorySourceInspection =
+	| { kind: "repository"; repository: string; ref: string }
+	| { kind: "other" }
+	| { kind: "empty" };
+
+/** Use the SDK's public source parser/fetcher as the first source interpretation. */
+export async function inspectRepositorySource(
+	source: string,
+	cwd: string,
+): Promise<RepositorySourceInspection> {
+	let handle: SkillSource;
+	try {
+		handle = await resolveSkillSource(source, cwd);
+	} catch (cause) {
+		if (isSdkDiagnostic(cause) && cause.code === "SKILLS_NO_VALID_SKILLS")
+			return { kind: "empty" };
+		throw cause;
+	}
+	try {
+		if (!["github", "gitlab", "git"].includes(handle.source.type)) return { kind: "other" };
+		return {
+			kind: "repository",
+			repository: handle.source.url,
+			ref: handle.source.ref ?? "HEAD",
+		};
+	} finally {
+		await handle.dispose();
+	}
+}
+
+export async function resolveSkillSource(source: string, cwd: string): Promise<SkillSource> {
+	return resolveSource(source, {
+		cwd,
+		config: sdkConfig,
+		fullDepth: true,
+		onWarning: (warning) => {
+			throw warning;
+		},
+	});
+}
+
 export async function resolveBundleSource(input: {
 	source: string;
 	bundles: readonly string[];
@@ -58,14 +99,10 @@ export async function resolveBundleSource(input: {
 
 	let handle: SkillSource;
 	try {
-		handle = await resolveSource(local ? join(parsed.workspace, source, "skillbox") : source, {
-			cwd: parsed.workspace,
-			config: sdkConfig,
-			fullDepth: true,
-			onWarning: (warning) => {
-				throw warning;
-			},
-		});
+		handle = await resolveSkillSource(
+			local ? join(parsed.workspace, source, "skillbox") : source,
+			parsed.workspace,
+		);
 	} catch (cause) {
 		if (cause instanceof ResponseError) throw cause;
 		if (isSdkDiagnostic(cause)) {

@@ -4,9 +4,13 @@ import { dirname, join, resolve } from "node:path";
 import { z } from "zod";
 
 const root = resolve(import.meta.dirname, "..");
+const entrypoint = join(root, "src/cli.ts");
 const nodeRequire = createRequire(import.meta.url);
 const result = await Bun.build({
-	entrypoints: [join(root, "src/cli.ts")],
+	entrypoints: [entrypoint],
+	// A Bun shebang overrides the target for direct imports, splitting module identities.
+	// The npm launcher in bin/skillbox.mjs owns the Node shebang.
+	files: { [entrypoint]: (await readFile(entrypoint, "utf8")).replace(/^#![^\n]*\n/, "") },
 	outdir: join(root, "dist"),
 	naming: "cli.mjs",
 	target: "node",
