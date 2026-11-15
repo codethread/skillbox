@@ -38,7 +38,7 @@ function expectFailure(result: CommandResult): CliResponse {
 }
 
 test("returns a structured JSON error for invalid command arguments", async () => {
-	expect(expectFailure(await run("add"))).toMatchInlineSnapshot(`
+	expect(expectFailure(await run("add", "skills", "--path", "skills"))).toMatchInlineSnapshot(`
 	  {
 	    "data": null,
 	    "errors": [

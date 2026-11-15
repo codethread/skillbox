@@ -45,18 +45,13 @@
 		"prepack": "bun run build:npm"
 	},
 	"devDependencies": {
-		"@clack/prompts": "^1.2.0",
 		"@codethread/cli-changelog": "github:codethread/cli-changelog#c457e0a28686ce6349ce0956b1375635d53148d8",
 		"@types/bun": "^1.4.4",
-		"@vercel/detect-agent": "^1.2.1",
 		"commander": "^15.1.0",
 		"husky": "9.1.7",
 		"lint-staged": "17.6.0",
 		"oxfmt": "0.78.0",
 		"oxlint": "^1.93.0",
-		"picocolors": "^1.1.1",
-		"simple-git": "^3.36.0",
-		"skills": "github:vercel-labs/skills#4a351bc302b856b58fa13a055e764d3a384b741d",
 		"smol-toml": "^1.9.1",
 		"ts-pattern": "^5.9.2",
 		"typescript": "^7.0.2",

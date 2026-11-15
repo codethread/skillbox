@@ -1,16 +1,25 @@
 {
 	"sources": [
 		{
+			"type": "skills",
+			"id": "development",
 			"source": "https://github.com/codethread/agents",
-			"bundles": ["coding", "dev"]
+			"path": "skillbox/coding"
 		},
 		{
-			"source": ".",
-			"bundles": ["local"]
+			"type": "skills",
+			"id": "development",
+			"source": "https://github.com/codethread/agents",
+			"path": "skillbox/dev"
 		},
 		{
+			"type": "skills",
+			"id": "deslop",
 			"source": "https://github.com/cursor/plugins",
-			"bundles": ["deslop"]
+			"ref": "main",
+			"path": "cursor-team-kit/skills",
+			"pick": ["deslop"]
 		}
-	]
+	],
+	"install": ["development", "local", "deslop"]
 }

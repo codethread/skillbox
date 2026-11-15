@@ -41,7 +41,9 @@ description: Review a proposed code change for correctness, unintended effects, 
 From a separate consuming directory, install with:
 
 ```sh
-skillbox add ../team-skills development
+skillbox add skillbox ../team-skills development --bundle development
 ```
+
+The first `development` is the consumer's destination id; `--bundle development` selects the producer's bundle. This native-only producer needs no config, and its own installation choices do not restrict publication.
 
 The installed skill is `.agents/skills/review-changes/SKILL.md`; the supporting file is `.agents/skills/review-changes/references/checklist.md`. These relative links must continue to resolve after installation. Symlinked source content is rejected; distribute real files and directories.
