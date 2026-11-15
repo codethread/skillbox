@@ -75,6 +75,8 @@ Selection uses config, with no new CLI flags. Raw plugin layouts such as Cursor 
 
 Adapt upstream skills to your workflow with reviewable patches and a reason for each changed file. Skillbox records the source snapshot; your agent can help review updates before you adopt them.
 
+For an external skill used unchanged, commit its pinned source reference and skill selection. Add patches and intent when you customize it. `sync` recreates the external files in the generated installation.
+
 Choose the producer revision you want to use. Keep project-specific customizations in your project's patch pack, separate from the shared bundle. Ask your agent to follow the built-in patch guidance.
 
 ## What to commit

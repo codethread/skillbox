@@ -95,7 +95,15 @@ A producer exports an adapted bundle through `skillbox/patches/<bundle>/bundle.t
 
 Skillbox replays the complete adapted bundle before selecting skills. Source, hash, intent, and patch validation still cover unselected siblings. Selection changes only the local installation and its lock entries, not the pinned source or complete patch pack.
 
-Publishing remains independent of local config selection. Native folders and complete adapted packs define exports. Selecting only `deslop` locally does not turn an exported Cursor Team Kit pack into a deslop-only bundle.
+Publishing remains independent of local config selection. Native folders define authored exports. A pinned source descriptor can select an external export with an optional nonempty `export_skills` list of exact post-patch frontmatter names. Omit it to export the whole bundle. For example, add this to `skillbox/patches/cursor-team-kit/bundle.toml` to publish only deslop:
+
+```toml
+export_skills = ["deslop"]
+```
+
+This declaration limits the bundle's distributable skills for both this checkout and downstream imports. Config can select fewer skills from that export. Complete source, intent, and patch validation still runs before selection. Prepared editing workspaces retain the full source; imported consumers receive only the producer's export.
+
+An unchanged external export commits only its descriptor and pinned source lock, alongside the workspace config and installation lock. Do not copy upstream skills into a native source bundle. First customization adds patches and per-file intent beside the same source reference. No new selection flags are required.
 
 Load `skillbox skills get skillbox-patch` for the editable-workspace, capture, intent, update, and conflict workflow. `update <bundle>` stages a newer producer snapshot for an imported adaptation, not a new original-upstream revision independently. Keep generated installations separate from committed patch artifacts.
 

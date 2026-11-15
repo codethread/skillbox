@@ -16,11 +16,12 @@ import { dirname, isAbsolute, join, posix, resolve, sep } from "node:path";
 import { xdgCache } from "xdg-basedir";
 import { parse, stringify } from "smol-toml";
 import { z } from "zod";
+import { installSkills } from "skills";
 import { ResponseError, responseError, type ResponseErrorItem } from "../response.ts";
-import { bundleSchema } from "./config.ts";
+import { bundleSchema, selectBundleSkills } from "./config.ts";
 import { localPath, statOptional } from "./paths.ts";
 import { createPatchGit, type PatchGit } from "./patch-git.ts";
-import { inspectRepositorySource } from "./sdk.ts";
+import { inspectRepositorySource, resolveBundleSource, sdkConfig } from "./sdk.ts";
 
 const revisionSchema = z.string().regex(/^[0-9a-f]{40}$/);
 const digestSchema = z.string().regex(/^[0-9a-f]{64}$/);
@@ -57,6 +58,7 @@ const gitDescriptorSchema = z.strictObject({
 	upstream: z.string().min(1),
 	root: relativePath,
 	skills_root: relativePath,
+	export_skills: z.array(z.string().min(1)).min(1).optional(),
 	update_ref: z.string().min(1).optional(),
 });
 const importedDescriptorSchema = z.strictObject({
@@ -68,6 +70,7 @@ const importedDescriptorSchema = z.strictObject({
 	root: relativePath,
 	source_bundle: bundleSchema,
 	skills_root: relativePath,
+	export_skills: z.array(z.string().min(1)).min(1).optional(),
 	update_ref: z.string().min(1).optional(),
 });
 export const descriptorSchema = z.discriminatedUnion("source_type", [
@@ -261,12 +264,7 @@ async function resolveExportedBundle(
 				join(staging, "producer"),
 				runtime,
 			);
-			await rm(materialized.canonical, { recursive: true, force: true });
-			await normalizeImportedBaseline(
-				join(staging, "producer"),
-				pack.descriptor.skills_root,
-				join(staging, "tree"),
-			);
+			await normalizeImportedBaseline(materialized.canonical, bundle, join(staging, "tree"));
 			const sourceHash = await hashTree(join(staging, "tree"));
 			const descriptor: BundleDescriptor = {
 				schema: 1,
@@ -287,7 +285,7 @@ async function resolveExportedBundle(
 				runtime,
 			);
 			const canonical = join(staging, "canonical");
-			await createCanonical(cached.root, descriptor.skills_root, bundle, canonical);
+			await createCanonical(cached.root, descriptor, canonical);
 			const lock: BundleLock = {
 				schema: 1,
 				source: descriptor.source,
@@ -534,6 +532,12 @@ async function materializeProducerSource(
 				{ source: descriptor.source, skill: descriptor.source_bundle },
 			);
 	}
+	if (await hasNativeBundle(producerRoot, descriptor.source_bundle))
+		throw responseError(
+			"BUNDLE_SOURCE_AMBIGUOUS",
+			`Source exports both a native and adapted bundle named ${descriptor.source_bundle}.`,
+			{ source: descriptor.source, skill: descriptor.source_bundle },
+		);
 	await requireProducerIntents(pack.directory);
 	const activeKey = `${descriptor.source}\0${descriptor.source_bundle}\0${pinKey(pin)}`;
 	if (runtime.activeImports.has(activeKey))
@@ -550,10 +554,9 @@ async function materializeProducerSource(
 			join(staging, "producer"),
 			runtime,
 		);
-		await rm(materialized.canonical, { recursive: true, force: true });
 		await normalizeImportedBaseline(
-			join(staging, "producer"),
-			pack.descriptor.skills_root,
+			materialized.canonical,
+			descriptor.source_bundle,
 			join(staging, "tree"),
 		);
 		const sourceHash = await hashTree(join(staging, "tree"));
@@ -815,7 +818,7 @@ async function materializeBundle(
 	if (conflicts.length) throw new ResponseError(conflicts);
 	const outputs = await hashSkillOutputs(destination, pack.descriptor.skills_root);
 	const canonical = join(dirname(destination), "canonical");
-	await createCanonical(destination, pack.descriptor.skills_root, bundle, canonical);
+	await createCanonical(destination, pack.descriptor, canonical);
 	return {
 		descriptor: pack.descriptor,
 		pin: source.pin,
@@ -937,24 +940,78 @@ async function regularTree(root: string): Promise<string[]> {
 
 async function createCanonical(
 	root: string,
-	skillsRoot: string,
-	bundle: string,
+	descriptor: BundleDescriptor,
 	canonical: string,
 ): Promise<void> {
-	await mkdir(join(canonical, "skillbox", bundle), { recursive: true });
-	await cp(join(root, skillsRoot), join(canonical, "skillbox", bundle), {
+	const source = descriptor.export_skills === undefined ? canonical : join(canonical, ".source");
+	const sourceDirectory = join(source, "skillbox", descriptor.bundle);
+	await mkdir(sourceDirectory, { recursive: true });
+	await cp(join(root, descriptor.skills_root), sourceDirectory, {
 		recursive: true,
 		preserveTimestamps: true,
 	});
+	if (descriptor.export_skills === undefined) return;
+	const resolved = await resolveBundleSource({
+		source,
+		bundles: [descriptor.bundle],
+		cwd: source,
+		workspace: source,
+	});
+	const destination = join(canonical, "skillbox", descriptor.bundle);
+	const projection = join(canonical, ".export");
+	const validation = join(canonical, ".validate");
+	try {
+		// The SDK checks duplicates and symlinks during installation, not discovery.
+		const result = await installSkills(resolved.handle, {
+			cwd: validation,
+			config: { ...sdkConfig, lockfile: false },
+			onWarning: (warning) => {
+				throw warning;
+			},
+		});
+		if (result.failed.length)
+			throw new ResponseError(
+				result.failed.map((failure) => ({
+					code: failure.code,
+					message: failure.message,
+					source: descriptor.source,
+					skill: failure.skill,
+				})),
+			);
+		if (result.skipped.length || result.installed.length !== resolved.skills.length)
+			throw new Error("The library did not validate every source skill.");
+		await mkdir(projection);
+		const selected = selectBundleSkills(
+			{ bundle: descriptor.bundle, skills: descriptor.export_skills },
+			resolved.skills,
+			descriptor.source,
+		);
+		for (const skill of selected) {
+			const path = posix.relative(descriptor.bundle, skill.path!);
+			await mkdir(dirname(join(projection, path)), { recursive: true });
+			await cp(join(sourceDirectory, path), join(projection, path), {
+				recursive: true,
+				preserveTimestamps: true,
+			});
+		}
+		await mkdir(dirname(destination), { recursive: true });
+		await rm(destination, { recursive: true, force: true });
+		await rename(projection, destination);
+	} finally {
+		await resolved.handle.dispose();
+		await rm(source, { recursive: true, force: true });
+		await rm(validation, { recursive: true, force: true });
+		await rm(projection, { recursive: true, force: true });
+	}
 }
 
 async function normalizeImportedBaseline(
-	producerRoot: string,
-	producerSkillsRoot: string,
+	canonical: string,
+	bundle: string,
 	destination: string,
 ): Promise<void> {
 	await mkdir(destination, { recursive: true });
-	await cp(join(producerRoot, producerSkillsRoot), join(destination, "skills"), {
+	await cp(join(canonical, "skillbox", bundle), join(destination, "skills"), {
 		recursive: true,
 		preserveTimestamps: true,
 	});
