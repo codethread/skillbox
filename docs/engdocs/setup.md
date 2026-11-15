@@ -2,7 +2,7 @@
 
 The CLI builds with `bun install --frozen-lockfile` and `bun run build`. The following setup also configures this repository's maintainer tooling and Botlake lake.
 
-Install [mise](https://mise.jdx.dev/getting-started.html). Prepare the shared private `ct-config` archive through the Botlake checkout's install task. This lake installs public Botlake packages from npm and private configuration from that packed tarball, using its committed lockfile.
+Install [mise](https://mise.jdx.dev/getting-started.html). The lake installs Botlake packages and the shared `@botlake/extension-ct-config` preset from npm. The repository root owns the Bun workspace and its single committed `bun.lock`; do not install dependencies separately inside `.botlake`.
 
 Run from the repository root:
 
