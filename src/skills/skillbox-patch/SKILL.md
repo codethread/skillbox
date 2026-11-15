@@ -9,9 +9,17 @@ Adapt an upstream Git skills subtree or customize a producer's adapted bundle wi
 
 Keep the patch command surface deliberately minimal. Use Git and worktrees to review, select, revert, and reorganize changes before committing. Do not introduce parallel patch-management commands such as `apply`, `rollback`, `adjust`, or `pick`; Git owns that history and selection workflow. Skillbox prepares editable source, records diffs, and reproduces the recorded bundle through sync.
 
+## Publish an external skill
+
+An unchanged external bundle needs only `skillbox/patches/<bundle>/bundle.toml` and its `lock.json`. Register the pinned source with `patch init` below. To publish a subset, add `export_skills = ["deslop"]` to its descriptor before sync. The list must be nonempty and contain exact post-patch frontmatter names. Omit it to export all skills.
+
+The descriptor controls what this bundle offers to this checkout and downstream consumers. Config can further narrow the local installation. Complete source and patch validation still runs before export selection, and prepare retains the full editable source. Consumers receive only the declared export, with its supporting files and executable modes.
+
+Commit the metadata for an unchanged import. To customize it, use the same prepare and capture workflow below, then commit the added diffs and per-file intent alongside that reference. Keep fetched upstream files, prepared workspaces, and generated installations out of Git.
+
 ## Start or reopen an edit
 
-To install only selected skills, load `skillbox skills file skillbox-configure references/configuration.md` before the first installation. It covers config subsets for producer imports and raw subtrees such as Cursor Team Kit. Selection follows full adapted replay and does not narrow the source pin, patch validation, or publisher exports.
+To install only selected skills, load `skillbox skills file skillbox-configure references/configuration.md` before the first installation. It covers config subsets for producer imports and raw subtrees such as Cursor Team Kit. Installation selection follows full adapted replay and does not narrow the source pin, patch validation, or the producer's export declaration.
 
 To consume a producer's adapted bundle, run `skillbox add <producer-source> <bundle>`. Add installs the producer's output and creates an empty consumer-owned patch pack. The producer retains its own source pin, diffs, and intents; your pack records the producer snapshot and only your changes. Use prepare below to customize it, without a separate init. Importing a native bundle does not create a patch pack.
 

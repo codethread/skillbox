@@ -754,6 +754,487 @@ test("adapted subsets omit false collisions without bypassing unselected produce
 	expect(await projectState(consumer)).toEqual(beforeCollision);
 }, 90_000);
 
+test("a metadata-only export preserves alias files and modes through nested imports and cold restoration", async () => {
+	const { run, ...f } = await exportFixture();
+	const pack = join(f.producer.author, "skillbox/patches/deslop");
+	expect(await files(pack)).toEqual(["bundle.toml", "lock.json"]);
+	const originalPack = await snapshot(pack);
+	const expected = await snapshot(join(f.upstream.author, "plugin/skills/alias-folder"));
+	expect(await snapshot(join(f.producer.author, ".agents/skills/deslop"))).toEqual(expected);
+	expect((await readdir(join(requiredPath(f.prepared, "editable"), "skills"))).sort()).toEqual([
+		"alias-folder",
+		"other",
+	]);
+	expect(
+		expectSuccess(
+			await run(
+				f.producer.author,
+				f.producerCache,
+				"patch",
+				"capture",
+				"deslop",
+				"--from",
+				requiredPath(f.prepared, "workspace"),
+			),
+		).status,
+	).toBe("unchanged");
+	expect(await snapshot(pack)).toEqual(originalPack);
+
+	const consumer = await consumerDirectory(f.root, "selected-consumer");
+	const cache = join(f.root, "selected-cache");
+	const source = `${f.source}#${f.producer.revision}`;
+	expect(expectSuccess(await run(consumer, cache, "add", source, "deslop"))).toMatchObject({
+		installed: 1,
+	});
+	expect(await readdir(join(consumer, ".agents/skills"))).toEqual(["deslop"]);
+	expect(await snapshot(join(consumer, ".agents/skills/deslop"))).toEqual(expected);
+	const consumerPack = join(consumer, "skillbox/patches/deslop");
+	expect(await files(consumerPack)).toEqual(["bundle.toml", "lock.json"]);
+	expect(await readFile(join(consumerPack, "bundle.toml"), "utf8")).not.toContain(
+		"export_skills",
+	);
+	const prepared = expectSuccess(await run(consumer, cache, "patch", "prepare", "deslop"));
+	const pristine = join(requiredPath(prepared, "workspace"), "pristine/skills");
+	expect(await readdir(pristine)).toEqual(["alias-folder"]);
+	expect(await snapshot(join(pristine, "alias-folder"))).toEqual(expected);
+
+	const config = await json(join(consumer, "skillbox/config.json"));
+	for (const name of ["other", "alias-folder"]) {
+		config.sources[0].bundles = [{ bundle: "deslop", skills: [name] }];
+		await put(consumer, "skillbox/config.json", `${JSON.stringify(config)}\n`);
+		const before = await projectState(consumer);
+		expectFailure(await run(consumer, cache, "sync"), "SKILL_NOT_FOUND");
+		expect(await projectState(consumer)).toEqual(before);
+	}
+	config.sources[0].bundles = [{ bundle: "deslop", skills: ["deslop"] }];
+	await put(consumer, "skillbox/config.json", `${JSON.stringify(config)}\n`);
+	expectSuccess(await run(consumer, cache, "sync"));
+	await setExportSkills(consumerPack, ["deslop", "deslop"]);
+	expect(
+		expectSuccess(
+			await run(
+				consumer,
+				cache,
+				"patch",
+				"capture",
+				"deslop",
+				"--from",
+				requiredPath(prepared, "workspace"),
+			),
+		).status,
+	).toBe("unchanged");
+	const intermediatePin = await commit(consumer, "Publish a selected imported bundle");
+	await git(f.root, "clone", "--quiet", "--bare", consumer, join(f.root, "intermediate.git"));
+
+	const nested = await consumerDirectory(f.root, "nested-consumer");
+	const nestedCache = join(f.root, "nested-cache");
+	expectSuccess(
+		await run(
+			nested,
+			nestedCache,
+			"add",
+			`https://skillbox-export.invalid/intermediate.git#${intermediatePin}`,
+			"deslop",
+		),
+	);
+	expect(await readdir(join(nested, ".agents/skills"))).toEqual(["deslop"]);
+	expect(await snapshot(join(nested, ".agents/skills/deslop"))).toEqual(expected);
+	expect(await files(join(nested, "skillbox/patches/deslop"))).toEqual([
+		"bundle.toml",
+		"lock.json",
+	]);
+	await commit(nested, "Track the nested export");
+	const cold = join(f.root, "cold-selected-consumer");
+	await git(f.root, "clone", "--quiet", nested, cold);
+	const coldCache = join(f.root, "cold-selected-cache");
+	expectSuccess(await run(cold, coldCache, "sync"));
+	expect(await snapshot(join(cold, ".agents/skills"))).toEqual(
+		await snapshot(join(nested, ".agents/skills")),
+	);
+	const beforeRepeat = await projectState(cold);
+	const times = await modificationTimes(cold, [
+		"skillbox/lock.json",
+		".agents/skills/deslop/scripts/run.sh",
+	]);
+	expect(expectSuccess(await run(cold, coldCache, "sync")).status).toBe("unchanged");
+	expect(await projectState(cold)).toEqual(beforeRepeat);
+	expect(
+		await modificationTimes(cold, [
+			"skillbox/lock.json",
+			".agents/skills/deslop/scripts/run.sh",
+		]),
+	).toEqual(times);
+
+	await put(
+		consumer,
+		"skillbox/deslop/native/SKILL.md",
+		skill("native", "An ambiguous native export beside the imported pack."),
+	);
+	const ambiguousPin = await commit(consumer, "Introduce an ambiguous intermediate export");
+	await git(consumer, "push", "--quiet", join(f.root, "intermediate.git"), "main");
+	const beforeAmbiguous = await projectState(nested);
+	expectFailure(
+		await run(nested, nestedCache, "update", "deslop", "--ref", ambiguousPin),
+		"BUNDLE_SOURCE_AMBIGUOUS",
+	);
+	expect(await projectState(nested)).toEqual(beforeAmbiguous);
+}, 90_000);
+
+test("first export customization keeps its Git descriptor and explicit update accepts the prepared producer pin", async () => {
+	const { run, ...f } = await exportFixture();
+	const pack = join(f.producer.author, "skillbox/patches/deslop");
+	const descriptor = await readFile(join(pack, "bundle.toml"), "utf8");
+	const originalLock = await json(join(pack, "lock.json"));
+	const consumer = await consumerDirectory(f.root, "pinned-export-consumer");
+	const cache = join(f.root, "pinned-export-cache");
+	expectSuccess(
+		await run(consumer, cache, "add", `${f.source}#${f.producer.revision}`, "deslop"),
+	);
+	const installed = await snapshot(join(consumer, ".agents/skills"));
+
+	await put(
+		requiredPath(f.prepared, "editable"),
+		"skills/alias-folder/references/nested/choice.md",
+		"The producer's first customization.\n",
+	);
+	const captured = expectSuccess(
+		await run(
+			f.producer.author,
+			f.producerCache,
+			"patch",
+			"capture",
+			"deslop",
+			"--from",
+			requiredPath(f.prepared, "workspace"),
+		),
+	);
+	expect(captured).toMatchObject({ changed: 1, pendingIntents: 1 });
+	expect(await readFile(join(pack, "bundle.toml"), "utf8")).toBe(descriptor);
+	const customizedLock = await json(join(pack, "lock.json"));
+	expect(customizedLock).toMatchObject({
+		pin: originalLock.pin,
+		sourceHash: originalLock.sourceHash,
+	});
+	expect(customizedLock.patchHash).not.toBe(originalLock.patchHash);
+	expect(await files(pack)).toEqual([
+		"alias-folder/changes/0001-captured.patch",
+		"alias-folder/patch.toml",
+		"bundle.toml",
+		"lock.json",
+	]);
+	await annotateBlankIntents(pack, "Customize the selected upstream guidance.");
+	expectSuccess(await run(f.producer.author, f.producerCache, "sync"));
+	const candidatePin = await commitAndPush(f.producer, "Publish the first optional patch");
+	const before = await projectState(consumer);
+	expect(expectSuccess(await run(consumer, cache, "sync")).status).toBe("unchanged");
+	const staged = expectSuccess(
+		await run(consumer, cache, "update", "deslop", "--ref", candidatePin),
+	);
+	expect(staged).toMatchObject({
+		status: "prepared",
+		to: { type: "git", revision: candidatePin },
+	});
+	expect(await projectState(consumer)).toEqual(before);
+	await put(
+		f.producer.author,
+		"skillbox/later/later/SKILL.md",
+		skill("later", "Advance the producer after preparation."),
+	);
+	const laterPin = await commitAndPush(f.producer, "Advance beyond the prepared pin");
+	expectSuccess(
+		await run(
+			consumer,
+			cache,
+			"patch",
+			"capture",
+			"deslop",
+			"--from",
+			requiredPath(staged, "workspace"),
+		),
+	);
+	const accepted = await json(join(consumer, "skillbox/patches/deslop/lock.json"));
+	expect(accepted.pin).toMatchObject({ type: "git", revision: candidatePin });
+	expect(accepted.pin.revision).not.toBe(laterPin);
+	expect(await snapshot(join(consumer, ".agents/skills"))).toEqual(installed);
+	expect(await files(join(consumer, "skillbox/patches/deslop"))).toEqual([
+		"bundle.toml",
+		"lock.json",
+	]);
+	expectSuccess(await run(consumer, cache, "sync"));
+	expect(
+		await readFile(join(consumer, ".agents/skills/deslop/references/nested/choice.md"), "utf8"),
+	).toBe("The producer's first customization.\n");
+	expect(await readFile(join(pack, "bundle.toml"), "utf8")).toBe(descriptor);
+	expect((await json(join(pack, "lock.json"))).pin).toEqual(originalLock.pin);
+}, 90_000);
+
+test("export policy changes need no recapture but invalid selectors and unselected members fail atomically", async () => {
+	const { run, ...f } = await exportFixture();
+	const pack = join(f.producer.author, "skillbox/patches/deslop");
+	const consumer = await consumerDirectory(f.root, "invalid-export-consumer");
+	const cache = join(f.root, "invalid-export-cache");
+	const capture = () =>
+		run(
+			f.producer.author,
+			f.producerCache,
+			"patch",
+			"capture",
+			"deslop",
+			"--from",
+			requiredPath(f.prepared, "workspace"),
+		);
+	const originalLock = await json(join(pack, "lock.json"));
+	for (const selection of [["missing"], ["alias-folder"], [], [""]]) {
+		await setExportSkills(pack, selection);
+		const beforeProducer = await projectState(f.producer.author);
+		const beforeConsumer = await projectState(consumer);
+		const code = selection.length && selection[0] ? "SKILL_NOT_FOUND" : "PATCH_PACK_INVALID";
+		expectFailure(await capture(), code);
+		expectFailure(await run(f.producer.author, f.producerCache, "sync"), code);
+		expectFailure(await run(consumer, cache, "add", f.producer.author, "deslop"), code);
+		expect(await projectState(f.producer.author)).toEqual(beforeProducer);
+		expect(await projectState(consumer)).toEqual(beforeConsumer);
+	}
+	await setExportSkills(pack, ["other"]);
+	expect(expectSuccess(await capture()).status).toBe("unchanged");
+	expectSuccess(await run(f.producer.author, f.producerCache, "sync"));
+	expect(await readdir(join(f.producer.author, ".agents/skills"))).toEqual(["other"]);
+	expect(await json(join(pack, "lock.json"))).toEqual(originalLock);
+	await setExportSkills(pack, ["deslop"]);
+	expectSuccess(await run(f.producer.author, f.producerCache, "sync"));
+
+	const editable = requiredPath(f.prepared, "editable");
+	for (const invalid of [
+		{
+			content: skill("BadName", "Invalid content must not hide outside the export."),
+			code: "INVALID_SKILL_NAME",
+		},
+		{
+			content: "---\nname: other\n---\nMissing the required description.\n",
+			code: "SKILLS_SKILL_SKIPPED",
+		},
+	]) {
+		await put(editable, "skills/other/SKILL.md", invalid.content);
+		const beforeInvalid = await projectState(f.producer.author);
+		expectFailure(await capture(), invalid.code);
+		expect(await projectState(f.producer.author)).toEqual(beforeInvalid);
+	}
+	await put(editable, "skills/other/SKILL.md", skill("other", "The original sibling."));
+	await put(
+		editable,
+		"skills/duplicate/SKILL.md",
+		skill("other", "A second unselected sibling with the same name."),
+	);
+	const beforeDuplicate = await projectState(f.producer.author);
+	expectFailure(await capture(), "SKILLS_DUPLICATE_SKILL_NAME");
+	expect(await projectState(f.producer.author)).toEqual(beforeDuplicate);
+	await rm(join(editable, "skills/duplicate"), { recursive: true });
+	await put(
+		editable,
+		"skills/other/SKILL.md",
+		skill("renamed-other", "A post-patch frontmatter name."),
+	);
+	expect(expectSuccess(await capture()).pendingIntents).toBe(1);
+	const beforeIntent = await projectState(f.producer.author);
+	const beforeImport = await projectState(consumer);
+	expectFailure(await run(f.producer.author, f.producerCache, "sync"), "INTENT_REQUIRED");
+	expectFailure(
+		await run(consumer, cache, "add", f.producer.author, "deslop"),
+		"PRODUCER_INTENT_REQUIRED",
+	);
+	expect(await projectState(f.producer.author)).toEqual(beforeIntent);
+	expect(await projectState(consumer)).toEqual(beforeImport);
+	await annotateBlankIntents(pack, "Rename the unselected sibling for its own users.");
+	expectSuccess(await run(consumer, cache, "add", f.producer.author, "deslop"));
+	expect(await readdir(join(consumer, ".agents/skills"))).toEqual(["deslop"]);
+	const patchedLock = await json(join(pack, "lock.json"));
+	await setExportSkills(pack, ["renamed-other"]);
+	expectSuccess(await run(f.producer.author, f.producerCache, "sync"));
+	expect(await readdir(join(f.producer.author, ".agents/skills"))).toEqual(["renamed-other"]);
+	expect(await json(join(pack, "lock.json"))).toEqual(patchedLock);
+	const renamed = await consumerDirectory(f.root, "renamed-export-consumer");
+	expectSuccess(await run(renamed, cache, "add", f.producer.author, "deslop"));
+	const prepared = expectSuccess(await run(renamed, cache, "patch", "prepare", "deslop"));
+	expect(await readdir(join(requiredPath(prepared, "workspace"), "pristine/skills"))).toEqual([
+		"other",
+	]);
+}, 90_000);
+
+test("selected exports validate only their own full bundle during multi-bundle sync", async () => {
+	const { run, ...f } = await exportFixture();
+	await put(
+		f.upstream.author,
+		"earlier/skills/first/SKILL.md",
+		skill("first", "This skill belongs to the earlier bundle."),
+	);
+	await commitAndPush(f.upstream, "Publish a distinct earlier bundle");
+	expectSuccess(
+		await run(
+			f.producer.author,
+			f.producerCache,
+			"patch",
+			"init",
+			"a-prior",
+			"--source",
+			pathToFileURL(f.upstream.remote).href,
+			"--root",
+			"earlier",
+			"--skills-root",
+			"skills",
+			"--ref",
+			f.upstream.revision,
+		),
+	);
+	const config = await json(join(f.producer.author, "skillbox/config.json"));
+	expect(config.sources[0].bundles).toEqual(["a-prior", "deslop"]);
+	expectSuccess(await run(f.producer.author, f.producerCache, "sync"));
+	expect((await readdir(join(f.producer.author, ".agents/skills"))).sort()).toEqual([
+		"deslop",
+		"first",
+	]);
+	const before = await projectState(f.producer.author);
+	expect(expectSuccess(await run(f.producer.author, f.producerCache, "sync")).status).toBe(
+		"unchanged",
+	);
+	expect(await projectState(f.producer.author)).toEqual(before);
+
+	await put(
+		requiredPath(f.prepared, "editable"),
+		"skills/other/SKILL.md",
+		skill("first", "This unselected sibling is not the earlier bundle's skill."),
+	);
+	expectSuccess(
+		await run(
+			f.producer.author,
+			f.producerCache,
+			"patch",
+			"capture",
+			"deslop",
+			"--from",
+			requiredPath(f.prepared, "workspace"),
+		),
+	);
+	await annotateBlankIntents(
+		join(f.producer.author, "skillbox/patches/deslop"),
+		"Rename an unselected sibling without publishing it.",
+	);
+	expectSuccess(await run(f.producer.author, f.producerCache, "sync"));
+	expect(await readFile(join(f.producer.author, ".agents/skills/first/SKILL.md"), "utf8")).toBe(
+		skill("first", "This skill belongs to the earlier bundle."),
+	);
+	expect((await readdir(join(f.producer.author, ".agents/skills"))).sort()).toEqual([
+		"deslop",
+		"first",
+	]);
+	const beforeRepeat = await projectState(f.producer.author);
+	expect(expectSuccess(await run(f.producer.author, f.producerCache, "sync")).status).toBe(
+		"unchanged",
+	);
+	expect(await projectState(f.producer.author)).toEqual(beforeRepeat);
+}, 90_000);
+
+async function exportFixture() {
+	const root = await realpath(await mkdtemp(join(tmpdir(), "skillbox-export-")));
+	temporary.push(root);
+	const upstream = await repository(root, "upstream");
+	await put(upstream.author, "plugin/LICENSE", "License outside the exported skill.\n");
+	await put(
+		upstream.author,
+		"plugin/skills/alias-folder/SKILL.md",
+		skill("deslop", "Read [the choice](references/nested/choice.md)."),
+	);
+	await put(
+		upstream.author,
+		"plugin/skills/alias-folder/references/nested/choice.md",
+		"Original upstream guidance.\n",
+	);
+	await put(
+		upstream.author,
+		"plugin/skills/alias-folder/scripts/run.sh",
+		"#!/bin/sh\nprintf 'deslop\\n'\n",
+	);
+	await chmod(join(upstream.author, "plugin/skills/alias-folder/scripts/run.sh"), 0o755);
+	await writeFile(
+		join(upstream.author, "plugin/skills/alias-folder/references/data.bin"),
+		new Uint8Array([0, 255, 1, 128]),
+	);
+	await put(
+		upstream.author,
+		"plugin/skills/other/SKILL.md",
+		skill("other", "Keep this sibling editable but do not export it."),
+	);
+	upstream.revision = await commitAndPush(upstream, "Seed upstream skills with an aliased name");
+	const producer = await repository(root, "producer");
+	const producerCache = join(root, "producer-cache");
+	await put(
+		producer.author,
+		".gitignore",
+		"/.agents/\n/.claude/\n/.skillbox-*/\n/skillbox/.prepare/\n",
+	);
+	const prepared = expectSuccess(
+		await run(
+			producer.author,
+			producerCache,
+			"patch",
+			"init",
+			"deslop",
+			"--source",
+			pathToFileURL(upstream.remote).href,
+			"--root",
+			"plugin",
+			"--skills-root",
+			"skills",
+			"--ref",
+			upstream.revision,
+			"--update-ref",
+			"main",
+		),
+	);
+	await setExportSkills(join(producer.author, "skillbox/patches/deslop"), ["deslop"]);
+	expectSuccess(await run(producer.author, producerCache, "sync"));
+	producer.revision = await commitAndPush(
+		producer,
+		"Publish only pinned metadata and an export selector",
+	);
+	const gitConfig = join(root, "gitconfig");
+	await git(
+		root,
+		"config",
+		"--file",
+		gitConfig,
+		`url.${pathToFileURL(root).href}/.insteadOf`,
+		"https://skillbox-export.invalid/",
+	);
+	return {
+		root,
+		upstream,
+		producer,
+		producerCache,
+		prepared,
+		source: "https://skillbox-export.invalid/producer.git",
+		run: (cwd: string, cache: string, ...args: string[]) =>
+			runWithEnv(
+				{ GIT_CONFIG_GLOBAL: gitConfig, GIT_CONFIG_NOSYSTEM: "1" },
+				cwd,
+				cache,
+				...args,
+			),
+	};
+}
+
+async function setExportSkills(pack: string, skills: string[]): Promise<void> {
+	const path = join(pack, "bundle.toml");
+	const descriptor = (await readFile(path, "utf8")).replace(/^export_skills\s*=.*\n?/gm, "");
+	await writeFile(path, `${descriptor.trimEnd()}\nexport_skills = ${JSON.stringify(skills)}\n`);
+}
+
+function expectFailure(result: Outcome, code: string): void {
+	expect(result.exitCode).not.toBe(0);
+	expect(result.stderr).toBe("");
+	expect(result.response.success).toBe(false);
+	expect(result.response.errors).toContainEqual(expect.objectContaining({ code }));
+}
+
 async function fixture(): Promise<Fixture> {
 	const root = await realpath(await mkdtemp(join(tmpdir(), "skillbox-consumer-")));
 	temporary.push(root);
@@ -931,7 +1412,17 @@ async function annotateBlankIntents(root: string, intent: string): Promise<void>
 }
 
 async function run(cwd: string, cache: string, ...args: string[]): Promise<Outcome> {
+	return runWithEnv({}, cwd, cache, ...args);
+}
+
+async function runWithEnv(
+	env: Record<string, string>,
+	cwd: string,
+	cache: string,
+	...args: string[]
+): Promise<Outcome> {
 	const result = await processResult([process.execPath, cli, ...args], cwd, {
+		...env,
 		SKILLBOX_CACHE_DIR: cache,
 		NO_COLOR: "1",
 		DO_NOT_TRACK: "1",

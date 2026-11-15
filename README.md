@@ -75,6 +75,8 @@ Selection uses config, with no new CLI flags. Raw plugin layouts such as Cursor 
 
 Adapt upstream skills to your workflow with reviewable patches and a reason for each changed file. Skillbox records the source snapshot; your agent can help review updates before you adopt them.
 
+For an external skill used unchanged, commit its pinned source reference and skill selection. Add patches and intent when you customize it. `sync` recreates the external files in the generated installation.
+
 This repository publishes the PSTACK workflow bundle for CT-configured Botlake agents:
 
 ```sh

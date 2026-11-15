@@ -89,10 +89,12 @@
 			"installMode": "copy"
 		},
 		"deslop": {
-			"source": "./skillbox",
-			"sourceType": "local",
-			"computedHash": "0be761ddf65b41dde060856540ca8d80e4a7c548357a51d9a9498db4c24b7b1e",
-			"installMode": "copy"
+			"source": "https://github.com/cursor/plugins",
+			"sourceType": "git",
+			"computedHash": "8883a7d459c07a0b2ee06972e79baa634009aa3bab969a6650acbefac394ad41",
+			"installMode": "copy",
+			"skillPath": "cursor-team-kit/skills/deslop/SKILL.md",
+			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
 		},
 		"figure-it-out": {
 			"source": "https://github.com/cursor/plugins",

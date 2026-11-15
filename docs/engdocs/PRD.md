@@ -109,6 +109,16 @@ This response contract does not define rollback or transaction boundaries, or au
 
 Coverage: [public CLI selection journeys](../../tests/selection.test.ts) verify native and raw adapted subsets, complete supporting files, exact installation locks, restoration, repeated sync, selection edits, and atomic failures. [Consumer journeys](../../tests/consumer.test.ts) verify selected producer imports and retained pins.
 
+### Publish an external skill by reference
+
+- **Given** an external source contains a skill I want to publish,
+- **When** I select that skill without modifying it,
+- [x] **Then** the committed export contains its source, immutable revision, and explicit skill selection without copied upstream skill files,
+- [x] **And** consumers install and restore only that skill and its supporting files,
+- [x] **And** customizing the skill adds patches and per-file intent alongside the same source reference.
+
+Coverage: [public CLI export journeys](../../tests/consumer.test.ts) verify metadata-only publication, exact alias paths and supporting files, nested cold restoration, unchanged repeated sync, first customization, prepared update pins, complete validation, and atomic selector failures.
+
 ### Install an external skill
 
 - **Given** an external repository contains a skill with `SKILL.md` and supporting files,
