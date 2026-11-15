@@ -20,8 +20,9 @@ import {
 } from "./skills/catalog.ts";
 import { failureResponse, responseError, successResponse } from "./response.ts";
 import { sync } from "./commands/sync.ts";
-import { patchCapture, patchInit, patchPrepare, patchUpdate } from "./commands/patch.ts";
-import { createAdaptedBundles } from "./workspace/adapted.ts";
+import { patchCapture, patchPrepare, patchUpdate } from "./commands/patch.ts";
+import { createBundles } from "./workspace/bundles.ts";
+import { createPatchGit } from "./workspace/patch-git.ts";
 
 const program = new Command()
 	.name("skillbox")
@@ -35,39 +36,74 @@ const program = new Command()
 	.configureOutput({ writeErr: () => {} })
 	.exitOverride();
 
-program
+const addCommand = program
 	.command("add")
-	.description("Add repository bundles to the config and SDK project lock.")
-	.argument("<source>", "local repository, GitHub shorthand, or Git/tree URL")
-	.argument("[bundles...]", "bundle names; implied by a skillbox/<bundle> tree URL")
-	.addHelpText(
-		"after",
-		`
-Prefer a repository URL or GitHub shorthand with explicit bundle names.
-Bundles merge into one config entry only when the source strings match exactly.
-Tree URLs are retained as supplied; different bundle URLs create separate entries.
-
-Examples:
-  skillbox add owner/repo frontend backend
-  skillbox add owner/repo testing`,
-	)
-	.action(async (source: string, bundles: string[]) => {
+	.description("Contribute a source to a local destination bundle.")
+	.action(() => {
+		throw responseError("SOURCE_TYPE_REQUIRED", "Use add skillbox or add skills.");
+	});
+addCommand
+	.command("skillbox")
+	.description("Merge published Skillbox bundles into a destination local bundle.")
+	.argument("<source>", "producer repository URL, shorthand, or authored local path")
+	.argument("<id>", "destination local bundle name")
+	.requiredOption("--bundle <name>", "upstream bundle (repeatable)", collect, [])
+	.option("--pick <json>", "bundle-to-skill-names selection map")
+	.option("--omit <json>", "bundle-to-skill-names exclusion map")
+	.option("--ref <ref>", "Git resolution and future update target")
+	.option("--no-install", "publish without selecting the destination for local installation")
+	.action(async (source: string, id: string, options) => {
 		const cwd = process.cwd();
-		const workspace = await selectedWorkspace(cwd);
-		const result = await add({
-			adapted: createAdaptedBundles(),
-			cwd,
-			source,
-			bundles,
-			workspace,
-		});
 		writeJson(
-			successResponse({
-				status: result.status,
-				source: result.source,
-				bundles: result.bundles,
-				installed: result.installed,
-			}),
+			successResponse(
+				await add({
+					bundles: workspaceBundles(),
+					cwd,
+					workspace: await selectedWorkspace(cwd),
+					install: options.install,
+					contribution: {
+						type: "skillbox",
+						source,
+						id,
+						bundles: options.bundle,
+						ref: options.ref,
+						pick: parseSelection(options.pick),
+						omit: parseSelection(options.omit),
+					},
+				}),
+			),
+		);
+	});
+addCommand
+	.command("skills")
+	.description("Merge an arbitrary upstream skills directory into a destination local bundle.")
+	.argument("<source>", "repository URL, shorthand, or authored local path")
+	.argument("<id>", "destination local bundle name")
+	.requiredOption("--path <dir>", "relative upstream skills directory")
+	.option("--pick <name>", "include a skill name (repeatable)", collect)
+	.option("--omit <name>", "exclude a skill name (repeatable)", collect)
+	.option("--ref <ref>", "Git resolution and future update target")
+	.option("--no-install", "publish without selecting the destination for local installation")
+	.action(async (source: string, id: string, options) => {
+		const cwd = process.cwd();
+		writeJson(
+			successResponse(
+				await add({
+					bundles: workspaceBundles(),
+					cwd,
+					workspace: await selectedWorkspace(cwd),
+					install: options.install,
+					contribution: {
+						type: "skills",
+						source,
+						id,
+						path: options.path,
+						ref: options.ref,
+						pick: options.pick,
+						omit: options.omit,
+					},
+				}),
+			),
 		);
 	});
 
@@ -76,40 +112,8 @@ const patch = program
 	.description("Edit pinned bundles and record file intent with ordered diffs.")
 	.addHelpText(
 		"after",
-		"\nWorkflow: init → edit → capture → annotate file intent → sync.\nUpdates: update → review/edit → capture → sync.\nRepeat edit/capture in the same workspace; capture preserves file notes.\nAgent guidance: skills get skillbox-patch.",
+		"\nWorkflow: add → prepare → edit → capture → annotate file intent → sync.\nUpdates: update → review/edit → capture → sync.\nRepeat edit/capture in the same workspace; capture preserves file notes.\nAgent guidance: skills get skillbox-patch.",
 	);
-patch
-	.command("init")
-	.description("Pin a Git skills subtree and create an editable workspace.")
-	.argument("<bundle>")
-	.requiredOption("--source <repo>", "Git repository or GitHub tree URL")
-	.option("--root <path>", "plugin root relative to the repository; use . for its root")
-	.option(
-		"--skills-root <path>",
-		"skills directory relative to the plugin root (default: skills)",
-	)
-	.option("--ref <ref>", "source revision to resolve to an immutable commit")
-	.option("--update-ref <ref>", "ref to resolve on a later explicit update")
-	.option("--output <dir>", "new editing directory (default: skillbox/.prepare/<bundle>/edit)")
-	.action(async (bundle, options) => {
-		const cwd = process.cwd();
-		const workspace = await selectedWorkspace(cwd);
-		writeJson(
-			successResponse(
-				await patchInit({
-					adapted: createAdaptedBundles(),
-					workspace,
-					bundle,
-					source: options.source,
-					root: options.root,
-					skillsRoot: options.skillsRoot,
-					ref: options.ref,
-					updateRef: options.updateRef,
-					output: options.output,
-				}),
-			),
-		);
-	});
 patch
 	.command("prepare")
 	.description("Create pristine and editable copies of the pinned patched source.")
@@ -120,7 +124,7 @@ patch
 		writeJson(
 			successResponse(
 				await patchPrepare({
-					adapted: createAdaptedBundles(),
+					bundles: workspaceBundles(),
 					workspace: await selectedWorkspace(cwd),
 					bundle,
 					output: options.output,
@@ -134,7 +138,10 @@ patch
 		"Record edited files or accept an update candidate; annotate new file intent before sync.",
 	)
 	.argument("<bundle>")
-	.requiredOption("--from <dir>", "prepared workspace containing manifest.json and edited/")
+	.requiredOption(
+		"--from <dir>",
+		"prepared workspace containing manifest.json and edited/skills/",
+	)
 	.option("--skill <name>", "capture only this skill")
 	.option(
 		"--map <mapping...>",
@@ -145,7 +152,7 @@ patch
 		writeJson(
 			successResponse(
 				await patchCapture({
-					adapted: createAdaptedBundles(),
+					bundles: workspaceBundles(),
 					workspace: await selectedWorkspace(cwd),
 					bundle,
 					from: options.from,
@@ -165,14 +172,14 @@ program
 	)
 	.addHelpText(
 		"after",
-		"\nGit sources use the bundle's update_ref when --ref is omitted.\nLocal producers use the current worktree and reject --ref.\nReturns source pins and editable paths; tracked files and installations stay unchanged.\nUPDATE_CONFLICT retains the candidate and reports failed patches.\nReview with Git and file intent, then accept with patch capture and install with sync.",
+		"\nGit sources use contribution ref or HEAD when --ref is omitted.\nLocal producers use the current worktree and reject --ref.\nTracked files and installations stay unchanged until capture/sync.\nUPDATE_CONFLICT retains the candidate for review and capture.",
 	)
 	.action(async (bundle, options) => {
 		const cwd = process.cwd();
 		writeJson(
 			successResponse(
 				await patchUpdate({
-					adapted: createAdaptedBundles(),
+					bundles: workspaceBundles(),
 					workspace: await selectedWorkspace(cwd),
 					bundle,
 					ref: options.ref,
@@ -187,7 +194,7 @@ program
 	.action(async () => {
 		const cwd = process.cwd();
 		const result = await sync({
-			adapted: createAdaptedBundles(),
+			bundles: workspaceBundles(),
 			cwd,
 			workspace: await selectedWorkspace(cwd),
 		});
@@ -284,6 +291,27 @@ async function selectedWorkspace(cwd: string): Promise<string> {
 			"WORKSPACE_NOT_FOUND",
 			`Workspace does not exist: ${input}`,
 			{ input },
+			cause,
+		);
+	}
+}
+
+function workspaceBundles() {
+	return createBundles(createPatchGit(), process.env.SKILLBOX_CACHE_DIR);
+}
+
+function collect(value: string, previous: string[] = []): string[] {
+	return [...previous, value];
+}
+function parseSelection(value: string | undefined): unknown {
+	if (value === undefined) return undefined;
+	try {
+		return JSON.parse(value);
+	} catch (cause) {
+		throw responseError(
+			"INVALID_INPUT",
+			"Selectors must be valid JSON maps.",
+			{ input: value },
 			cause,
 		);
 	}

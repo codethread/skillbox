@@ -1,45 +1,39 @@
 ---
 name: skillbox-patch
-description: Import and maintain an adapted Skillbox bundle with pinned upstream source, editable workspaces, per-file diffs, and explicit patch intent.
+description: Customize composed Skillbox bundles with per-file patches and intent, then review and capture explicit upstream updates.
 ---
 
-# Maintain adapted bundles
+# Customize composed bundles
 
-Adapt an upstream Git skills subtree or customize a producer's adapted bundle without editing generated installations. Use command `--help` for syntax and inspect every JSON result before continuing.
+Use this workflow to change imported instructions without editing generated installations or losing upstream provenance. It works on the destination bundle composed from all its contributions. Use command `--help` for syntax and inspect each JSON result before continuing.
 
-Keep the patch command surface deliberately minimal. Use Git and worktrees to review, select, revert, and reorganize changes before committing. Do not introduce parallel patch-management commands such as `apply`, `rollback`, `adjust`, or `pick`; Git owns that history and selection workflow. Skillbox prepares editable source, records diffs, and reproduces the recorded bundle through sync.
+Source registration belongs to `add skills` or `add skillbox`. For source selection, load `skillbox-configure`. An unchanged import has config and a root lock, but no patch directory.
 
-## Publish an external skill
+## Prepare an edit
 
-An unchanged external bundle needs only `skillbox/patches/<bundle>/bundle.toml` and its `lock.json`. Register the pinned source with `patch init` below. To publish a subset, add `export_skills = ["deslop"]` to its descriptor before sync. The list must be nonempty and contain exact post-patch frontmatter names. Omit it to export all skills.
+```sh
+skillbox patch prepare <id>
+```
 
-The descriptor controls what this bundle offers to this checkout and downstream consumers. Config can further narrow the local installation. Complete source and patch validation still runs before export selection, and prepare retains the full editable source. Consumers receive only the declared export, with its supporting files and executable modes.
+Record the returned `workspace` and `editable` paths. The default workspace is `skillbox/.prepare/<id>/edit/`; `--output <directory>` chooses another workspace.
 
-Commit the metadata for an unchanged import. To customize it, use the same prepare and capture workflow below, then commit the added diffs and per-file intent alongside that reference. Keep fetched upstream files, prepared workspaces, and generated installations out of Git.
+- Edit distributed skill files under `<workspace>/edited/skills/<original-directory>/`.
+- Do not edit `<workspace>/pristine/` or `manifest.json`; these are CLI-managed preparation state.
+- Preparation preserves original skill directory names, which can differ from frontmatter names. Selectors and installed names use frontmatter names; a capture `--skill` filter uses the original directory.
+- Ignore `skillbox/.prepare/`. Capture wanted edits before deleting or recreating a workspace.
+- Treat `.agents/skills/` and `.claude/skills` as generated installations.
 
-## Start or reopen an edit
+The pristine baseline is the composed output before this workspace's patches. For a producer contribution, it already includes producer-owned adaptations. Do not copy producer patch payloads or intent into your own patch files.
 
-To install only selected skills, load `skillbox skills file skillbox-configure references/configuration.md` before the first installation. It covers config subsets for producer imports and raw subtrees such as Cursor Team Kit. Installation selection follows full adapted replay and does not narrow the source pin, patch validation, or the producer's export declaration.
+Use Git to review, select, revert, and reorganize your repository changes. Skillbox prepares editable content, captures diffs, and reproduces them through sync; do not invent parallel patch-management commands.
 
-To consume a producer's adapted bundle, run `skillbox add <producer-source> <bundle>`. Add installs the producer's output and creates an empty consumer-owned patch pack. The producer retains its own source pin, diffs, and intents; your pack records the producer snapshot and only your changes. Use prepare below to customize it, without a separate init. Importing a native bundle does not create a patch pack.
+## Capture and explain
 
-To adapt a raw Git skills subtree, run `skillbox patch init <bundle> ...`. Init pins and registers the source, then creates an editing workspace; it does not install skills. `--output` is optional and defaults to `skillbox/.prepare/<bundle>/edit`. Record `data.workspace` and `data.editable` from the result.
+```sh
+skillbox patch capture <id> --from <workspace>
+```
 
-For an existing adapted bundle, run `skillbox patch prepare <bundle>`. It recreates the workspace from the recorded bundle, including a draft captured earlier. The same optional output default applies.
-
-Paths have distinct ownership:
-
-- Edit only `<workspace>/edited/<skills-root>/**`. Imported adaptations use `skills/`; raw Git imports use the configured skills root (`skills/` by default).
-- Keep `<workspace>/pristine/` and its manifest as CLI-managed preparation state. For an imported adaptation, pristine means the producer's adapted output before your local patches.
-- Ignore `skillbox/.prepare/`; prepared workspaces are local editing state, not source to commit. Delete a workspace only after capturing any edits you want to retain.
-- Commit `skillbox/config.json`, `skillbox/lock.json`, and `skillbox/patches/<bundle>/`.
-- Treat `.agents/skills/` and `.claude/skills` as generated installation output.
-
-## Capture and annotate
-
-Run `skillbox patch capture <bundle> --from <workspace>`. Capture appends incremental per-file diffs against the last captured output, verifies strict replay, writes the bundle pack, and refreshes the workspace manifest atomically. A later edit or deliberate revert adds another ordered patch rather than rewriting earlier artifacts. Capture never installs skills.
-
-Intent belongs to the file, independently of its ordered patch records. Capture preserves a manually edited file intent and gives a newly targeted file a blank one in `skillbox/patches/<bundle>/<skill>/patch.toml`:
+Capture records per-file diffs and verifies replay; it does not install skills. Ordinary subsequent captures append ordered changes, including deliberate reverts. Existing file intent is preserved; newly targeted files need a reason in `skillbox/patches/<id>/<skill>/patch.toml`:
 
 ```toml
 schema = 1
@@ -52,28 +46,34 @@ target = "./references/tools.md"
 patch = "changes/0001-captured.patch"
 ```
 
-The bundle's `lock.json` pins its source: an exact Git revision or a local producer content snapshot. An imported adaptation retains the producer's original-source pin through that producer snapshot. File records hold your intent; ordered patch records contain only your target and diff path. Do not copy or revise producer-owned intent as if it were yours.
+Use the result's `pendingIntents` and `intentFiles` to find missing annotations. For each changed file explain:
 
-Use the result's `pendingIntents` count and workspace-relative `intentFiles` paths to find manifests requiring annotation. For every blank intent, edit `patch.toml` directly and state:
+- **Why:** which upstream assumption requires the change.
+- **Outcome:** the behavior the file must retain.
+- **Constraints:** policy, compatibility, or scope future regeneration must preserve.
 
-- **Why:** the upstream behavior or runtime assumption that requires adaptation.
-- **Outcome:** the behavior the adapted file must retain.
-- **Constraints:** compatibility, policy, or scope that future regeneration must preserve.
+Intent belongs to the file, independently of its ordered patches. Capture does not infer or rewrite the reason as later edits change that file. Review its continuing accuracy. An optional collection-wide explanation in existing repository prose can give context, but cannot replace file intent or introduce a new metadata schema.
 
-File intent should be sufficient to review or regenerate the change without a separate adaptation guide.
+Keep the existing per-skill `patch.toml` and `changes/` format. Root `skillbox/lock.json` owns source pins and flattened provenance.
 
-Intent is explanatory: changing it does not invalidate the patch hash. Patch targets and paths, diff payloads, and the bundle's source identity remain integrity-protected.
+## Sync and commit
 
-The prepared workspace is reusable. After capture or manual intent annotation, make further edits in the same `edited/skills/` tree and capture again. Existing reasons remain attached and shared by every patch for that target; only new targets need annotation. The user owns the continuing accuracy of those notes as the file evolves—capture does not rewrite or guess intent.
+After every required intent is nonblank, run `skillbox sync`. Sync replays recorded patches; it does not ask an agent to reinterpret the intent each time. Missing intent blocks sync/export.
 
-## Install
+Commit config, root lock, authored sources, and your per-skill patch metadata/payloads. Never commit fetched upstream copies, preparation workspaces, or generated installations. Producer changes remain producer-owned; a consumer records only its additional changes against the pinned producer output.
 
-Run `skillbox sync` only after every intent is nonblank. Otherwise sync returns `INTENT_REQUIRED` without changing the installation. A valid sync verifies the recorded bundle source and patches. Runtime capture has already verified that replay reproduces the edited tree. Sync still rejects native source content that differs from its locked hash.
+## Review updates
 
-## Update from upstream
+```sh
+skillbox update <id>
+```
 
-`skillbox update <bundle>` stages a new source candidate. For an imported adaptation, it updates the producer snapshot and replays your local patches; it does not advance the producer's original upstream independently.
+Update stages a candidate for the composed bundle without accepting its pins or installing it. Review upstream changes and every affected intent, edit the candidate, then capture it to accept the reviewed pins. Sync installs the result. A clean textual replay alone is not approval.
 
-An upstream update requires more than a successful patch replay. Compare the old and candidate pins in Git when the source is Git-backed, read the upstream-authored changes, and judge the candidate against each file intent. For a local producer, compare the recorded and candidate trees and use the producer's history where available. Check broad changes, including new files, renames, deletions, scripts, executable modes, and runtime assumptions.
+For a producer contribution, update adopts the producer's output and locked dependencies, not independently newer versions of those dependencies. Git sources stay pinned during ordinary sync; local filesystem sources are live worktrees.
 
-Before updating, run `skillbox skills file skillbox-patch references/updating.md`. The reference explains which Git revisions and trees to compare, how to review file intent, and how to capture the candidate and sync.
+Before updating, load:
+
+```sh
+skillbox skills file skillbox-patch references/updating.md
+```

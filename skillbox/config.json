@@ -1,16 +1,32 @@
 {
 	"sources": [
 		{
+			"type": "skills",
+			"id": "development",
 			"source": "https://github.com/codethread/agents",
-			"bundles": ["coding", "dev"]
+			"path": "skillbox/coding"
 		},
 		{
-			"source": ".",
-			"bundles": ["local"]
+			"type": "skills",
+			"id": "development",
+			"source": "https://github.com/codethread/agents",
+			"path": "skillbox/dev"
 		},
 		{
+			"type": "skills",
+			"id": "deslop",
 			"source": "https://github.com/cursor/plugins",
-			"bundles": ["deslop", "pstack"]
+			"ref": "main",
+			"path": "cursor-team-kit/skills",
+			"pick": ["deslop"]
+		},
+		{
+			"type": "skills",
+			"id": "pstack",
+			"source": "https://github.com/cursor/plugins",
+			"ref": "main",
+			"path": "pstack/skills"
 		}
-	]
+	],
+	"install": ["development", "local", "deslop", "pstack"]
 }

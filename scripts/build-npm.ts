@@ -1,11 +1,9 @@
 import { readFile, readdir } from "node:fs/promises";
-import { createRequire } from "node:module";
-import { dirname, join, resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { z } from "zod";
 
 const root = resolve(import.meta.dirname, "..");
 const entrypoint = join(root, "src/cli.ts");
-const nodeRequire = createRequire(import.meta.url);
 const result = await Bun.build({
 	entrypoints: [entrypoint],
 	// A Bun shebang overrides the target for direct imports, splitting module identities.
@@ -46,14 +44,6 @@ for (const directory of [...packages].sort()) {
 		.map((file) => join(directory, file.name))
 		.sort();
 
-	// These git-js packages omit the license file from their npm tarballs.
-	// Their sibling package ships the same repository's MIT license.
-	if (metadata.name === "simple-git" || metadata.name === "@simple-git/argv-parser") {
-		const siblingModule = nodeRequire.resolve("@simple-git/args-pathspec", {
-			paths: [directory],
-		});
-		files.push(join(dirname(dirname(siblingModule)), "LICENSE"));
-	}
 	if (files.length === 0) throw new Error(`No license notice found for ${metadata.name}.`);
 	notices.push(`\n${"=".repeat(72)}\n${metadata.name}@${metadata.version}\n`);
 	for (const file of files) notices.push(await readFile(file, "utf8"));
