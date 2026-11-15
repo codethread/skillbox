@@ -6,7 +6,7 @@
 		},
 		{
 			"source": ".",
-			"bundles": ["local"]
+			"bundles": ["deslop", "local"]
 		},
 		{
 			"source": "https://github.com/cursor/plugins",

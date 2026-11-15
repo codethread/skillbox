@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Retire setup-pstack callers without recreating its unused role map or mandatory agent-selection interview. Route configuration questions directly to Botlake only when needed, keep existing defaults ready to use, preserve task-specific choices and required independence and model diversity, and require scoped approval before persistent shared configuration changes. Remove the compulsory category menu because the user's question already determines help routing. Route changed goals by expressed intent, not a magic reset phrase. Distinguish one status report from an explicit babysit request without a named control-mode layer. Keep prompt-first help, once-per-chat optional offers for both verification creators, their evidence requirements, consuming-project source ownership, and all creator and maintainer links. Do not add an alias, stub, replacement manual, or configuration layer."
+intent = "Retire setup-pstack callers without recreating its unused role map or mandatory agent-selection interview. Route configuration questions directly to Botlake only when needed, keep existing defaults ready to use, preserve task-specific choices and required independence and model diversity, and require scoped approval before persistent shared configuration changes. Remove the compulsory category menu because the user's question already determines help routing. Route changed goals by expressed intent, not a magic reset phrase. Distinguish one status report from an explicit babysit request without a named control-mode layer. Keep prompt-first help, once-per-chat optional offers for both verification creators, their evidence requirements, consuming-project source ownership, and all creator and maintainer links. Do not add an alias, stub, replacement manual, or configuration layer. Route code-cleanup requests to upstream cursor-team-kit/skills/deslop/SKILL.md from the deslop companion bundle through its installed sibling link. Keep unslop for prose and no-comments for independent comment review without requiring the full Cursor Team Kit."
 
 [files."./references/prompting.md"]
 intent = "Remove the unsupported rule that changing tasks requires a special phrase or otherwise continues the prior playbook. Keep concise context-aware follow-ups and explicit changed goals and constraints. Do not replace the phrase with another token or reset mechanism."
@@ -61,10 +61,10 @@ intent = "Guide users through `/how`, `/why`, `/teach`, and `/recall` for code b
 intent = "Remove the setup-pstack panel-configuration caller because Botlake's catalog and project configuration already own available agents. Keep panel adjustments in the actual task prompt and preserve Arena's model diversity, independent judging rules, and protected skill routes. Do not recreate a shared stack role map."
 
 [files."./references/guide/05-build-and-clean.md"]
-intent = "Show how to prompt build playbooks from observed symptoms and clean a diff with independent comment and prose review. Preserve reproduction-first debugging, behavior checks, Comment Sicko's comment-only scope, and no unverified cleanup claims."
+intent = "Show how to prompt build playbooks from observed symptoms. Route code cleanup to upstream cursor-team-kit/skills/deslop/SKILL.md from the deslop companion bundle and prose cleanup to pstack/skills/unslop/SKILL.md. Link the installed skills rather than inlining checklists or requiring the full Cursor Team Kit. Preserve reproduction-first debugging, behavior checks, independent comment review, Comment Sicko's comment-only scope, and no unverified cleanup claims."
 
 [files."./references/guide/06-verify-and-ship.md"]
-intent = "Remove the unsolicited daily scheduled-maintenance prescription because the verification creator permits cadence suggestions only on request. Keep the maintainer, every-feature source and live coverage, evidence and regression reporting, and all verification creator and maintainer links. Do not restore a standing schedule through onboarding guidance."
+intent = "Remove the unsolicited daily scheduled-maintenance prescription because the verification creator permits cadence suggestions only on request. Keep the maintainer, every-feature source and live coverage, evidence and regression reporting, and all verification creator and maintainer links. Do not restore a standing schedule through onboarding guidance. Name the PR workflow's distinct code and prose cleanup steps. Link upstream cursor-team-kit/skills/deslop/SKILL.md through the deslop companion bundle's installed skill and keep unslop for prose."
 
 [files."./references/guide/07-overnight.md"]
 intent = "Define safe unattended work through a checkable exit condition, isolated writers, Botlake task and context records, decision trails, bounded active waits, and morning audit. Do not imply that task status, timeouts, or a stopped coordinator schedules or proves progress."
@@ -79,7 +79,7 @@ intent = "Remove the implication that customizable model roles form a stack-spec
 intent = "Remove the obsolete stack-role reference left by setup-pstack retirement. Keep the unavailable-model advice bound to Botlake's catalog and the setup page's conditional agent help. Do not restore a role map or change protected skill links or routes."
 
 [files."./references/guide/README.md"]
-intent = "Remove compulsory agent review from the onboarding summary because existing Botlake configuration is ready to use. Keep the guide's installation-to-first-task route and all existing navigation targets, including protected skills and verification guidance."
+intent = "Remove compulsory agent review from the onboarding summary because existing Botlake configuration is ready to use. Keep the guide's installation-to-first-task route and all existing navigation targets, including protected skills and verification guidance. Include deslop in the build-and-clean summary because the deslop companion bundle supplies upstream cursor-team-kit/skills/deslop/SKILL.md for code cleanup. Retain unslop and no-comments as distinct steps."
 
 [files."./references/licenses/ATTRIBUTION.md"]
 intent = "Record the canonical guide's derivation, copyright holder, pinned source revision, and MIT license. Keep attribution and the license link intact so redistribution remains traceable and compliant."
@@ -318,3 +318,19 @@ patch = "changes/0057-captured.patch"
 [[patches]]
 target = "./references/prompting.md"
 patch = "changes/0058-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0059-captured.patch"
+
+[[patches]]
+target = "./references/guide/05-build-and-clean.md"
+patch = "changes/0060-captured.patch"
+
+[[patches]]
+target = "./references/guide/06-verify-and-ship.md"
+patch = "changes/0061-captured.patch"
+
+[[patches]]
+target = "./references/guide/README.md"
+patch = "changes/0062-captured.patch"

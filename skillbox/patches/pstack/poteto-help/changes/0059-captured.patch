@@ -1,0 +1,12 @@
+diff --git a/SKILL.md b/SKILL.md
+index fe727f88881ad0ebf23d31845d65e548a74dd40d..0ccadfde435ce2d0c585ef09aae3759573ef13e2 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -68,6 +68,7 @@ The default answer is `/poteto-mode`, which runs most of the others when its ste
+ | Have different models review a diff and try to break it | [`/interrogate`](../interrogate/SKILL.md) |
+ | Fix a bug test-first when a cheap local test exists | [`/tdd`](../tdd/SKILL.md) |
+ | Apply TypeScript rules to `.ts` or `.tsx` work | [`/typescript-best-practices`](../typescript-best-practices/SKILL.md) |
++| Clean AI-generated code slop from the branch diff | [`/deslop`](../deslop/SKILL.md), from the deslop companion bundle |
+ | Strip comments before review, using a reviewer that didn't write them | [`/no-comments`](../no-comments/SKILL.md) |
+ | Clean AI tells out of prose | [`/unslop`](../unslop/SKILL.md) |
+ | Write docs, an RFC, a README, a PR description, or a commit message to a standard | [`/technical-writing`](../technical-writing/SKILL.md) |

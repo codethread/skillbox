@@ -88,6 +88,12 @@
 			"skillPath": "skillbox/coding/declutter/SKILL.md",
 			"installMode": "copy"
 		},
+		"deslop": {
+			"source": "./skillbox",
+			"sourceType": "local",
+			"computedHash": "0be761ddf65b41dde060856540ca8d80e4a7c548357a51d9a9498db4c24b7b1e",
+			"installMode": "copy"
+		},
 		"figure-it-out": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
@@ -194,7 +200,7 @@
 		"poteto-help": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "6f3077b66dcab9e42d6ba6d0e5e7be60d9fdae1c4aedc261b43876270cb06c8b",
+			"computedHash": "f51f45d50fc69a44f42ad88443fcd8b3df608bdf26d47d5adde017ebe347bbda",
 			"installMode": "copy",
 			"skillPath": "pstack/skills/poteto-help/SKILL.md",
 			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
@@ -202,7 +208,7 @@
 		"poteto-mode": {
 			"source": "https://github.com/cursor/plugins",
 			"sourceType": "git",
-			"computedHash": "77fba8a247a00016615b8f6994ea0ab725caad4af80681470e244c7e5c82624a",
+			"computedHash": "102f5c5b31c99357cbbd1e2080abf54a13a9d13b83738e77ddb995ae92ebc83e",
 			"installMode": "copy",
 			"skillPath": "pstack/skills/poteto-mode/SKILL.md",
 			"ref": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"

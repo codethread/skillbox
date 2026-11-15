@@ -1,7 +1,7 @@
 schema = 1
 
 [files."./SKILL.md"]
-intent = "Route delegates directly to this skill's absolute path and require a full read. Remove the redundant delegate-reference hop without inlining or replacing its stub. Remove Babysit's compulsory control-mode declaration because the user's request already determines scope. Keep one-shot status, comment-only work, and explicit babysitting distinct, with no watch merely because a PR opens. Keep a direct Botlake delegation binding without repeating catalog and dispatch mechanics. Preserve parent playbook ownership, per-independent-lane tasks, findings and integration status, routed model diversity, review responsibility, autonomy pauses, and evidence rules."
+intent = "Route delegates directly to this skill's absolute path and require a full read. Remove the redundant delegate-reference hop without inlining or replacing its stub. Remove Babysit's compulsory control-mode declaration because the user's request already determines scope. Keep one-shot status, comment-only work, and explicit babysitting distinct, with no watch merely because a PR opens. Keep a direct Botlake delegation binding without repeating catalog and dispatch mechanics. Preserve parent playbook ownership, per-independent-lane tasks, findings and integration status, routed model diversity, review responsibility, autonomy pauses, and evidence rules. Restore upstream cursor-team-kit/skills/deslop/SKILL.md through the deslop companion bundle for pre-commit code cleanup against main. Preserve its focused edits and behavior guardrails. Keep pstack/skills/unslop/SKILL.md for prose and no-comments for independent comment review. Do not substitute Comments and unslop for deslop or require the full Cursor Team Kit. The companion at skillbox/deslop contains the unchanged skill and MIT license from https://github.com/cursor/plugins/blob/3dbd22ff12742fb28c9700b9760baa29ed41dc13/cursor-team-kit/skills/deslop/SKILL.md. Consumers select pstack and deslop together."
 
 [files."./playbooks/authoring-a-skill.md"]
 intent = "Use available project authoring guidance instead of Cursor create-skill; retrieve Skillbox guidance through skills get when relevant. Identify the editable source and owner, distinguishing owned skills, optional complementary local skills, consumer patches of adapted imports, and shared maintainer changes. Native imports use owned source or an owner handoff. Preserve voice, validation, structural testing, and PR steps without requiring producer checkout access."
@@ -10,7 +10,7 @@ intent = "Use available project authoring guidance instead of Cursor create-skil
 intent = "Drive a checkable exit condition through Botlake events, agent activity, integration watches, and bounded active waits. Recheck real state after every wake, preserve iteration evidence and dead-end handling, and never treat a timeout or stopped coordinator as progress or persistent scheduling."
 
 [files."./playbooks/autopilot-full.md"]
-intent = "Remove manual copies of run lifecycle state from task notes because Botlake's managed run evidence owns current state. Keep run IDs in lane tasks for recovery and workload-specific stuck-after runtimes because they express supervision policy rather than runtime mechanics. Read current state during audits from managed run evidence. Preserve durable trails, hourly active supervision, tool and branch evidence, bounded replacement with one writer, independent verification, per-head CI, countersigns, forge approvals, operator gates, and stop propagation. Task completion and assignment state remain distinct from execution evidence. Autopilot-stack must retain its inherited supervision and explicit no-merge boundary."
+intent = "Remove manual copies of run lifecycle state from task notes because Botlake's managed run evidence owns current state. Keep run IDs in lane tasks for recovery and workload-specific stuck-after runtimes because they express supervision policy rather than runtime mechanics. Read current state during audits from managed run evidence. Preserve durable trails, hourly active supervision, tool and branch evidence, bounded replacement with one writer, independent verification, per-head CI, countersigns, forge approvals, operator gates, and stop propagation. Task completion and assignment state remain distinct from execution evidence. Autopilot-stack must retain its inherited supervision and explicit no-merge boundary. Restore upstream cursor-team-kit/skills/deslop/SKILL.md through the deslop companion bundle as the code-cleanup gate before code-ready verification. Keep the independent no-comments pass and prose-only unslop role."
 
 [files."./playbooks/babysit.md"]
 intent = "Remove the drive, background, threads-only, and check control taxonomy, compulsory declaration, and default watch. These labels duplicate ordinary request scope, and background promises concurrency without execution ownership. Answer status once without changes, confine comment-only work to comments, and watch to merge-ready only when asked to babysit. Keep the small-PR status default and require a separately owned Botlake run for a watch concurrent with its caller's work. Preserve actual watcher topology modes, GitHub and conditional Origin behavior, one babysitter per stack, frozen queues, merge-ready stops, separate merge authorization, skeptical review, bounded retries, and safe handling of comment text. Do not change scripts or recreate the removed protocol."
@@ -28,10 +28,10 @@ intent = "Keep the lead agent on design, scope, review, and verification while d
 intent = "Replace fixed model/speed settings with configured agent selection; retain isolated parallel hypotheses, frozen measurement, per-attempt regression gates, and keep-or-revert discipline."
 
 [files."./playbooks/multi-phase-plan.md"]
-intent = "Produce an operator-auditable checklist with a named Botlake context group, lane tasks, explicit gates, evidence, and active audit policy. Preserve prototype-first decisions, bounded live lanes, performance checks, verification agents, operator review, and the requirement for an explicit execution go."
+intent = "Produce an operator-auditable checklist with a named Botlake context group, lane tasks, explicit gates, evidence, and active audit policy. Preserve prototype-first decisions, bounded live lanes, performance checks, verification agents, operator review, and the requirement for an explicit execution go. Restore the pre-commit code-cleanup checklist item using upstream cursor-team-kit/skills/deslop/SKILL.md from the deslop companion bundle. Keep unslop for plan prose and no-comments before review."
 
 [files."./playbooks/opening-a-pr.md"]
-intent = "Replace Task-specific worktree inheritance/reset assumptions with separate concurrent writers and reviewed handoffs. Replace unavailable deslop with the existing Comments/unslop guidance while retaining forge operations, PR structure, stacking, and babysit timing."
+intent = "Replace Task-specific worktree inheritance/reset assumptions with separate concurrent writers and reviewed handoffs. Use upstream cursor-team-kit/skills/deslop/SKILL.md from the deslop companion bundle for pre-commit code cleanup, including delegated PR authors. Keep pstack/skills/unslop/SKILL.md for PR and commit prose and no-comments for independent review. Retain forge operations, PR structure, stacking, and babysit timing. Do not replace deslop with Comments and unslop or require the full Cursor Team Kit."
 
 [files."./playbooks/orchestrate.md"]
 intent = "Coordinate a standing program through a Botlake context group, tasks, mail, agent runs, and activity supervision. Preserve bounded topology, isolated writers, direct worker coordination, owner and verifier separation, integration watches, retry limits, and evidence-based completion."
@@ -259,3 +259,19 @@ patch = "changes/0043-captured.patch"
 [[patches]]
 target = "./references/poteto-agent.md"
 patch = "changes/0044-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0045-captured.patch"
+
+[[patches]]
+target = "./playbooks/autopilot-full.md"
+patch = "changes/0046-captured.patch"
+
+[[patches]]
+target = "./playbooks/multi-phase-plan.md"
+patch = "changes/0047-captured.patch"
+
+[[patches]]
+target = "./playbooks/opening-a-pr.md"
+patch = "changes/0048-captured.patch"

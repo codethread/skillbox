@@ -1,0 +1,22 @@
+diff --git a/references/guide/05-build-and-clean.md b/references/guide/05-build-and-clean.md
+index 320d4e43d107fcf8adf92e4079840cfbb0373b8d..c8d2758fd55d2f7e14b23fe90d37b2ddd351d956 100644
+--- a/references/guide/05-build-and-clean.md
++++ b/references/guide/05-build-and-clean.md
+@@ -56,7 +56,7 @@ In context, that's enough. [`/tdd`](../../../tdd/SKILL.md) writes the smallest t
+ 
+ ## Clean before you commit
+ 
+-The [Opening a PR playbook](../../../poteto-mode/playbooks/opening-a-pr.md) cleans the diff before each commit and applies [`/unslop`](../../../unslop/SKILL.md) to the PR description and commit bodies. Ask it to remove narrating comments, unsupported guards, dead compatibility paths, and unrelated edits.
++The [Opening a PR playbook](../../../poteto-mode/playbooks/opening-a-pr.md) runs [`/deslop`](../../../deslop/SKILL.md) on the code diff before each commit and applies [`/unslop`](../../../unslop/SKILL.md) to the PR description and commit bodies. The deslop companion bundle provides the upstream code-cleanup skill without the rest of `cursor-team-kit`.
+ 
+ For prose, `/unslop` takes a target and any extra rules you have:
+ 
+@@ -76,7 +76,7 @@ Comments need their own pass, and not from the agent that wrote them. An author
+ 
+ [`/no-comments`](../../../no-comments/SKILL.md) spawns [Comment Sicko](../../../no-comments/references/comment-sicko.md), an independent reviewer that may delete comments but not edit application code with a short keep list: license headers, doc comments on a public API, links that explain what code can't, behavior forced by an external dependency you can't reshape. Everything else goes. A surprise in your own code gets no such pass. The comment comes back as a refactor flag, and `/no-comments` fixes the flags it accepts at the root cause. When a comment claims a constraint, "do not remove", the skill offers to encode the claim as a type, test, or lint. Either way, the comment comes out.
+ 
+-The division of labor is worth keeping straight. Code cleanup removes slop from the diff, `/unslop` cleans it out of prose, and `/no-comments` hands the comments to a reviewer who didn't write them.
++`/deslop` cleans code, `/unslop` cleans prose, and `/no-comments` hands the comments to a reviewer who didn't write them.
+ 
+ **Pitfall:** cleanup is not optional polish. A diff with narrating comments and defensive dead weight reads as unfinished to reviewers, and the extra code is where the next bug hides. If the diff feels padded, say `deslop it` before you commit, not after review calls it out.
+ 
