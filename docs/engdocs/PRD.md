@@ -99,6 +99,14 @@ This response contract does not define rollback or transaction boundaries, or au
 
 ## Repository-local installation and provenance
 
+### Select an individual skill
+
+- **Given** a source or bundle contains multiple skills,
+- **When** my configuration explicitly selects one skill,
+- [ ] **Then** Skillbox installs and locks only that skill and its supporting files,
+- [ ] **And** unselected skills from that source or bundle remain absent,
+- [ ] **And** sync in a fresh checkout and repeated sync reproduce that selection.
+
 ### Install an external skill
 
 - **Given** an external repository contains a skill with `SKILL.md` and supporting files,
