@@ -11,6 +11,8 @@ Keep the patch command surface deliberately minimal. Use Git and worktrees to re
 
 ## Start or reopen an edit
 
+To install only selected skills, load `skillbox skills file skillbox-configure references/configuration.md` before the first installation. It covers config subsets for producer imports and raw subtrees such as Cursor Team Kit. Selection follows full adapted replay and does not narrow the source pin, patch validation, or publisher exports.
+
 To consume a producer's adapted bundle, run `skillbox add <producer-source> <bundle>`. Add installs the producer's output and creates an empty consumer-owned patch pack. The producer retains its own source pin, diffs, and intents; your pack records the producer snapshot and only your changes. Use prepare below to customize it, without a separate init. Importing a native bundle does not create a patch pack.
 
 To adapt a raw Git skills subtree, run `skillbox patch init <bundle> ...`. Init pins and registers the source, then creates an editing workspace; it does not install skills. `--output` is optional and defaults to `skillbox/.prepare/<bundle>/edit`. Record `data.workspace` and `data.editable` from the result.

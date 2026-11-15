@@ -16,10 +16,18 @@ import {
 	type BundleDescriptor,
 	type PatchManifest,
 } from "../workspace/adapted.ts";
-import { bundleSchema, configPath, readConfig, withBundles } from "../workspace/config.ts";
+import {
+	bundleName,
+	bundleSchema,
+	configPath,
+	readConfig,
+	selectBundleSkills,
+	withBundles,
+} from "../workspace/config.ts";
 import { lockPath, readLock } from "../workspace/lock.ts";
 import { readOptional, statOptional } from "../workspace/paths.ts";
 import { publish } from "../workspace/publish.ts";
+import { resolveBundleSource, resolveSkillSource } from "../workspace/sdk.ts";
 import { ResponseError, responseError } from "../response.ts";
 
 export async function patchInit(input: {
@@ -85,15 +93,18 @@ export async function patchInit(input: {
 		}
 	}
 	const current = config ?? { sources: [] };
-	if (current.sources.some((entry) => entry.bundles.includes(bundle)))
+	if (
+		current.sources.some((entry) =>
+			entry.bundles.some((selection) => bundleName(selection) === bundle),
+		)
+	)
 		throw responseError("BUNDLE_EXISTS", "Bundle name is already configured: " + bundle, {
 			skill: bundle,
 		});
 	const occupied = new Set(existingLock ? Object.keys(readLock(existingLock).skills) : []);
 	const source = await input.adapted.acquireSource(descriptor, requested, workspace);
 	const outputs = await hashSkillOutputs(source.root, descriptor.skills_root);
-	const names = Object.keys(outputs);
-	if (!names.length)
+	if (!Object.keys(outputs).length)
 		throw responseError(
 			"BUNDLE_EMPTY",
 			"No skill directories found in the selected source subtree.",
@@ -102,8 +113,15 @@ export async function patchInit(input: {
 	const staging = await mkdtemp(join(workspace, ".skillbox-init-"));
 	let retain = false;
 	try {
+		const incoming = await resolveSkillSource(
+			join(source.root, descriptor.skills_root),
+			workspace,
+		);
+		const names = incoming.skills.map((skill) => skill.name);
+		await incoming.dispose();
 		for (const entry of current.sources) {
-			for (const name of entry.bundles) {
+			for (const selection of entry.bundles) {
+				const name = bundleName(selection);
 				if (!(await readAdaptedBundle(workspace, name))) continue;
 				const directory = join(staging, "occupied", name);
 				await mkdir(directory, { recursive: true });
@@ -112,7 +130,22 @@ export async function patchInit(input: {
 					name,
 					join(directory, "edited"),
 				);
-				for (const skill of Object.keys(materialized.outputs)) occupied.add(skill);
+				const resolved = await resolveBundleSource({
+					source: materialized.canonical,
+					bundles: [name],
+					cwd: workspace,
+					workspace,
+				});
+				try {
+					for (const skill of selectBundleSkills(
+						selection,
+						resolved.skills,
+						entry.source,
+					))
+						occupied.add(skill.name);
+				} finally {
+					await resolved.handle.dispose();
+				}
 			}
 		}
 		for (const skill of names)

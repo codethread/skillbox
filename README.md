@@ -52,6 +52,25 @@ For the local selection, author skills at `skillbox/local/<name>/SKILL.md`, with
 
 Use `add` for the first installation. Afterward, edit the config and run `sync` to install selections or remove deselected skills.
 
+### Select individual skills
+
+Use a bundle name to select all its skills, or an object to select a subset. For a native source, first run `skillbox add ../team-skills base` if your project has no managed installation. Then edit `skillbox/config.json` to select only `deslop` from the never-installed `review` bundle:
+
+```json
+{
+	"sources": [
+		{
+			"source": "../team-skills",
+			"bundles": ["base", { "bundle": "review", "skills": ["deslop"] }]
+		}
+	]
+}
+```
+
+Run `skillbox sync` to install the selection. Skill names must be exact names within that bundle, and `skills` must be nonempty. Edit the list and sync again to expand or reduce it. Each selected skill includes its supporting files; references to other skills do not install them automatically.
+
+Selection uses config, with no new CLI flags. Raw plugin layouts such as Cursor Team Kit need `patch init` before selection; load `skillbox skills get skillbox-configure` for that workflow.
+
 ## Customize upstream skills
 
 Adapt upstream skills to your workflow with reviewable patches and a reason for each changed file. Skillbox records the source snapshot; your agent can help review updates before you adopt them.
@@ -59,7 +78,7 @@ Adapt upstream skills to your workflow with reviewable patches and a reason for 
 This repository publishes the PSTACK workflow bundle for CT-configured Botlake agents:
 
 ```sh
-skillbox add codethread/skillbox pstack
+skillbox add codethread/skillbox pstack deslop
 ```
 
 Choose the producer revision you want to use. Keep project-specific customizations in your project's patch pack, separate from the shared bundle. Ask your agent to follow the built-in patch guidance.

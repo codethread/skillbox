@@ -104,7 +104,7 @@ test("a consumer imports a pinned adapted bundle, owns only its local layer, and
 	const missingPack = await run(consumer, cache, "add", producerSource, "pstack");
 	expect(missingPack.response.success).toBe(false);
 	expect(missingPack.response.errors).toContainEqual(
-		expect.objectContaining({ code: "PATCH_PACK_NOT_FOUND" }),
+		expect.objectContaining({ code: "SKILL_NAME_COLLISION" }),
 	);
 	expect(await projectState(consumer)).toEqual(beforeMissingPack);
 	await rename(savedPack, consumerPack);
@@ -498,6 +498,260 @@ test("producer intent failures and mixed-source skill collisions leave a new con
 		true,
 	);
 	expect(await snapshot(collisionConsumer)).toEqual(collisionBefore);
+}, 90_000);
+
+test("a preconfigured adapted subset imports atomically, keeps its pin on later adds, and restores only selected output", async () => {
+	const f = await fixture();
+	const consumer = await consumerDirectory(f.root, "subset-consumer");
+	const cache = join(f.root, "subset-cache");
+	const source = pathToFileURL(f.producer.remote).href;
+	expectSuccess(await run(consumer, cache, "add", source, "native"));
+	const config = await json(join(consumer, "skillbox/config.json"));
+	config.sources[0].bundles.push({ bundle: "pstack", skills: ["alpha", "missing"] });
+	await put(consumer, "skillbox/config.json", `${JSON.stringify(config, null, 2)}\n`);
+	const beforeUnknown = await projectState(consumer);
+	const unknown = await run(consumer, cache, "add", source, "pstack");
+	expect(unknown.exitCode).not.toBe(0);
+	expect(unknown.stderr).toBe("");
+	expect(unknown.response.errors).toContainEqual(
+		expect.objectContaining({
+			code: "SKILL_NOT_FOUND",
+			source,
+			input: "pstack",
+			skill: "missing",
+		}),
+	);
+	expect(await projectState(consumer)).toEqual(beforeUnknown);
+	expect(await exists(join(consumer, "skillbox/patches/pstack"))).toBe(false);
+
+	config.sources[0].bundles[1].skills = ["alpha"];
+	await put(consumer, "skillbox/config.json", `${JSON.stringify(config, null, 2)}\n`);
+	const baseLock = (await json(join(consumer, "skillbox/lock.json"))).skills["native-only"];
+	expect(expectSuccess(await run(consumer, cache, "add", source, "pstack"))).toMatchObject({
+		status: "added",
+		installed: 1,
+	});
+	expect((await readdir(join(consumer, ".agents/skills"))).sort()).toEqual([
+		"alpha",
+		"native-only",
+	]);
+	const installedLock = await json(join(consumer, "skillbox/lock.json"));
+	expect(Object.keys(installedLock.skills).sort()).toEqual(["alpha", "native-only"]);
+	expect(installedLock.skills["native-only"]).toEqual(baseLock);
+	expect(installedLock.skills.alpha).toMatchObject({
+		source,
+		ref: f.producer.revision,
+		sourceType: "git",
+	});
+	expect(installedLock.skills.alpha.skillPath).toBeUndefined();
+	expect(
+		await readFile(join(consumer, ".agents/skills/alpha/references/choice.md"), "utf8"),
+	).toBe("Producer prefers interfaces.\n");
+	expect(
+		await readFile(join(consumer, ".agents/skills/alpha/references/nested/local.md"), "utf8"),
+	).toBe("Producer-owned nested guidance.\n");
+	expect((await lstat(join(consumer, ".agents/skills/alpha/scripts/run.sh"))).mode & 0o111).toBe(
+		0o111,
+	);
+	expect(
+		(await files(join(consumer, "skillbox/patches/pstack"))).filter((path) =>
+			path.endsWith("patch.toml"),
+		),
+	).toEqual([]);
+	const pack = await snapshot(join(consumer, "skillbox/patches/pstack"));
+	const initialLock = await readFile(join(consumer, "skillbox/lock.json"), "utf8");
+
+	await changeProducerChoice(
+		f,
+		"A newer producer revision.\n",
+		"Advance producer beyond consumer subset pin",
+	);
+	await put(
+		f.producer.author,
+		"skillbox/later/later-only/SKILL.md",
+		skill("later-only", "Another native bundle."),
+	);
+	await commitAndPush(f.producer, "Publish another native bundle");
+	expect(
+		expectSuccess(await run(consumer, cache, "add", source, "pstack", "later")),
+	).toMatchObject({ status: "added", installed: 1 });
+	expect((await json(join(consumer, "skillbox/config.json"))).sources[0].bundles).toEqual([
+		"later",
+		"native",
+		{ bundle: "pstack", skills: ["alpha"] },
+	]);
+	expect((await json(join(consumer, "skillbox/lock.json"))).skills.alpha).toEqual(
+		installedLock.skills.alpha,
+	);
+	expect(await snapshot(join(consumer, "skillbox/patches/pstack"))).toEqual(pack);
+	expect(
+		await readFile(join(consumer, ".agents/skills/alpha/references/choice.md"), "utf8"),
+	).toBe("Producer prefers interfaces.\n");
+	const beforeRepeat = await projectState(consumer);
+	expect(expectSuccess(await run(consumer, cache, "add", source, "pstack"))).toMatchObject({
+		status: "unchanged",
+		installed: 0,
+	});
+	expect(await projectState(consumer)).toEqual(beforeRepeat);
+	const unknownRetained = await json(join(consumer, "skillbox/config.json"));
+	unknownRetained.sources[0].bundles[2].skills.push("native-only");
+	await put(consumer, "skillbox/config.json", `${JSON.stringify(unknownRetained, null, 2)}\n`);
+	const beforeUnknownRetained = await projectState(consumer);
+	const repeatedUnknown = await run(consumer, cache, "add", source, "pstack");
+	expect(repeatedUnknown.exitCode).not.toBe(0);
+	expect(repeatedUnknown.stderr).toBe("");
+	expect(repeatedUnknown.response.errors).toContainEqual(
+		expect.objectContaining({
+			code: "SKILL_NOT_FOUND",
+			source,
+			input: "pstack",
+			skill: "native-only",
+		}),
+	);
+	expect(await projectState(consumer)).toEqual(beforeUnknownRetained);
+	unknownRetained.sources[0].bundles[2].skills = ["alpha"];
+	await put(consumer, "skillbox/config.json", `${JSON.stringify(unknownRetained, null, 2)}\n`);
+
+	await removeGenerated(consumer);
+	expectSuccess(await run(consumer, cache, "sync"));
+	expect((await readdir(join(consumer, ".agents/skills"))).sort()).toEqual([
+		"alpha",
+		"later-only",
+		"native-only",
+	]);
+	expect(
+		await readFile(join(consumer, ".agents/skills/alpha/references/choice.md"), "utf8"),
+	).toBe("Producer prefers interfaces.\n");
+	expect(expectSuccess(await run(consumer, cache, "sync")).status).toBe("unchanged");
+	const expanded = await json(join(consumer, "skillbox/config.json"));
+	expanded.sources[0].bundles[2].skills.push("gamma");
+	await put(consumer, "skillbox/config.json", `${JSON.stringify(expanded, null, 2)}\n`);
+	expectSuccess(await run(consumer, cache, "sync"));
+	expect((await json(join(consumer, "skillbox/lock.json"))).skills.alpha).toEqual(
+		JSON.parse(initialLock).skills.alpha,
+	);
+	expect(await readFile(join(consumer, ".agents/skills/gamma/scripts/check.sh"), "utf8")).toBe(
+		"#!/bin/sh\nprintf 'gamma\\n'\n",
+	);
+	expanded.sources[0].bundles[2].skills = ["gamma"];
+	await put(consumer, "skillbox/config.json", `${JSON.stringify(expanded, null, 2)}\n`);
+	expectSuccess(await run(consumer, cache, "sync"));
+	expect((await readdir(join(consumer, ".agents/skills"))).sort()).toEqual([
+		"gamma",
+		"later-only",
+		"native-only",
+	]);
+	expect(await snapshot(join(consumer, "skillbox/patches/pstack"))).toEqual(pack);
+}, 90_000);
+
+test("adapted subsets omit false collisions without bypassing unselected producer intent validation", async () => {
+	const f = await fixture();
+	const consumer = await consumerDirectory(f.root, "subset-collision-consumer");
+	const cache = join(f.root, "subset-collision-cache");
+	const source = pathToFileURL(f.producer.remote).href;
+	await put(
+		f.producer.author,
+		"skillbox/collision/alpha/SKILL.md",
+		skill("alpha", "Native collision owner."),
+	);
+	await commitAndPush(f.producer, "Publish a colliding native skill");
+	expectSuccess(await run(consumer, cache, "add", source, "collision"));
+	const config = await json(join(consumer, "skillbox/config.json"));
+	config.sources[0].bundles.push({ bundle: "pstack", skills: ["gamma"] });
+	await put(consumer, "skillbox/config.json", `${JSON.stringify(config, null, 2)}\n`);
+
+	const prepared = expectSuccess(
+		await run(f.producer.author, f.producerCache, "patch", "prepare", "pstack"),
+	);
+	await put(
+		requiredPath(prepared, "editable"),
+		"skills/alpha/references/pending.md",
+		"Unselected producer guidance requires intent.\n",
+	);
+	expectSuccess(
+		await run(
+			f.producer.author,
+			f.producerCache,
+			"patch",
+			"capture",
+			"pstack",
+			"--from",
+			requiredPath(prepared, "workspace"),
+		),
+	);
+	await commitAndPush(f.producer, "Publish unselected guidance without intent");
+	const beforeIntent = await projectState(consumer);
+	const failed = await run(consumer, cache, "add", source, "pstack");
+	expect(failed.exitCode).not.toBe(0);
+	expect(failed.stderr).toBe("");
+	expect(failed.response.errors).toContainEqual(
+		expect.objectContaining({ code: "PRODUCER_INTENT_REQUIRED" }),
+	);
+	expect(await projectState(consumer)).toEqual(beforeIntent);
+	await annotateBlankIntents(
+		join(f.producer.author, "skillbox/patches/pstack"),
+		"Keep the producer's unselected guidance valid.",
+	);
+	await commitAndPush(f.producer, "Document producer intent");
+	config.sources[0].bundles[1].skills = ["alpha"];
+	await put(consumer, "skillbox/config.json", `${JSON.stringify(config, null, 2)}\n`);
+	const beforeImportCollision = await projectState(consumer);
+	const importCollision = await run(consumer, cache, "add", source, "pstack");
+	expect(importCollision.exitCode).not.toBe(0);
+	expect(importCollision.stderr).toBe("");
+	expect(importCollision.response.errors).toContainEqual(
+		expect.objectContaining({ code: "SKILL_NAME_COLLISION", skill: "alpha" }),
+	);
+	expect(await projectState(consumer)).toEqual(beforeImportCollision);
+	config.sources[0].bundles[1].skills = ["gamma"];
+	await put(consumer, "skillbox/config.json", `${JSON.stringify(config, null, 2)}\n`);
+	expect(expectSuccess(await run(consumer, cache, "add", source, "pstack"))).toMatchObject({
+		installed: 1,
+	});
+	expect((await readdir(join(consumer, ".agents/skills"))).sort()).toEqual(["alpha", "gamma"]);
+	expect(await readFile(join(consumer, ".agents/skills/alpha/SKILL.md"), "utf8")).toContain(
+		"Native collision owner.",
+	);
+	const local = expectSuccess(await run(consumer, cache, "patch", "prepare", "pstack"));
+	await put(
+		requiredPath(local, "editable"),
+		"skills/alpha/references/consumer-pending.md",
+		"Unselected consumer guidance still needs intent.\n",
+	);
+	expectSuccess(
+		await run(
+			consumer,
+			cache,
+			"patch",
+			"capture",
+			"pstack",
+			"--from",
+			requiredPath(local, "workspace"),
+		),
+	);
+	const beforeLocalIntent = await projectState(consumer);
+	const localIntent = await run(consumer, cache, "add", source, "pstack");
+	expect(localIntent.exitCode).not.toBe(0);
+	expect(localIntent.stderr).toBe("");
+	expect(localIntent.response.errors).toContainEqual(
+		expect.objectContaining({ code: "INTENT_REQUIRED", skill: "alpha" }),
+	);
+	expect(await projectState(consumer)).toEqual(beforeLocalIntent);
+	await annotateBlankIntents(
+		join(consumer, "skillbox/patches/pstack"),
+		"Keep the complete consumer patch layer valid.",
+	);
+	expectSuccess(await run(consumer, cache, "sync"));
+	config.sources[0].bundles[1].skills.push("alpha");
+	await put(consumer, "skillbox/config.json", `${JSON.stringify(config, null, 2)}\n`);
+	const beforeCollision = await projectState(consumer);
+	const collision = await run(consumer, cache, "sync");
+	expect(collision.exitCode).not.toBe(0);
+	expect(collision.stderr).toBe("");
+	expect(collision.response.errors).toContainEqual(
+		expect.objectContaining({ code: "SKILL_NAME_COLLISION", skill: "alpha" }),
+	);
+	expect(await projectState(consumer)).toEqual(beforeCollision);
 }, 90_000);
 
 async function fixture(): Promise<Fixture> {

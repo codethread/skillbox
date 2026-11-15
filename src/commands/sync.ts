@@ -11,7 +11,7 @@ import {
 } from "node:fs/promises";
 import { dirname, join, posix, resolve } from "node:path";
 import { installSkills } from "skills";
-import { configPath, readConfig } from "../workspace/config.ts";
+import { bundleName, configPath, readConfig, selectBundleSkills } from "../workspace/config.ts";
 import { lockPath, readLock, relocateLock } from "../workspace/lock.ts";
 import { readOptional, statOptional } from "../workspace/paths.ts";
 import { publish } from "../workspace/publish.ts";
@@ -66,7 +66,8 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 			{ source: string; pin: SourcePin; skillPath?: string }
 		>();
 		for (const source of config.sources) {
-			for (const bundle of source.bundles) {
+			for (const selection of source.bundles) {
+				const bundle = bundleName(selection);
 				const adapted = await readAdaptedBundle(workspace, bundle);
 				if (adapted && adapted.descriptor.source !== source.source) {
 					throw responseError(
@@ -102,7 +103,8 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 					workspace,
 				});
 				try {
-					for (const skill of resolved.skills) {
+					const skills = selectBundleSkills(selection, resolved.skills, source.source);
+					for (const skill of skills) {
 						if (adapted && materialized)
 							adaptedEntries.set(skill.name, {
 								source: adapted.descriptor.source,
@@ -112,7 +114,7 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 											skillPath: posix.join(
 												adapted.descriptor.root,
 												adapted.descriptor.skills_root,
-												skill.name,
+												posix.relative(bundle, skill.path!),
 												"SKILL.md",
 											),
 										}
@@ -132,7 +134,7 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 					const result = await installSkills(resolved.handle, {
 						cwd: staging,
 						config: sdkConfig,
-						skills: resolved.skills.map((skill) => skill.name),
+						skills: skills.map((skill) => skill.name),
 						onWarning: (warning) => {
 							throw warning;
 						},
@@ -147,10 +149,7 @@ export async function sync(input: SyncInput): Promise<SyncResult> {
 							})),
 						);
 					}
-					if (
-						result.skipped.length > 0 ||
-						result.installed.length !== resolved.skills.length
-					) {
+					if (result.skipped.length > 0 || result.installed.length !== skills.length) {
 						throw new Error(
 							"The library did not install every selected skill. No skills were changed.",
 						);

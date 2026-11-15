@@ -38,14 +38,7 @@ export async function inspectRepositorySource(
 ): Promise<RepositorySourceInspection> {
 	let handle: SkillSource;
 	try {
-		handle = await resolveSource(source, {
-			cwd,
-			config: sdkConfig,
-			fullDepth: true,
-			onWarning: (warning) => {
-				throw warning;
-			},
-		});
+		handle = await resolveSkillSource(source, cwd);
 	} catch (cause) {
 		if (isSdkDiagnostic(cause) && cause.code === "SKILLS_NO_VALID_SKILLS")
 			return { kind: "empty" };
@@ -61,6 +54,17 @@ export async function inspectRepositorySource(
 	} finally {
 		await handle.dispose();
 	}
+}
+
+export async function resolveSkillSource(source: string, cwd: string): Promise<SkillSource> {
+	return resolveSource(source, {
+		cwd,
+		config: sdkConfig,
+		fullDepth: true,
+		onWarning: (warning) => {
+			throw warning;
+		},
+	});
 }
 
 export async function resolveBundleSource(input: {
@@ -95,14 +99,10 @@ export async function resolveBundleSource(input: {
 
 	let handle: SkillSource;
 	try {
-		handle = await resolveSource(local ? join(parsed.workspace, source, "skillbox") : source, {
-			cwd: parsed.workspace,
-			config: sdkConfig,
-			fullDepth: true,
-			onWarning: (warning) => {
-				throw warning;
-			},
-		});
+		handle = await resolveSkillSource(
+			local ? join(parsed.workspace, source, "skillbox") : source,
+			parsed.workspace,
+		);
 	} catch (cause) {
 		if (cause instanceof ResponseError) throw cause;
 		if (isSdkDiagnostic(cause)) {

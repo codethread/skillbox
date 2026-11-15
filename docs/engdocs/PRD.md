@@ -103,9 +103,11 @@ This response contract does not define rollback or transaction boundaries, or au
 
 - **Given** a source or bundle contains multiple skills,
 - **When** my configuration explicitly selects one skill,
-- [ ] **Then** Skillbox installs and locks only that skill and its supporting files,
-- [ ] **And** unselected skills from that source or bundle remain absent,
-- [ ] **And** sync in a fresh checkout and repeated sync reproduce that selection.
+- [x] **Then** Skillbox installs and locks only that skill and its supporting files,
+- [x] **And** unselected skills from that source or bundle remain absent,
+- [x] **And** sync in a fresh checkout and repeated sync reproduce that selection.
+
+Coverage: [public CLI selection journeys](../../tests/selection.test.ts) verify native and raw adapted subsets, complete supporting files, exact installation locks, restoration, repeated sync, selection edits, and atomic failures. [Consumer journeys](../../tests/consumer.test.ts) verify selected producer imports and retained pins.
 
 ### Install an external skill
 

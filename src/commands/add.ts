@@ -13,7 +13,15 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { installSkills, type SkillInfo, type SkillSource } from "skills";
 import { z } from "zod";
-import { bundleSchema, configPath, readConfig, withBundles } from "../workspace/config.ts";
+import {
+	bundleName,
+	bundleSchema,
+	configPath,
+	readConfig,
+	selectBundleSkills,
+	withBundles,
+	type BundleSelection,
+} from "../workspace/config.ts";
 import { lockPath, readLock, relocateLock } from "../workspace/lock.ts";
 import { readOptional, statOptional } from "../workspace/paths.ts";
 import { publish } from "../workspace/publish.ts";
@@ -23,6 +31,7 @@ import {
 	descriptorText,
 	lockText as bundleLockText,
 	readAdaptedBundle,
+	pendingIntents,
 	type AdaptedBundles,
 	type ResolvedExportedBundle,
 } from "../workspace/adapted.ts";
@@ -153,7 +162,28 @@ export async function add(
 			}
 			if (native.bundles.length === 0) await native.handle.dispose();
 		}
+		const source = canonicalSource ?? parsed.source;
+		const current = config ?? { sources: [] };
+		const existing = current.sources.find((entry) => entry.source === source);
+		const configured = (bundle: string): BundleSelection =>
+			existing?.bundles.find((selection) => bundleName(selection) === bundle) ?? bundle;
+		const resolvedBundles = [
+			...selections.map((selection) => selection.bundle),
+			...exported.map((entry) => entry.bundle),
+		];
+		const imports = new Set<string>();
 		for (const entry of exported) {
+			if (
+				existing?.bundles.some((selection) => bundleName(selection) === entry.bundle) &&
+				(await validateExistingExportedBundle(
+					adapted,
+					workspace,
+					entry,
+					configured(entry.bundle),
+				))
+			)
+				continue;
+			imports.add(entry.bundle);
 			const resolved = await resolveBundleSource({
 				source: entry.canonical,
 				bundles: [entry.bundle],
@@ -167,16 +197,18 @@ export async function add(
 			});
 		}
 
-		const resolvedBundles = selections.map((selection) => selection.bundle);
-		const source = canonicalSource ?? parsed.source;
-		const current = config ?? { sources: [] };
-		const existing = current.sources.find((entry) => entry.source === source);
-		const bundles = resolvedBundles.filter((bundle) => !existing?.bundles.includes(bundle));
-		for (const entry of exported.filter((candidate) =>
-			existing?.bundles.includes(candidate.bundle),
-		)) {
-			await validateExistingExportedBundle(adapted, workspace, entry);
+		for (const selection of selections) {
+			selection.skills = selectBundleSkills(
+				configured(selection.bundle),
+				selection.skills,
+				source,
+			);
 		}
+		const bundles = resolvedBundles.filter(
+			(bundle) =>
+				imports.has(bundle) ||
+				!existing?.bundles.some((selection) => bundleName(selection) === bundle),
+		);
 		if (bundles.length === 0) {
 			return {
 				status: "unchanged",
@@ -337,12 +369,10 @@ async function validateExistingExportedBundle(
 	adapted: AdaptedBundles,
 	workspace: string,
 	entry: ResolvedExportedBundle,
-): Promise<void> {
+	selection: BundleSelection,
+): Promise<boolean> {
 	const pack = await readAdaptedBundle(workspace, entry.bundle);
-	if (!pack)
-		throw responseError("PATCH_PACK_NOT_FOUND", `Patch pack not found: ${entry.bundle}.`, {
-			skill: entry.bundle,
-		});
+	if (!pack) return false;
 	if (
 		pack.descriptor.source_type !== "bundle" ||
 		pack.descriptor.source !== entry.source ||
@@ -353,9 +383,36 @@ async function validateExistingExportedBundle(
 			`Patch bundle ${entry.bundle} belongs to a different source.`,
 			{ source: entry.source, skill: entry.bundle },
 		);
+	const missing = await pendingIntents(pack.directory);
+	if (missing.length)
+		throw new ResponseError(
+			missing.map(({ skill, target, manifest }) => ({
+				code: "INTENT_REQUIRED",
+				message: `Add intent for ${skill}/${target} in ${manifest} before adding.`,
+				skill,
+				target,
+				input: manifest,
+			})),
+		);
 	const validation = await mkdtemp(join(workspace, ".skillbox-add-check-"));
 	try {
-		await adapted.materializeBundle(workspace, entry.bundle, join(validation, "materialized"));
+		const materialized = await adapted.materializeBundle(
+			workspace,
+			entry.bundle,
+			join(validation, "materialized"),
+		);
+		const resolved = await resolveBundleSource({
+			source: materialized.canonical,
+			bundles: [entry.bundle],
+			cwd: workspace,
+			workspace,
+		});
+		try {
+			selectBundleSkills(selection, resolved.skills, entry.source);
+			return true;
+		} finally {
+			await resolved.handle.dispose();
+		}
 	} finally {
 		await rm(validation, { recursive: true, force: true });
 	}
