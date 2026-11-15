@@ -1,89 +1,108 @@
 # Skillbox
 
-Give your agents reusable skills without copying them between projects. Choose bundles, restore your project's skills after cloning, and customize upstream instructions while keeping a record of **why** you changed them.
+Give your agents reusable skills without copying them between projects. Compose bundles from upstream and locally authored skills, choose which bundles your project installs, and customize instructions with a record of **why** you changed them.
 
 ## Get started
 
-Requires **Node.js 22.20+ and Git**. Install in your project, then add your first bundles:
+Requires **Node.js 22.20+ and Git**. Install in your project, then import some skills:
 
 ```sh
 npm install --save-dev @codethread/skillbox
 # or: bun add --dev @codethread/skillbox
-npx skillbox add codethread/agents dev coding
+npx skillbox add skills codethread/agents development --path skillbox/coding
+npx skillbox add skills codethread/agents development --path skillbox/dev
 ```
 
-Skills and their supporting files install into `.agents/skills/`; `.claude/skills` links to that directory.
+Here `development` is your destination bundle. Both source directories contribute skills to it; their skill names must not collide.
 
-After cloning a configured project, install dependencies and restore its skills:
+Skills and their supporting files install into `.agents/skills/`; `.claude/skills` links to that directory. After cloning a configured project, install dependencies and restore its skills:
 
 ```sh
 npx skillbox sync
 ```
 
-For the examples below, use `npx skillbox` in a terminal or `skillbox` in package scripts, such as `"skills:sync": "skillbox sync"`.
+Below, use `npx skillbox` in a terminal or `skillbox` in package scripts, such as `"skills:sync": "skillbox sync"`.
 
-## Let your agent handle the details
+## Compose a bundle
 
-**Skillbox ships offline instructions for agents** covering setup, authoring, migration, customization, and upstream updates. Ask your agent to discover and load the relevant guidance:
+Use `add skills` for a repository with ordinary skill directories, or `add skillbox` for a repository publishing Skillbox bundles:
 
 ```sh
-skillbox skills list
-skillbox skills get skillbox-configure
+# Import selected skills from an arbitrary directory in a repository.
+skillbox add skills owner/toolkit development --path skills --pick review --pick testing
+
+# Add another contribution to the same destination bundle.
+skillbox add skillbox owner/team development --bundle coding --bundle review \
+  --pick '{"coding":["typescript"]}' --omit '{"review":["legacy"]}'
 ```
 
-The instructions and supporting references are built into the CLI—no checkout or network needed. If your project already has installed skills, have your agent follow the migration guidance before the first `add`.
+Both commands accept `--ref <ref>`. Omit selectors to include all skills. Raw `skills` contributions accept either repeated `--pick` or repeated `--omit`, not both. For `skillbox` contributions, each upstream bundle can use pick or omit, but not both. Missing names and collisions fail rather than silently skipping or overwriting skills.
 
-Use `skillbox <command> --help` for options.
+Author project skills at `skillbox/development/<skill>/SKILL.md`, with supporting files alongside them. That native directory contributes to the same `development` bundle automatically; it can coexist with imported contributions.
 
-## Choose bundles
+## Publish separately from installation
 
-`skillbox/config.json` selects remote and local sources:
-
-```json
-{
-	"sources": [
-		{ "source": "codethread/agents", "bundles": ["dev", "coding"] },
-		{ "source": ".", "bundles": ["local"] }
-	]
-}
-```
-
-For the local selection, author skills at `skillbox/local/<name>/SKILL.md`, with supporting files alongside them. No patch pack is needed. You can also select a sibling repository such as `../team-skills`; config paths resolve from your project root. Skill names must be distinct across selections.
-
-Use `add` for the first installation. Afterward, edit the config and run `sync` to install selections or remove deselected skills.
-
-### Select individual skills
-
-Use a bundle name to select all its skills, or an object to select a subset. For a native source, first run `skillbox add ../team-skills base` if your project has no managed installation. Then edit `skillbox/config.json` to select only `deslop` from the never-installed `review` bundle:
+`skillbox/config.json` defines imported contributions and a separate installation list:
 
 ```json
 {
 	"sources": [
 		{
-			"source": "../team-skills",
-			"bundles": ["base", { "bundle": "review", "skills": ["deslop"] }]
+			"type": "skills",
+			"id": "development",
+			"source": "owner/toolkit",
+			"path": "skills",
+			"pick": ["review", "testing"]
+		},
+		{
+			"type": "skillbox",
+			"id": "development",
+			"source": "owner/team",
+			"bundles": ["coding"],
+			"pick": { "coding": ["typescript"] }
 		}
-	]
+	],
+	"install": ["development", "local"]
 }
 ```
 
-Run `skillbox sync` to install the selection. Skill names must be exact names within that bundle, and `skills` must be nonempty. Edit the list and sync again to expand or reduce it. Each selected skill includes its supporting files; references to other skills do not install them automatically.
+Every composed bundle is publishable, whether or not it appears in `install`. Native bundles such as `skillbox/local/` are publishable too; a native-only producer needs no config. The name `local` is a convention, not access control.
 
-Selection uses config, with no new CLI flags. Raw plugin layouts such as Cursor Team Kit need `patch init` before selection; load `skillbox skills get skillbox-configure` for that workflow.
+`add` selects the destination for installation by default. Use `--no-install` to add a publishable contribution without changing `install`. Edit `install` and run `sync` to change what this project uses; an empty list installs no bundles without removing their exports. A local Skillbox source such as `"."` can compose other bundles in this repository; composition cycles fail.
 
-## Customize upstream skills
+## Customize and update
 
-Adapt upstream skills to your workflow with reviewable patches and a reason for each changed file. Skillbox records the source snapshot; your agent can help review updates before you adopt them.
+An unchanged import needs its config and root `skillbox/lock.json`, not a patch directory or copied upstream files. The lock records immutable Git pins and flattened provenance. Ordinary sync retains Git pins rather than following upstream changes. Filesystem-path sources are live local worktrees; use a Git URL (including `file://`) when you need immutable replay.
 
-For an external skill used unchanged, commit its pinned source reference and skill selection. Add patches and intent when you customize it. `sync` recreates the external files in the generated installation.
+To customize a composed bundle:
 
-Choose the producer revision you want to use. Keep project-specific customizations in your project's patch pack, separate from the shared bundle. Ask your agent to follow the built-in patch guidance.
+```sh
+skillbox patch prepare development
+# Edit the prepared skills at the returned path, then:
+skillbox patch capture development --from <workspace>
+# Fill in the per-file reasons in the reported patch.toml files.
+skillbox sync
+```
+
+`skillbox update development` stages an upstream candidate for review; capture accepts the reviewed candidate, then sync installs it. Producer patches belong to the producer. A consumer receives that producer's pinned output and records only its own additional changes and intent.
+
+## Let your agent handle the details
+
+**Skillbox ships offline instructions for agents** covering setup, authoring, migration, customization, and upstream review:
+
+```sh
+skillbox skills list
+skillbox skills get skillbox-configure
+skillbox skills get skillbox-patch
+```
+
+Instructions and references are built into the CLI—no checkout or network needed. If the project already has unmanaged installed skills, load `skillbox-migrate` before the first add. Use `skillbox <command> --help` for options. Operational commands return JSON by default; `--workspace <dir>` selects another project directory.
 
 ## What to commit
 
-Commit `skillbox/config.json`, `skillbox/lock.json`, any `skillbox/patches/` packs, and locally authored source bundles, along with dependency changes and ignore rules.
+Commit `skillbox/config.json`, `skillbox/lock.json`, locally authored bundles, and any `skillbox/patches/<bundle>/<skill>/patch.toml` files with their `changes/` payloads. Include dependency changes and ignore rules.
 
-Edit owned sources or prepared adaptations, not generated installations. Prepared editing workspaces and update candidates live under `skillbox/.prepare/<bundle>/`; capture wanted edits before deleting them. Add these rules yourself; Skillbox does not manage `.gitignore`:
+Edit owned sources or prepared skills, not generated installations. Capture wanted edits before deleting a preparation workspace. Add these rules yourself; Skillbox does not manage `.gitignore`:
 
 ```gitignore
 /.agents/skills/

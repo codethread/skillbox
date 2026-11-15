@@ -1,69 +1,56 @@
 ---
 name: skillbox-configure
-description: Configure repository-local Skillbox sources and bundles, import or patch upstream skills, restore installed skills, or diagnose sync and update failures.
+description: Compose repository-local Skillbox bundles, choose what to install or publish, restore skills, and diagnose configuration or sync failures.
 ---
 
 # Configure Skillbox
 
-Use `skillbox --help` and the selected command's `--help` for current syntax. All operational results are JSON with `success`, `data`, and `errors`; a nonzero exit means failure. Inspect structured errors before retrying.
+Use `skillbox --help` and the selected command's `--help` for current syntax. Operational results are JSON with `success`, `data`, and `errors`; inspect failures before retrying. For unmanaged existing installations or `MIGRATION_REQUIRED`, load `skillbox skills get skillbox-migrate` first.
 
-For existing unmanaged skills or `MIGRATION_REQUIRED` during first add, use `skillbox skills get skillbox-migrate` before changing installation paths.
+## Choose how to run it
 
-## Choose how to run Skillbox
-
-Skillbox is published on npm as `@codethread/skillbox` and requires Node.js 22.20+ and Git. In an npm-backed project, prefer a project-local dev dependency with the project's package manager:
+Skillbox requires Node.js 22.20+ and Git. Prefer a project-local dev dependency using the project's package manager:
 
 ```sh
 npm install --save-dev @codethread/skillbox
-# or:
-bun add --dev @codethread/skillbox
-# or:
-pnpm add --save-dev @codethread/skillbox
+# or: bun add --dev @codethread/skillbox
+# or: pnpm add --save-dev @codethread/skillbox
 ```
 
-Use `skillbox` in package scripts (for example, `"skills:sync": "skillbox sync"`); the package manager exposes the local executable there. Commit the package manifest and package-manager lockfile.
+Use `npx skillbox` in a terminal or `skillbox` in package scripts, for example `"skills:sync": "skillbox sync"`. Commit the dependency manifest and package-manager lockfile. Without an npm manifest, use `npx --yes @codethread/skillbox` or `bunx @codethread/skillbox` instead; no permanent global install is needed.
 
-For a project without an npm package manifest, such as Rust or Go, run the npm-published CLI on demand instead:
+## Compose, then select installation
 
-```sh
-npx --yes @codethread/skillbox sync
-# or:
-bunx @codethread/skillbox sync
-```
+1. Inspect `skillbox/config.json`, `skillbox/lock.json`, native `skillbox/<id>/` bundles, existing patches, `.agents/skills/`, and `.claude/skills`. Preserve unmanaged skills and existing tracking files.
+2. Choose a destination bundle id and the source layout:
 
-These runners do not require adding a project dependency or permanently installing a global executable. In the commands below, substitute the chosen runner for `skillbox` when using it outside package scripts.
+    ```sh
+    # A repository exposing ordinary skill directories.
+    skillbox add skills owner/toolkit development --path skills --pick review --pick testing
 
-## Choose the operation
+    # A repository exposing Skillbox bundles.
+    skillbox add skillbox owner/team development --bundle coding --bundle review \
+      --pick '{"coding":["typescript"]}' --omit '{"review":["legacy"]}'
+    ```
 
-For individual-skill selection, load the configuration reference before installing the target bundle. It covers native sources, producer adaptations, and raw Cursor Team Kit acquisition without installing unwanted siblings. Use it also for configuration fields, source examples, or a failed command:
+3. Each command adds a contribution to `development`; several sources can contribute to the same id. A native `skillbox/development/<skill>/SKILL.md` contributes automatically too. Names must not collide. Include supporting files within each skill directory.
+4. Add selects the destination in `install` by default. Use `--no-install` to contribute without changing the installation list. Both source types accept `--ref`. For selectors, local-source examples, and the config shape, load:
 
-```sh
-skillbox skills file skillbox-configure references/configuration.md
-```
+    ```sh
+    skillbox skills file skillbox-configure references/configuration.md
+    ```
 
-```text
-START
-  |
-  v
-[Adding a source or bundle?] -- yes --> skillbox add
-  |
-  no
-  v
-[Restoring skills or applying config edits?] -- yes --> skillbox sync
-  |
-  no
-  v
-Inspect config and errors before changing state
-```
+5. Use `skillbox sync` to restore installed skills or reconcile approved config edits. `install` selects destination ids, not source bundles or individual skills. Removing an id from `install` removes its managed installation, not its publication. Ordinary sync is not an upstream update.
+6. Verify `success: true`, reported counts, installed names, supporting files, and `.claude/skills` linking to `.agents/skills`. Verify that publish-only bundles are absent from the installation but remain available to a disposable consumer.
 
-1. Select an existing workspace directory. `--workspace <dir>` defaults to the invocation directory; it selects a directory, not a config file. Separate workspaces have separate installations and tracking files.
-2. Inspect `skillbox/config.json`, `skillbox/lock.json`, `.agents/skills/`, and `.claude/skills` in that workspace before modifying it. Preserve unmanaged skills and existing tracking files.
-3. For a new source or bundle, use `skillbox --workspace <dir> add <source> [bundles...]`. Local paths are resolved from the invocation directory, even when selecting another workspace. Prefer a repository URL or GitHub shorthand with explicit bundle names. Reuse the exact configured Git source string to group additional bundles in the same entry. A GitHub tree URL ending in `skillbox/<bundle>` can imply the bundle, but is retained as supplied: different bundle URLs create separate source entries, even for the same repository and ref. Do not substitute a different Git ref merely to group entries; load the configuration reference before consolidating existing tree-URL entries.
-4. To restore an installation or apply source, bundle, or skill-selection edits in its config, use `skillbox --workspace <dir> sync`. It needs both tracking files, locks newly selected skills, and removes deselected managed skills and lock entries. Retained skill contents must match their saved hashes; this is not an update command. Config local paths resolve from the selected workspace root. An empty `sources` array removes all managed skills. Adding another bundle preserves existing subset objects. Re-adding a bundle never widens its subset or applies edits to an existing selection; use sync for those edits.
-5. Confirm `success: true` and inspect the reported status/counts. Check that installed skill directories and installation lock entries match the configured selection, including the absence of deselected skills. Check each selected skill's `SKILL.md` and supporting files under `.agents/skills/`; `.claude/skills` should link to that directory. Add `/.agents/skills/` and `/.claude/skills` to the workspace's `.gitignore`; omit the trailing slash on the Claude rule to ignore the symlink itself. If either generated path is already tracked, untrack it with `git rm -r --cached -- <path>` without deleting the installation. Commit the config, Skillbox lock, ignore rules, and any removal of tracked generated paths together. The CLI does not configure ignores automatically.
+All operational commands accept `--workspace <dir>`; it selects an existing workspace directory, not a config file. It defaults to the invocation directory. Configured local source paths resolve from that workspace root; use absolute local source paths at the CLI when working across directories to avoid ambiguity.
 
-`add <producer-source> <bundle>` also imports a producer's committed adapted bundle. It installs the adapted output and creates an empty consumer-owned patch pack under `skillbox/patches/<bundle>/`. Commit that pack with the config and lock. Ordinary sync retains the recorded producer snapshot; it does not follow new producer commits or local edits. A source may offer native and adapted bundles, but the same bundle name cannot select both layouts.
+## Ownership and next steps
 
-For raw third-party plugin imports or changes to an imported adaptation, load `skillbox skills get skillbox-patch`. Raw imports start with init; existing adapted bundles use prepare, capture, sync, and update. Consumer patches remain separate from the producer's diffs and intents. To add a complementary project skill instead, use `skillbox skills get skillbox-author` and select its owned local bundle. Skill names must remain distinct.
+An unchanged import creates no patch directory. Config and the root lock record composition and pinned provenance. Consumers receive a producer's composed output, including producer patches, independently of what the producer installs. Consumer changes and intent belong in the consumer's own patch files, not copied producer metadata.
 
-Treat managed installed files as generated output: sync can replace edits within managed skill directories. Change an owned source or an adapted bundle's prepared `edited/skills/` tree instead. Commit the relevant tracking and patch files. Native bundles retain their existing hash-checking behavior; automatic migration remains separate work.
+- To author complementary skills or change an owned source, load `skillbox skills get skillbox-author`.
+- To change imported instructions or review upstream updates, load `skillbox skills get skillbox-patch`. Source registration uses `add`.
+- Treat `.agents/skills/` and `.claude/skills` as generated output. Edit owned sources or the path returned by patch preparation instead.
+
+Commit config, root lock, authored sources, and any patch metadata/payloads. Ignore `/.agents/skills/`, `/.claude/skills` (no trailing slash on the symlink rule), and `/skillbox/.prepare/`; Skillbox does not manage ignores. If generated paths are tracked, untrack them without deleting the installation, preserving unrelated changes.

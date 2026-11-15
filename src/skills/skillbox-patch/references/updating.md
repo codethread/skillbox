@@ -1,79 +1,69 @@
 # Review and capture an upstream update
 
-Use this workflow when the user asks to update an adapted bundle. Skillbox stages source and replay results. You inspect upstream changes, judge whether the adaptation still meets each file intent, and report unresolved decisions to the user.
+Use this workflow when the user asks to update a composed bundle. Skillbox stages a candidate; you review upstream changes against the user's intent before accepting it.
 
-## Stage the exact candidate
-
-Run one of these commands:
+## Stage, do not install
 
 ```sh
-skillbox update <bundle>
-skillbox update <bundle> --ref <ref>
+skillbox update <id>
 ```
 
-For a Git source, Skillbox resolves the descriptor's configured update ref unless you supply `--ref`. It resolves that ref once and stages the exact commit. A later upstream push does not change the candidate. For a local producer, update snapshots the current worktree and rejects `--ref`.
+The destination can contain several contributions. Each direct Git contribution has its own configured ref and locked revision. Use command help for ref overrides; do not assume all sources share a branch or tag. Local filesystem sources use current worktree content rather than immutable Git pins. Update another local bundle's Git sources by addressing that bundle explicitly; updating its consumer does not advance them.
 
-For an imported adaptation, the source is the producer. Update materializes the candidate producer's committed adaptation and replays your consumer patches on top. It does not independently advance the original source pinned by the producer.
+Update creates a candidate workspace under `skillbox/.prepare/<id>/`. Use the returned paths rather than guessing its generated name:
 
-Update never installs and never changes a tracked pin. It creates a fresh `skillbox/.prepare/<bundle>/update-*` workspace with these trees:
+- `pristine/skills/` holds the candidate composition before your local patches.
+- `edited/skills/` holds the candidate with replayed local changes; conflicts may leave a partial result requiring repair.
+- `manifest.json` is CLI-managed candidate state, not a file to edit.
 
-- `pristine` is the candidate baseline: unmodified source for a raw plugin import, or the producer's adapted output for an imported bundle.
-- `edited` starts with the candidate source plus every patch that replayed successfully.
-- If a target conflicts, `edited` contains the partial result. Skillbox skips later patches for that target.
+Update does not install or accept tracked pins. A later upstream push must not silently replace the staged Git candidate. On a conflict, retain the returned workspace and read the affected skill/target and error. Do not discard old intent or treat a nonzero result as an accepted update.
 
-For a clean replay, expect `data.status` to be `prepared`, `data.conflicts` to be empty, and `data` to include `source`, `from`, `to`, `workspace`, `pristine`, and `editable`. The `editable` field is the path to the edited tree. `from` and `to` are pin objects: Git pins have `type: "git"`, `revision`, and `tree`; local pins have `type: "local"` and `digest`.
-
-For a conflict, expect a nonzero result with `UPDATE_CONFLICT`. The same paths remain in `data`, `data.status` is `conflicted`, and each conflict names the failed `skill`, `target`, `patch`, and `reason`.
+For a Skillbox producer contribution, the baseline includes that producer's patches and locked dependencies. Your patches apply on top. Updating the producer does not independently update its dependencies.
 
 ## Review what upstream authored
 
-Do not treat a clean replay as proof that the update is correct. Agents are expected to use Git well and make the semantic judgment.
+Do not equate clean patch replay with a correct update.
 
-1. For a Git source, use the returned old and candidate revisions in a source checkout. Inspect the descriptor root between them:
+1. Identify each changed contribution and compare its old and candidate Git revisions in a source checkout:
 
     ```sh
-    git log --oneline <data.from.revision>..<data.to.revision> -- <descriptor-root>
-    git diff --stat <data.from.revision> <data.to.revision> -- <descriptor-root>
-    git diff --find-renames <data.from.revision> <data.to.revision> -- <descriptor-root>
+    git log --oneline <old-revision>..<candidate-revision> -- <source-path>
+    git diff --stat <old-revision> <candidate-revision> -- <source-path>
+    git diff --find-renames <old-revision> <candidate-revision> -- <source-path>
     ```
 
-    For an imported adaptation, inspect the producer pack's diffs, intents, and original-source pin changes, then compare the old and candidate materialized trees. Local producer snapshots have content digests rather than Git revisions; compare their trees and use available producer history instead of passing digests to Git.
+    For raw skills, inspect their configured directory. For a Skillbox producer, inspect its native members, config, root lock, and patches, then compare materialized output. Do not pass a local worktree marker or content digest to Git as a revision.
 
-2. Read the broad upstream change, not only patched files. Include new files, deleted or renamed files, executable-mode changes, scripts, links, and runtime assumptions.
-3. Read every affected file intent in `skillbox/patches/<bundle>/<skill>/patch.toml`.
-4. Compare the upstream-authored change, the intent, and the candidate's current adapted result under `edited`.
-5. When useful, run `skillbox patch prepare <bundle> --output <fresh-directory>` for the current recorded adaptation. Compare its edited tree with the candidate using `git diff --no-index <old-edited> <candidate-edited>`. Do this before capturing the candidate, while the bundle lock still names the old pin.
+2. Review broad upstream changes, not only patched files: new files, renames, deletions, scripts, executable modes, and runtime assumptions.
+3. Read every affected file intent in `skillbox/patches/<id>/<skill>/patch.toml`. Compare that intent with the candidate under `edited/skills/`.
+4. If useful, prepare the currently recorded bundle in a separate fresh directory before capturing the candidate:
 
-Look for issues that strict replay cannot decide:
+    ```sh
+    skillbox patch prepare <id> --output <fresh-directory>
+    git diff --no-index <old-workspace>/edited <candidate-workspace>/edited
+    ```
 
-- Upstream changed the behavior around a patch, but the patch still applies.
-- Upstream absorbed all or part of the local adaptation.
-- Upstream renamed or deleted a target or added its replacement elsewhere.
-- A new script, reference, mode, or runtime assumption needs adaptation.
-- A clean textual result no longer satisfies the file's intent.
-- A conflict needs a product or policy choice rather than a mechanical edit.
+    This compares recorded Git pins, but cannot recover old live local worktree content; retain backups or use the source's history for that case.
 
-Report meaningful findings and choices to the user. Do not manufacture a custom classifier or summarize every changed line.
+Look for changes that replay cannot judge: upstream absorbed your customization, a renamed target needs its intent transferred, a new reference or script needs adaptation, or a clean textual result no longer meets the required outcome. Report meaningful findings and unresolved product/policy choices, not a summary of every changed line.
 
-## Edit and capture the candidate
+## Edit, capture, then sync
 
-Edit only distributed skill files under `editable/<skills-root>/`. Do not edit other candidate source files. Resolve conflicts and semantic issues in the skill tree. You can edit and capture repeatedly.
-
-Capture the staged candidate with:
+Edit only distributed skill files under `<workspace>/edited/skills/`. Resolve replay conflicts and semantic issues, then accept the staged candidate with:
 
 ```sh
-skillbox patch capture <bundle> --from <workspace>
+skillbox patch capture <id> --from <workspace>
 ```
 
-Capture records the exact staged candidate as the new bundle pin and regenerates your diffs against its pristine baseline. For an imported adaptation, the producer's diffs and intents stay in the producer snapshot. Capture retains your existing file intent and verifies that replay reproduces the edited tree.
-
-If upstream renamed a file and its intent still applies, preserve that intent during capture:
+Candidate capture accepts its staged source pins and regenerates your diffs against its pristine baseline. Producer-owned diffs and intent remain with the producer. Preserve existing file intent; when upstream renamed a target and its reason still applies, transfer it explicitly:
 
 ```sh
-skillbox patch capture <bundle> --from <workspace> \
-  --map 'skill/old-path=skill/new-path'
+skillbox patch capture <id> --from <workspace> \
+  --map 'skill-directory/old-path=skill-directory/new-path'
 ```
 
-New targets receive blank intent. Update their `patch.toml` entries with the reason, required outcome, and constraints. Further captures append ordered patches as usual.
+Capture rejects unresolved replay conflicts rather than dropping their patches. Repair every reported target. If a customization is no longer wanted, deliberately remove its obsolete patch records, payloads, and intent, then stage a fresh candidate.
 
-Proceed with authorized routine changes. Ask the user only about unresolved product or policy decisions. Run `skillbox sync` after all intent notes and reported findings are addressed. Sync verifies the recorded source and patch hashes before installation.
+New targets receive blank intent. Fill the reported `patch.toml` entries with the reason, required outcome, and constraints. Further ordinary captures append ordered changes as usual.
+
+Proceed with authorized routine changes; ask about unresolved product or policy decisions. Run `skillbox sync` only after intent and review findings are addressed. Verify the installed result, repeat sync for unchanged contents, and commit the root lock and changed patch artifacts together.

@@ -1,12 +1,17 @@
 {
 	"sources": [
 		{
+			"type": "skills",
+			"id": "development",
 			"source": "https://github.com/codethread/agents",
-			"bundles": ["coding", "dev"]
+			"path": "skillbox/coding"
 		},
 		{
-			"source": ".",
-			"bundles": ["local"]
+			"type": "skills",
+			"id": "development",
+			"source": "https://github.com/codethread/agents",
+			"path": "skillbox/dev"
 		}
-	]
+	],
+	"install": ["development", "local"]
 }

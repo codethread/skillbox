@@ -1,38 +1,55 @@
-import { resolve } from "node:path";
+import { join } from "node:path";
 import { z } from "zod";
-import { localPath } from "./paths.ts";
+import { contributionSchema, relativePathSchema, bundleSchema } from "./config.ts";
+import { readOptional } from "./paths.ts";
+import { responseError } from "../response.ts";
 
 export const lockPath = "skillbox/lock.json";
-
-// Retain SDK-owned fields, including fields added by upstream.
-const lockSchema = z.looseObject({
-	version: z.literal(1),
-	skills: z.record(
+export const pinSchema = z.discriminatedUnion("type", [
+	z.strictObject({
+		type: z.literal("git"),
+		revision: z.string().regex(/^[0-9a-f]{40}$/),
+		tree: z.string().regex(/^[0-9a-f]{40}$/),
+	}),
+	z.strictObject({ type: z.literal("local") }),
+]);
+export type Pin = z.infer<typeof pinSchema>;
+export const memberSchema = z.strictObject({
+	name: bundleSchema,
+	directory: bundleSchema,
+	source: z.string(),
+	path: relativePathSchema,
+	revision: z.string().optional(),
+});
+export type Member = z.infer<typeof memberSchema>;
+export const lockSchema = z.strictObject({
+	version: z.literal(2),
+	sources: z.record(
 		z.string(),
-		z.looseObject({
-			source: z.string(),
-			sourceType: z.string(),
-			computedHash: z.string(),
-		}),
+		z.strictObject({ contribution: contributionSchema, pin: pinSchema }),
+	),
+	bundles: z.record(
+		bundleSchema,
+		z.strictObject({ members: z.array(memberSchema), sourceHash: z.string() }),
+	),
+	installed: z.record(
+		bundleSchema,
+		z.strictObject({ bundle: bundleSchema, directory: bundleSchema, hash: z.string() }),
 	),
 });
-
-export function readLock(text: string) {
+export type Lock = z.infer<typeof lockSchema>;
+export function emptyLock(): Lock {
+	return { version: 2, sources: {}, bundles: {}, installed: {} };
+}
+export async function readLock(root: string): Promise<Lock | undefined> {
+	const text = await readOptional(join(root, lockPath));
+	if (text === undefined) return undefined;
 	try {
 		return lockSchema.parse(JSON.parse(text));
 	} catch (cause) {
-		throw new Error(`Invalid ${lockPath}. Fix it before adding skills.`, { cause });
+		throw responseError("LOCK_INVALID", `Invalid ${lockPath}.`, { input: lockPath }, cause);
 	}
 }
-
-// The SDK writes local sources relative to its cwd. Moving a staged lock must
-// preserve those targets; hashes, ordering, and every other field stay SDK-owned.
-export function relocateLock(text: string, from: string, to: string) {
-	const lock = readLock(text);
-	for (const entry of Object.values(lock.skills)) {
-		if (entry.sourceType === "local") {
-			entry.source = localPath(to, resolve(from, entry.source));
-		}
-	}
-	return `${JSON.stringify(lock, null, 2)}\n`;
+export function jsonText(value: unknown): string {
+	return JSON.stringify(value, null, 2) + "\n";
 }

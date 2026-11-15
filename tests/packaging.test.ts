@@ -47,7 +47,15 @@ test("npm CLI preserves structured subset errors under Node without changing man
 			);
 		}
 		const nodeCli = ["node", join(packaged, "bin/skillbox.mjs")];
-		const added = await run(cwd, [...nodeCli, "add", "../source", "base"]);
+		const added = await run(cwd, [
+			...nodeCli,
+			"add",
+			"skillbox",
+			"../source",
+			"base",
+			"--bundle",
+			"base",
+		]);
 		expect(added.exitCode).toBe(0);
 		expect(added.stderr).toBe("");
 		expect(JSON.parse(added.stdout)).toMatchObject({ success: true, errors: [] });
@@ -60,10 +68,14 @@ test("npm CLI preserves structured subset errors under Node without changing man
 				{
 					sources: [
 						{
+							type: "skillbox",
+							id: "base",
 							source: "../source",
-							bundles: ["base", { bundle: "review", skills: ["missing"] }],
+							bundles: ["base", "review"],
+							pick: { review: ["missing"] },
 						},
 					],
+					install: ["base"],
 				},
 				null,
 				2,
@@ -81,9 +93,7 @@ test("npm CLI preserves structured subset errors under Node without changing man
 				errors: [
 					{
 						code: "SKILL_NOT_FOUND",
-						message: "No skill named missing in bundle: review.",
-						source: "../source",
-						input: "review",
+						message: "No selected skill named missing.",
 						skill: "missing",
 					},
 				],
