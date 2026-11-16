@@ -234,7 +234,13 @@ async function smokeInstall(directory: string, target: string): Promise<void> {
 	assert.equal(await readFile(join(installed, "SKILL.md"), "utf8"), instructions);
 	await rm(join(client, ".agents"), { recursive: true });
 	await rm(join(client, ".claude/skills"));
-	assert.deepEqual(invoke("sync"), { status: "synced", installed: 1, unchanged: 0, removed: 0 });
+	assert.deepEqual(invoke("sync"), {
+		status: "synced",
+		config: "skillbox/config.json",
+		installed: 1,
+		unchanged: 0,
+		removed: 0,
+	});
 	assert.equal(await readFile(join(installed, "SKILL.md"), "utf8"), instructions);
 	assert.equal(
 		await readFile(join(installed, "references/fixture.md"), "utf8"),
@@ -246,6 +252,7 @@ async function smokeInstall(directory: string, target: string): Promise<void> {
 	);
 	assert.deepEqual(invoke("sync"), {
 		status: "unchanged",
+		config: "skillbox/config.json",
 		installed: 0,
 		unchanged: 1,
 		removed: 0,
