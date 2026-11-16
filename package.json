@@ -48,6 +48,7 @@
 		"@codethread/cli-changelog": "0.1.1",
 		"@types/bun": "^1.4.4",
 		"commander": "^15.1.0",
+		"gray-matter": "^4.0.3",
 		"husky": "9.1.7",
 		"lint-staged": "17.6.0",
 		"oxfmt": "0.78.0",
