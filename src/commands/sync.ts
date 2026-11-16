@@ -1,278 +1,211 @@
 import {
+	cp,
 	mkdir,
 	mkdtemp,
-	readFile,
-	readdir,
 	readlink,
+	readdir,
 	realpath,
 	rm,
 	symlink,
 	writeFile,
 } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
-import { installSkills } from "skills";
-import { configPath, readConfig } from "../workspace/config.ts";
-import { lockPath, readLock, relocateLock } from "../workspace/lock.ts";
+import { responseError } from "../response.ts";
+import { hashTree } from "../workspace/patches.ts";
+import { discover, isLocalSource, type Bundles } from "../workspace/bundles.ts";
+import { configPath, contributionIdentity, readConfig, type Config } from "../workspace/config.ts";
+import {
+	emptyLock,
+	jsonText,
+	lockPath,
+	lockSchema,
+	readLock,
+	type Lock,
+} from "../workspace/lock.ts";
 import { readOptional, statOptional } from "../workspace/paths.ts";
 import { publish } from "../workspace/publish.ts";
-import { ResponseError, responseError } from "../response.ts";
-import { resolveBundleSource, sdkConfig, sdkLockPath } from "../workspace/sdk.ts";
-
-export interface SyncInput {
-	cwd: string;
-	workspace?: string;
-}
 
 export interface SyncResult {
 	status: "synced" | "unchanged";
 	installed: number;
 	unchanged: number;
-	/** Deselected lock entries, including skills already absent from disk. */
 	removed: number;
 }
-
-export async function sync(input: SyncInput): Promise<SyncResult> {
-	const workspace = await realpath(resolve(input.cwd, input.workspace ?? "."));
-	const config = await readConfig(workspace);
-	if (!config) {
-		throw responseError("CONFIG_NOT_FOUND", `Missing ${configPath}; nothing to sync.`, {
-			input: configPath,
-		});
-	}
-
-	const lockText = await readOptional(join(workspace, lockPath));
-	if (lockText === undefined) {
-		throw responseError("LOCK_NOT_FOUND", `Missing ${lockPath}; cannot sync.`, {
+export async function sync(input: {
+	bundles: Bundles;
+	cwd: string;
+	workspace?: string;
+}): Promise<SyncResult> {
+	const root = await realpath(resolve(input.cwd, input.workspace ?? "."));
+	const config = await readConfig(root);
+	if (!config)
+		throw responseError("CONFIG_NOT_FOUND", `Missing ${configPath}.`, { input: configPath });
+	const lock = await readLock(root);
+	if (!lock && config.sources.length)
+		throw responseError("LOCK_MISSING", `Missing ${lockPath}. Register sources with add.`, {
 			input: lockPath,
 		});
-	}
-	const lock = readLock(lockText);
-	const configText = await readFile(join(workspace, configPath), "utf8");
+	return reconcile(input.bundles, root, config, lock ?? emptyLock());
+}
 
-	const staging = await mkdtemp(join(workspace, ".skillbox-sync-"));
-	let retainStaging = false;
-	try {
-		const selectedNames = new Set<string>();
-		for (const source of config.sources) {
-			const resolved = await resolveBundleSource({
-				source: source.source,
-				bundles: source.bundles,
-				cwd: workspace,
-				workspace,
+/** Stage exports, selected installation and metadata together; publish only after all checks pass. */
+export async function reconcile(
+	bundles: Bundles,
+	root: string,
+	config: Config,
+	candidate: Lock,
+	writeConfig = false,
+): Promise<SyncResult> {
+	const current = await readLock(root);
+	const sources: Lock["sources"] = {};
+	for (const contribution of config.sources) {
+		const key = contributionIdentity(contribution);
+		const entry = candidate.sources[key];
+		if (!entry)
+			throw responseError(
+				"PIN_MISSING",
+				`Missing source pin for ${contribution.source}. Register it with add.`,
+				{ source: contribution.source },
+			);
+		if (isLocalSource(contribution.source) && contribution.ref)
+			throw responseError("REF_UNSUPPORTED", "Local authored sources do not accept ref.", {
+				source: contribution.source,
 			});
-			try {
-				for (const skill of resolved.skills) {
-					if (selectedNames.has(skill.name)) {
-						throw responseError(
-							"SKILL_NAME_COLLISION",
-							`Skill name collision: ${skill.name}. No skills were changed.`,
-							{ source: resolved.source, skill: skill.name },
-						);
-					}
-					selectedNames.add(skill.name);
-				}
-
-				const result = await installSkills(resolved.handle, {
-					cwd: staging,
-					config: sdkConfig,
-					skills: resolved.skills.map((skill) => skill.name),
-					onWarning: (warning) => {
-						throw warning;
-					},
-				});
-				if (result.failed.length > 0) {
-					throw new ResponseError(
-						result.failed.map((failure) => ({
-							code: failure.code,
-							message: failure.message,
-							source: resolved.source,
-							skill: failure.skill,
-						})),
-					);
-				}
+		sources[key] = { contribution, pin: entry.pin };
+	}
+	candidate = { ...candidate, sources };
+	await preflight(root, current ?? emptyLock());
+	const staging = await mkdtemp(join(root, ".skillbox-sync-"));
+	let retain = false;
+	try {
+		const ids = new Set([...config.sources.map((source) => source.id), ...config.install]);
+		if (await statOptional(join(root, "skillbox")))
+			for (const entry of await readdir(join(root, "skillbox"), { withFileTypes: true })) {
 				if (
-					result.skipped.length > 0 ||
-					result.installed.length !== resolved.skills.length
-				) {
-					throw new Error(
-						"The library did not install every selected skill. No skills were changed.",
-					);
-				}
-			} finally {
-				await resolved.handle.dispose();
-			}
-		}
-
-		const expectedNames = [...selectedNames].sort();
-		const lockedNames = Object.keys(lock.skills);
-		const removed = lockedNames.filter((name) => !selectedNames.has(name)).length;
-		const lockChanged =
-			removed > 0 || expectedNames.some((name) => !Object.hasOwn(lock.skills, name));
-
-		const generatedText =
-			expectedNames.length === 0
-				? `${JSON.stringify({ version: 1, skills: {} })}\n`
-				: await readOptional(join(staging, sdkLockPath));
-		if (generatedText === undefined) {
-			throw responseError(
-				"SDK_LOCK_NOT_GENERATED",
-				"The SDK did not generate its staging lockfile. No skills were changed.",
-				{ input: lockPath },
-			);
-		}
-		const generated = readLock(relocateLock(generatedText, staging, workspace));
-		const generatedNames = Object.keys(generated.skills).sort();
-		if (!sameStrings(expectedNames, generatedNames)) {
-			throw responseError(
-				"SDK_SKILL_MISMATCH",
-				"The SDK generated a different skill set from the configured selections. No skills were changed.",
-			);
-		}
-		const nextSkills = { ...generated.skills };
-		for (const [name, skill] of Object.entries(generated.skills)) {
-			if (!Object.hasOwn(lock.skills, name)) continue;
-			const locked = lock.skills[name];
-			if (skill.computedHash !== locked.computedHash) {
-				throw responseError(
-					"LOCK_HASH_MISMATCH",
-					`Content hash mismatch for ${name}; ${lockPath} was not changed.`,
-					{ skill: name },
-				);
-			}
-			nextSkills[name] = locked;
-		}
-
-		const nextLock = { ...lock, skills: nextSkills };
-		const nextLockText = lockChanged ? `${JSON.stringify(nextLock, null, 2)}\n` : lockText;
-
-		await rejectUnmanagedSkills(workspace, lockedNames);
-		await rejectConflictingClaudeSkills(workspace);
-
-		let unchanged = 0;
-		for (const name of expectedNames) {
-			if (
-				await sameTree(
-					join(staging, ".agents/skills", name),
-					join(workspace, ".agents/skills", name),
+					entry.isDirectory() &&
+					!["patches", ".prepare"].includes(entry.name) &&
+					(
+						await discover(
+							join(root, "skillbox", entry.name),
+							".",
+							`skillbox/${entry.name}`,
+						)
+					).length
 				)
-			) {
-				unchanged += 1;
+					ids.add(entry.name);
+			}
+		const next: Lock = { ...candidate, bundles: {}, installed: {} };
+		await mkdir(join(staging, ".agents/skills"), { recursive: true });
+		for (const id of [...ids].sort()) {
+			const directory = join(staging, "exports", id);
+			await mkdir(dirname(directory), { recursive: true });
+			const composed = await bundles.compose(root, config, candidate, id, directory);
+			next.bundles[id] = composed;
+			if (!config.install.includes(id)) continue;
+			for (const member of composed.members) {
+				if (Object.hasOwn(next.installed, member.name))
+					throw responseError(
+						"SKILL_NAME_COLLISION",
+						`Installed skill collision: ${member.name}.`,
+						{ skill: member.name },
+					);
+				const skill = join(directory, member.directory);
+				next.installed[member.name] = {
+					bundle: id,
+					directory: member.directory,
+					hash: await hashTree(skill),
+				};
+				await cp(skill, join(staging, ".agents/skills", member.name), {
+					recursive: true,
+					preserveTimestamps: true,
+				});
 			}
 		}
-		const claudeMatches = await hasClaudeSkillsLink(workspace);
-		const skillsDirectory = await statOptional(join(workspace, ".agents/skills"));
-		if (
-			!lockChanged &&
-			unchanged === expectedNames.length &&
-			claudeMatches &&
-			skillsDirectory?.isDirectory()
-		) {
-			return { status: "unchanged", installed: 0, unchanged, removed: 0 };
+		let unchanged = 0;
+		for (const [name, entry] of Object.entries(next.installed)) {
+			const path = join(root, ".agents/skills", name);
+			if ((await statOptional(path))?.isDirectory() && (await hashTree(path)) === entry.hash)
+				unchanged++;
 		}
-
-		await mkdir(join(staging, ".agents/skills"), { recursive: true });
+		const removed = Object.keys(current?.installed ?? {}).filter(
+			(name) => !Object.hasOwn(next.installed, name),
+		).length;
+		const configText = jsonText(config);
+		const nextText = jsonText(lockSchema.parse(next));
+		const sameConfig =
+			!writeConfig || (await readOptional(join(root, configPath))) === configText;
+		if (
+			current &&
+			jsonText(current) === nextText &&
+			sameConfig &&
+			unchanged === Object.keys(next.installed).length &&
+			(await statOptional(join(root, ".agents/skills")))?.isDirectory() &&
+			(await hasClaudeLink(root))
+		)
+			return { status: "unchanged", installed: 0, unchanged, removed: 0 };
 		await mkdir(join(staging, "skillbox"), { recursive: true });
-		await writeFile(join(staging, configPath), configText);
-		await writeFile(join(staging, lockPath), nextLockText);
-		await mkdir(join(staging, ".claude"), { recursive: true });
+		await writeFile(join(staging, lockPath), nextText);
+		await mkdir(join(staging, ".claude"));
 		await symlink("../.agents/skills", join(staging, ".claude/skills"));
+		const paths = [".agents/skills", ".claude/skills", lockPath];
+		if (writeConfig) {
+			await writeFile(join(staging, configPath), configText);
+			paths.push(configPath);
+		}
 		try {
-			await publish(staging, workspace);
+			await publish(
+				staging,
+				paths.map((path) => ({ staged: join(staging, path), target: join(root, path) })),
+			);
 		} catch (cause) {
-			retainStaging = true;
+			retain = true;
 			throw responseError(
 				"PUBLISH_FAILED",
-				`Could not publish sync: ${cause instanceof Error ? cause.message : String(cause)} Recovery files retained at ${staging}.`,
+				`Publication failed; recovery retained at ${staging}.`,
 				{ input: staging },
 				cause,
 			);
 		}
 		return {
 			status: "synced",
-			installed: expectedNames.length - unchanged,
+			installed: Object.keys(next.installed).length - unchanged,
 			unchanged,
 			removed,
 		};
 	} finally {
-		if (!retainStaging) await rm(staging, { recursive: true, force: true });
+		if (!retain) await rm(staging, { recursive: true, force: true });
 	}
 }
 
-// -----------------------------------------------------------------------------
-
-function sameStrings(left: readonly string[], right: readonly string[]): boolean {
-	return left.length === right.length && left.every((value, index) => value === right[index]);
-}
-
-async function rejectUnmanagedSkills(workspace: string, lockedNames: readonly string[]) {
-	const skillsPath = join(workspace, ".agents/skills");
-	const directory = await statOptional(skillsPath);
-	if (!directory) return;
-	if (!directory.isDirectory()) {
+async function preflight(root: string, lock: Lock): Promise<void> {
+	const skills = join(root, ".agents/skills");
+	const entry = await statOptional(skills);
+	if (entry) {
+		if (!entry.isDirectory())
+			throw responseError(
+				"MANAGED_SKILLS_INVALID",
+				"Managed skills must be a real directory.",
+				{ input: ".agents/skills" },
+			);
+		for (const name of await readdir(skills))
+			if (!Object.hasOwn(lock.installed, name))
+				throw responseError(
+					"UNMANAGED_SKILL",
+					`Unmanaged skill would be replaced: ${name}.`,
+					{ skill: name },
+				);
+	}
+	if ((await statOptional(join(root, ".claude/skills"))) && !(await hasClaudeLink(root)))
 		throw responseError(
-			"MANAGED_SKILLS_INVALID",
-			"Managed .agents/skills must be a real directory. Remove the conflict before syncing.",
-			{ input: ".agents/skills" },
+			"CLAUDE_SKILLS_LINK_INVALID",
+			"Existing .claude/skills does not link to .agents/skills.",
+			{ input: ".claude/skills" },
 		);
-	}
-	const tracked = new Set(lockedNames);
-	const unmanaged = (await readdir(skillsPath)).filter((name) => !tracked.has(name)).sort();
-	if (unmanaged.length > 0) {
-		throw new ResponseError(
-			unmanaged.map((skill) => ({
-				code: "UNMANAGED_SKILL",
-				message: `Unmanaged skill would be replaced: ${skill}. No skills were changed.`,
-				skill,
-			})),
-		);
-	}
 }
-
-async function rejectConflictingClaudeSkills(workspace: string) {
-	const path = join(workspace, ".claude/skills");
-	const entry = await statOptional(path);
-	if (!entry || (entry.isSymbolicLink() && (await hasClaudeSkillsLink(workspace)))) return;
-	throw responseError(
-		"CLAUDE_SKILLS_LINK_INVALID",
-		"Existing .claude/skills does not link to .agents/skills. No skills were changed.",
-		{ input: ".claude/skills" },
-	);
-}
-
-async function hasClaudeSkillsLink(workspace: string): Promise<boolean> {
-	const path = join(workspace, ".claude/skills");
-	const entry = await statOptional(path);
+async function hasClaudeLink(root: string): Promise<boolean> {
+	const path = join(root, ".claude/skills");
 	return (
-		entry?.isSymbolicLink() === true &&
-		resolve(dirname(path), await readlink(path)) === join(workspace, ".agents/skills")
+		(await statOptional(path))?.isSymbolicLink() === true &&
+		resolve(dirname(path), await readlink(path)) === join(root, ".agents/skills")
 	);
-}
-
-async function sameTree(left: string, right: string): Promise<boolean> {
-	const [leftEntry, rightEntry] = await Promise.all([statOptional(left), statOptional(right)]);
-	if (!leftEntry || !rightEntry) return false;
-	if (
-		leftEntry.isDirectory() !== rightEntry.isDirectory() ||
-		leftEntry.isFile() !== rightEntry.isFile() ||
-		leftEntry.isSymbolicLink() !== rightEntry.isSymbolicLink()
-	) {
-		return false;
-	}
-	if (leftEntry.isSymbolicLink()) {
-		const [leftTarget, rightTarget] = await Promise.all([readlink(left), readlink(right)]);
-		return leftTarget === rightTarget;
-	}
-	if (leftEntry.isFile()) {
-		const [leftContents, rightContents] = await Promise.all([readFile(left), readFile(right)]);
-		return leftContents.equals(rightContents);
-	}
-	if (!leftEntry.isDirectory()) return false;
-
-	const [leftNames, rightNames] = await Promise.all([readdir(left), readdir(right)]);
-	leftNames.sort();
-	rightNames.sort();
-	if (!sameStrings(leftNames, rightNames)) return false;
-	return (
-		await Promise.all(leftNames.map((name) => sameTree(join(left, name), join(right, name))))
-	).every(Boolean);
 }

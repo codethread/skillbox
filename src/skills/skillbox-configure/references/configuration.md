@@ -1,62 +1,90 @@
-# Sources, tracking files, and failures
+# Contributions, installation, and tracking
 
-## Source selection
+## Choose a source layout
 
 ```sh
-# Run from the consuming project; ../team-skills is a sibling repository.
-skillbox add ../team-skills development
+# Raw skills: path is a skills directory relative to the source repository.
+skillbox add skills owner/toolkit development --path plugins/team/skills --pick review
 
-# Prefer a repository URL or GitHub shorthand with explicit bundle selections.
-skillbox add owner/repo frontend backend
+# Omit instead of pick; raw contributions cannot use both.
+skillbox add skills owner/other development --path skills --omit legacy
 
-# Reuse that exact source string to extend the same config entry.
-skillbox add owner/repo testing
+# Skillbox: combine upstream bundles into one destination.
+skillbox add skillbox owner/team development --bundle coding --bundle review \
+  --pick '{"coding":["typescript"]}' --omit '{"review":["legacy"]}'
 
-# A tree URL is also supported and selects a single bundle.
-skillbox add https://github.com/owner/repo/tree/main/skillbox/development
+# Compose other local bundles without selecting the destination for installation.
+skillbox add skillbox . shared --bundle development --bundle local --no-install
 
-# Restore a separate existing workspace.
 skillbox --workspace frontend sync
 ```
 
-Use the source repository root for local paths, not its `skillbox/` directory. Bundle names are single directory names containing letters, numbers, hyphens, or underscores, starting with a letter or number.
+The positional id (`development` or `shared`) names the destination bundle. `--bundle` names upstream bundles. Both add commands accept `--ref <ref>` and `--no-install`. By default add includes the destination in `install`; `--no-install` leaves that list unchanged, including any existing selection of that id.
 
-Git sources are grouped by exact source string, not repository identity. Tree URLs ending in `skillbox/frontend` and `skillbox/backend` create separate entries even for the same repository and ref; mixing a repository URL with GitHub shorthand does too. Prefer one repository-level source string plus explicit bundles when grouping is desired. Preserve the intended Git ref: sources at different refs are not interchangeable.
+Use the source repository root for local sources, not its `skillbox/` directory. Configured local paths resolve from the selected workspace root. Local filesystem sources use live worktree content and reject `--ref`; use a Git source such as a `file://` repository URL when immutable Git replay is required. Git refs select the initial resolution or explicit update target; ordinary sync replays the locked commit.
 
-To consolidate existing tree-URL entries, first verify that they select the same repository and ref. With user approval, replace them in the config with one repository-level source selecting that ref and the union of their bundles. Preserve the lockfile, run `skillbox sync`, and require successful hash verification before committing. Do not re-add already-installed skills under a new source string; this can raise `SKILL_NAME_COLLISION`. This is a deliberate config-only regrouping, not a general repair or update procedure.
+Changing `ref` in config changes the future update target, not the existing pin. Repeating `add` with a different explicit ref fails with `UPDATE_REQUIRED`; use the reviewed update workflow to advance it. Repeating a contribution updates its selectors; repeated Skillbox contributions merge upstream bundle names and replace selectors for the bundles named in that invocation.
 
-## Tracking files
-
-A config selecting a local source looks like:
+## Config
 
 ```json
 {
 	"sources": [
 		{
-			"source": "../team-skills",
-			"bundles": ["development"]
+			"type": "skills",
+			"id": "development",
+			"source": "owner/toolkit",
+			"path": "plugins/team/skills",
+			"ref": "main",
+			"pick": ["review"]
+		},
+		{
+			"type": "skillbox",
+			"id": "development",
+			"source": "owner/team",
+			"bundles": ["coding", "review"],
+			"pick": { "coding": ["typescript"] },
+			"omit": { "review": ["legacy"] }
 		}
-	]
+	],
+	"install": ["development", "local"]
 }
 ```
 
-`skillbox/config.json` accepts only `sources`, whose entries contain a nonempty `source` and a nonempty `bundles` array. Local paths resolve from the selected workspace root. Git sources retain their source string. Use `add` for the first installation. Once both tracking files exist, direct source/bundle edits can be applied with `sync`: newly selected skills receive lock entries, and deselected managed skills and their entries are removed. An empty `sources` array removes all managed skills. Config formatting and retained lock entries are preserved; retained skill contents must still match their saved hashes. Sync reports `installed`, `unchanged`, and `removed` skill counts and refuses to overwrite unmanaged skills.
+The config has two fields: `sources` and `install`.
 
-`skillbox/lock.json` uses the upstream SDK's format and records per-skill provenance and hashes. A moving Git ref or content hash is not an immutable revision pin. Ordinary sync resolves the configured sources again; it can fail if upstream moved rather than restoring an archived revision. Do not delete or regenerate the lock merely to silence drift errors without approval for changed contents.
+Each contribution has `type`, destination `id`, repository/path `source`, and optional `ref`:
 
-Skillbox does not read or modify the root `skills-lock.json` used by `npx skills`. Do not substitute that file for the Skillbox lock. There is no separate SDK config file to maintain.
+- `type: "skills"` requires `path`, the source-relative skills directory. Optional `pick` or `omit` is a nonempty list of exact skill names. They are mutually exclusive.
+- `type: "skillbox"` requires `bundles`, a list of upstream bundle ids. Optional `pick` and `omit` map requested upstream bundle ids to nonempty lists of exact skill names. A bundle cannot appear in both maps; picking from one and omitting from another is valid.
 
-## Failure decisions
+Without selectors, a contribution includes every skill in its selected directory or bundles. Selectors use skill names, not paths or patterns. The original skill directory name need not equal its frontmatter name; preserve both. Missing selected or omitted names, selectors for unrequested bundles, and duplicate skill names in a composition fail. Selected skills include their complete supporting files and executable modes; references to other skills do not import dependencies automatically.
 
-| Error | Next action |
-| --- | --- |
-| `WORKSPACE_NOT_FOUND` / `SOURCE_NOT_FOUND` | Correct the supplied path. Create the intended workspace separately if needed. |
-| `BUNDLE_REQUIRED` / `BUNDLE_NOT_FOUND` | Check source layout and explicit bundle names; use `add --help`. |
-| `CONFIG_NOT_FOUND` / `LOCK_NOT_FOUND` | Restore tracked files from version control, or use `add` for a genuinely new installation. |
-| `LOCK_HASH_MISMATCH` | A retained skill's contents changed. Restore the matching source/tracking files; config edits do not authorize updating existing hashes. |
-| `MIGRATION_REQUIRED` | Read `skillbox skills get skillbox-migrate` for a backed-up manual first-install cutover. |
-| `SKILL_NAME_COLLISION` / `UNMANAGED_SKILL` | Preserve existing contents and resolve naming/ownership deliberately before retrying. |
-| `CLAUDE_SKILLS_LINK_INVALID` | Inspect and preserve the existing Claude skills directory or link before resolving the conflict. |
-| `PUBLISH_FAILED` | Inspect the error's retained recovery directory and current workspace before retrying; do not assume nothing changed. |
+Multiple contributions may share an id. Native files at `skillbox/<id>/<skill>/SKILL.md` implicitly contribute to the same bundle, alongside virtual contributions. Local Skillbox sources can reference other native or composed bundles. Do not create composition cycles or a self-reference just to include a native directory—it is already included.
 
-Other SDK, config, and filesystem failures also return structured errors. Use their actual code/message and affected source, skill, or input where provided; avoid blindly repeating a mutation.
+`install` is a distinct list of destination bundle ids. It never controls exports. Every composed id and native bundle is publishable. An empty installation list removes managed installations without removing contributions or exports. Collisions between installed bundles also fail; there is no last-writer-wins order. To publish a broader collection while installing a smaller selection, compose a separate destination with its own selectors and install only that destination.
+
+A repository publishing only native directories needs no config. A composition producer commits its config and root lock even when it installs nothing. Downstream `add skillbox` reads its publishable bundles, not its installation list.
+
+## Root lock and patch ownership
+
+`skillbox/lock.json` owns resolved source pins, flattened bundle-member provenance, and managed installation state. Git sources use immutable revisions; local filesystem sources remain live worktrees. Do not hand-edit or delete pins merely to silence an error. Skillbox does not use or modify the root `skills-lock.json` belonging to `npx skills`.
+
+An unchanged import creates no patch directory and does not copy upstream source into a native bundle. To customize it, prepare the composed bundle, edit, capture, and annotate the per-file intent. Only those changes live under `skillbox/patches/<id>/<skill>/patch.toml` and `changes/`.
+
+A Git-backed consumer pins the producer revision. The producer's locked dependencies and patches determine its exported output. Consumers layer their own patches over that output; do not copy producer intent or patch payloads into consumer-owned files. Updating a producer contribution adopts the producer's reviewed output, not independently newer versions of its dependencies.
+
+Load `skillbox skills get skillbox-patch` for preparation, capture, intent, and staged updates.
+
+## Failures
+
+Read the returned error code, message, and affected input before retrying:
+
+- Missing source, bundle, or skill: verify the source layout and exact names; do not silently drop the selection.
+- Invalid selectors or composition cycles: correct config deliberately; do not widen picks to work around the error.
+- Name collisions or unmanaged installations: preserve existing files and agree on ownership/naming before retrying.
+- Missing tracking files or unavailable pinned revisions: restore the tracked state or access to that revision; do not substitute a moving ref.
+- Missing intent: fill the reported `patch.toml` file reasons, then retry.
+- Update conflicts: retain the candidate, old patch artifacts, and intent; follow the patch update guidance.
+- For a backed-up first-install cutover, use `skillbox-migrate` before changing existing installations.
+- Publication/filesystem failures: inspect current workspace state and any reported recovery directory; do not assume nothing changed.

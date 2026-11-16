@@ -1,27 +1,52 @@
 ---
 name: skillbox-author
-description: Author or extend a Skillbox source bundle with SKILL.md instructions and supporting resources, then verify installation in a consuming project.
+description: Author or compose a publishable Skillbox bundle, keep producer and consumer changes separate, and verify it from a consuming project.
 ---
 
 # Author Skillbox bundles
 
-Extend skills in an owned source repository, not in a client's generated installation. Skillbox currently has no patch or update command for customizing third-party skills while retaining upstream intent.
+Edit owned sources, not generated installations. Propose changes useful to all consumers to the shared producer's maintainer. Keep project-specific changes in the consumer: either author a complementary skill or use `skillbox-patch` to customize an imported skill with intent.
 
-Use `local` as the bundle name for repository-specific maintainer skills (for example, `skillbox/local/release/SKILL.md`), rather than implying they are intended for public reuse. Select that bundle from source `"."` in the repository's own config. This is a naming convention, not access control; files in a public repository remain public.
+## Author native skills
 
-1. Inspect the source repository's existing `skillbox/<bundle>/` layout and conventions. Create each skill at `skillbox/<bundle>/<skill-name>/SKILL.md`; keep its supporting resources inside that skill directory. Use lowercase kebab-case for the skill name and match the directory name to the frontmatter name. Selected bundles/sources must not install duplicate skill names.
-2. Give `SKILL.md` YAML frontmatter with `name` and `description`. The description tells an agent when to load the skill. Write an actionable body with observable completion criteria. Keep branch-specific examples or detailed reference material in supporting files and link to them relative to `SKILL.md`.
-3. For a complete starter with a supporting resource, load:
+1. Inspect existing bundle conventions. Create `skillbox/<id>/<skill-name>/SKILL.md`, with supporting resources inside that skill directory. Prefer lowercase kebab-case matching the frontmatter name for new skills. Preserve original directories and names when importing existing skills.
+2. Give `SKILL.md` YAML `name` and `description`. Explain when to load it, give actionable instructions and observable completion criteria, and link detailed references relative to `SKILL.md`.
+3. For a starter with a supporting resource, load:
 
     ```sh
     skillbox skills file skillbox-author references/example.md
     ```
 
-4. Create a disposable, empty consuming directory outside the source repository. Run `skillbox --workspace <client-dir> add <source-repo-path> <bundle>`. The source path is relative to the invocation directory, not the client directory; using an absolute path avoids ambiguity.
-5. Require `success: true`. Compare the installed `.agents/skills/<skill-name>/SKILL.md` and every supporting file with the source. Check that `.claude/skills` resolves to `.agents/skills`. Inspect both `skillbox/config.json` and `skillbox/lock.json` in the client for the expected selection and skill entries.
-6. Remove only the disposable client's generated `.agents/skills` directory and `.claude/skills` link, leaving its config and lock. Run `skillbox --workspace <client-dir> sync`; require the same installed contents. Run sync again and require an unchanged outcome. Remove the disposable client when finished.
-7. Commit the source skill and resources. Source repositories do not need an npm package. Give consumers the repository source plus bundle names, or a GitHub tree URL ending in `skillbox/<bundle>`.
+A native directory implicitly contributes to its bundle id. It can coexist with imported contributions of the same id, provided skill names do not collide. A native-only producer needs no config or npm package.
 
-When editing an existing source, test the changed content in a fresh disposable client. Repeating `add` in an already-configured client does not refresh it; sync rejects content that differs from saved hashes. Existing consumers need an explicitly agreed change process rather than an invented update command.
+Use `local` for repository-specific maintainer skills, such as `skillbox/local/release/SKILL.md`, and include `local` in `install` if this repository uses them. The name is a convention, not access control: native bundles remain publishable regardless of installation selection.
 
-For consuming-project configuration or add/sync diagnostics, use `skillbox skills get skillbox-configure`.
+## Compose without copying
+
+For unchanged external skills, use `add` to record contributions rather than copying upstream files:
+
+```sh
+skillbox add skills owner/toolkit development --path skills --pick review --no-install
+skillbox add skillbox owner/team development --bundle coding --no-install
+```
+
+Both contribute to `development`, alongside any `skillbox/development/` native skills. Use picks/omits to avoid unwanted members; collisions fail. Commit `skillbox/config.json` and root `skillbox/lock.json`. Unchanged imports need no patch directories. Load `skillbox-configure` for selectors and local composition.
+
+All composed bundles are publishable; `install` only chooses which this project uses. A producer may publish several bundles while installing only its maintainer bundle, or none at all. Consumers select the producer's bundle ids and receive its composed output, including producer patches. Consumer patches and per-file intent stay consumer-owned.
+
+If a collection-wide reason helps maintainers, explain it in existing repository prose. It supplements, rather than replaces, per-file patch intent; do not invent a bundle metadata file or schema.
+
+## Verify as a consumer
+
+1. Create an empty disposable directory outside the source repository. Use an absolute source path to avoid workspace ambiguity:
+
+    ```sh
+    skillbox --workspace <client-dir> add skillbox <absolute-source-repo> example --bundle development
+    ```
+
+2. Require `success: true`. Compare installed skill names, complete supporting files, and executable permissions against the expected composed output. Check `.claude/skills` links to `.agents/skills`, and inspect client config/root lock for the intended destination and provenance.
+3. Remove only the disposable client's generated skills directory and Claude link. Keep config and lock, run sync to restore, then sync again and require unchanged contents.
+4. For a composed producer, verify a bundle absent from the producer's `install` list is still available to the client. For immutable Git behavior, use a committed Git source (a `file://` repository URL works for a local smoke test), not a live filesystem path.
+5. Remove the disposable client when finished. Commit authored sources, composition tracking files, and any intentional patches. Give consumers the repository source plus upstream bundle ids.
+
+Local filesystem sources reflect owned worktree edits. Git-backed consumers retain their pinned revision until an explicit reviewed update; publishing a new producer commit does not silently update them.
