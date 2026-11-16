@@ -146,7 +146,7 @@
 					"path": "skillbox/local/release"
 				}
 			],
-			"sourceHash": "e97dd6d8b19aa63aa2edf56d951766317f9996c9537adef5ecb2909dcad3f6d2"
+			"sourceHash": "d21dc285858ab5963960ef1c91b36a73f305236dbaa4aa08bb32bb9fcd6cbe07"
 		},
 		"pstack": {
 			"members": [
@@ -592,7 +592,7 @@
 		"purge": {
 			"bundle": "development",
 			"directory": "purge",
-			"hash": "037e7003c56b8fa7defee75e7ea0f40777ce1321706e3c2e402a1c135d881244"
+			"hash": "e2a572166f7efdff2af0e0f2f0075e6ce8518904e0fe96026dee2b41eb0f263b"
 		},
 		"robustness": {
 			"bundle": "development",
@@ -607,292 +607,292 @@
 		"release": {
 			"bundle": "local",
 			"directory": "release",
-			"hash": "bd08570da20c0475dcee2f9ef0650be96435a49910c174ece5eb49dfc688ef12"
+			"hash": "eaeefdf30fd73a9dedf4115ce4e1277740c10fc305e039e155111fc10ca7f733"
 		},
 		"architect": {
 			"bundle": "pstack",
 			"directory": "architect",
-			"hash": "3d1af094821c58bb9c1f09f772d340495fd956f6395298c15c5b2d43f320ac9f"
+			"hash": "afc6eba9f1bb267714dceee991a2e0db5ca6331713dc2d46a121caf4d94f5c22"
 		},
 		"arena": {
 			"bundle": "pstack",
 			"directory": "arena",
-			"hash": "4c69a4a2a11b5ea1a3a94c755a59e75e819c037b0628c48b812210f6843c4c62"
+			"hash": "4fc601e83dce994bc85d74185b06ec4d67c9fcd7eed7d29d93d4d2a239bea835"
 		},
 		"automate-me": {
 			"bundle": "pstack",
 			"directory": "automate-me",
-			"hash": "b8a2bd62475912762b268064feb2e45fb2c921115c53f00ff1ef5f04f211049e"
+			"hash": "1e1583463955ab22d64f2fa608620697558cfa77ad5125fe10798386409ee69f"
 		},
 		"benchmark-checklist": {
 			"bundle": "pstack",
 			"directory": "benchmark-checklist",
-			"hash": "65f528ed8a1dff669b2f96c49644183d1edeb6fc75aeb0e426db8d48e9391550"
+			"hash": "c4a7af2c9be5ec2d0f9ea462b19e476affc3cc40392f54d85009a5f66f7410c5"
 		},
 		"blast-radius": {
 			"bundle": "pstack",
 			"directory": "blast-radius",
-			"hash": "8c0b1c5863be9a4b3b5c19b8ae4f25a5a29d2ae85f5b112b421719aa05f78f93"
+			"hash": "d0c0a88ff5e5a0672c9d41c1e075690c72705d52ccc5a9d9693e94f2d6e1aa8c"
 		},
 		"bro": {
 			"bundle": "pstack",
 			"directory": "bro",
-			"hash": "81db0996922915ff0736f3b38e197519dc52d394c5126727f94f2db59f7b39b0"
+			"hash": "2a96110b172cae2045d7749ea6b1fd9996bf857c95d9a9805f309e02e29364be"
 		},
 		"correct": {
 			"bundle": "pstack",
 			"directory": "correct",
-			"hash": "84dd6a2b40c45e1f75475d7abf6ea85474a919b5bb68258e37ce0fc687426521"
+			"hash": "d0ee148014a43494cf6d0ee182cf1e5170b94e01a2298d88f1d82bd4451e1f95"
 		},
 		"create-formal-verification-skill": {
 			"bundle": "pstack",
 			"directory": "create-formal-verification-skill",
-			"hash": "c926a874117863304aff21e0b9148065d68ebc648e75f9097da2a6428747ca16"
+			"hash": "1aff699cff9b47d0d153f7c011526281fd66ed9b8157c7f4a125aec29a5dcb6d"
 		},
 		"create-verification-skill": {
 			"bundle": "pstack",
 			"directory": "create-verification-skill",
-			"hash": "6312335c771f6b0f93961d6011c8effaeadf41a8700fcdec1cd1aa52e976edf3"
+			"hash": "df4409c94452dd43764150a7a87991c6a9e854d1399d64f24b347e6cdfc3eb1a"
 		},
 		"figure-it-out": {
 			"bundle": "pstack",
 			"directory": "figure-it-out",
-			"hash": "63cf30a506c2c52f35ec789fd43725cead189ee94d8a96cee3b1974fda843183"
+			"hash": "5965c0c0f7605d4a5d1f37126b59f173c38b9641eb3118e99551dab312a7a862"
 		},
 		"how": {
 			"bundle": "pstack",
 			"directory": "how",
-			"hash": "d13279ee601ee48166530c2b4f1811e562f8a5a3116504307264c84c0e40e389"
+			"hash": "5ca97be86143a51d3feeb41ccafe527f0b807324c8bc494712374baa98c88f2b"
 		},
 		"in-your-own-words": {
 			"bundle": "pstack",
 			"directory": "in-your-own-words",
-			"hash": "00ea4e9055cea813bd0d7910e2a2fdf712d8e3d695a1fa8b0491c396bdb9076b"
+			"hash": "92ee9f924278b7d47b85878cb7dc785566a8048e17cbfce36930b6ec473bf130"
 		},
 		"interrogate": {
 			"bundle": "pstack",
 			"directory": "interrogate",
-			"hash": "3d19060fb737e9cf1ad20df474c26cc5e11e48e4374953f247398f402dbb8e7c"
+			"hash": "40feba19120e038346486e51509ed438d390e7b1d0d87a113d5f1d7fa44becd9"
 		},
 		"ketchup": {
 			"bundle": "pstack",
 			"directory": "ketchup",
-			"hash": "3313391d9fd64320264fb462be848decb1b00f185eee87877a9828fcc32ccc8e"
+			"hash": "c7fa746ee76079f4f2ddd8de994992d8d4eec0820309643e654e95d86be105c3"
 		},
 		"ketchup-video": {
 			"bundle": "pstack",
 			"directory": "ketchup-video",
-			"hash": "6be7106b20f7ab67dea6d8d4ca1da874d7cb618150e2bb50f6a13c746b39eb89"
+			"hash": "f97646a766a0c3d2b1c5d924ced68c45b102be4d42b066bd98986fdec43e3bb9"
 		},
 		"maintain-formal-verification-skill": {
 			"bundle": "pstack",
 			"directory": "maintain-formal-verification-skill",
-			"hash": "a18537c09e63e224efa45baa375d8a5fc470fa9edfa86cc5a780b023fb721a07"
+			"hash": "98ca72dfde3912cbebe48d2efe1d9b04a0739e370f243b7059dc27a65611f3cb"
 		},
 		"maintain-verification-skill": {
 			"bundle": "pstack",
 			"directory": "maintain-verification-skill",
-			"hash": "e6090c7a7d6478c06b758ee048d2a2b15db151e67785472a15da8c5a3e539996"
+			"hash": "70d7647cd6cac056df8e63604eef49ded1073f3bc8fac6c9368fcb4d107deafe"
 		},
 		"make-bot-ui": {
 			"bundle": "pstack",
 			"directory": "make-bot-ui",
-			"hash": "4f2e6a4aae64c35914bfbde87fe83e72644efe1b80f48afb00a4c37b01fcc218"
+			"hash": "939c560b451c537c9e653a9d2372a6926360aa747c3629039d10f1a0943fee1c"
 		},
 		"no-comments": {
 			"bundle": "pstack",
 			"directory": "no-comments",
-			"hash": "2a6c86abee70b7c2a9b9a8637fe492a820d8a9f8db78d55e11e090996eead9d6"
+			"hash": "f25726ad771c80ca76ad4003ecb10a94bd8bee982bbfdd437201b0cb5d8020eb"
 		},
 		"poteto-help": {
 			"bundle": "pstack",
 			"directory": "poteto-help",
-			"hash": "0ea03c857af9b43f53c36cbba3b964aea8efc55a4b43d26818f3435d55bd524f"
+			"hash": "0f273e8b28fe92086173d3b627a0d423b4f453760364b7407b142eee90c1c40d"
 		},
 		"poteto-mode": {
 			"bundle": "pstack",
 			"directory": "poteto-mode",
-			"hash": "db79cb1247f8c04ba0b38a4048f9a2ae4cbd6996749b83440c2b1a83639da875"
+			"hash": "748eebb097949976aa61a2888135c0a2ca9d4eab2844a965798221a36aea07a0"
 		},
 		"principle-attack-the-premise": {
 			"bundle": "pstack",
 			"directory": "principle-attack-the-premise",
-			"hash": "26e6db9f3a2e8f9a15ea02f26b23da8ac3f2c1ef62259c19ccdccbd0e016dcca"
+			"hash": "33007cf099cd02cbbc752389fc9aa9f404433f6127a4e39236c04fc2e2d14474"
 		},
 		"principle-boundary-discipline": {
 			"bundle": "pstack",
 			"directory": "principle-boundary-discipline",
-			"hash": "ca9a876639c19e19bd505ed1003bdfe796b0b45a98ae6a83fa0d7695a1a343dd"
+			"hash": "d00789916a850bdba15c20cbadeff9f2394b66ab0cdf1de8bbefffae10a2d50d"
 		},
 		"principle-build-the-lever": {
 			"bundle": "pstack",
 			"directory": "principle-build-the-lever",
-			"hash": "aa25aaa616f0438c30bb7cb1173623a474d523714471940aef561cd0d50b291b"
+			"hash": "182c5eea1b19c7675418263a8dab44146299a33310ebe943ff66f8bc4f38e695"
 		},
 		"principle-encode-lessons-in-structure": {
 			"bundle": "pstack",
 			"directory": "principle-encode-lessons-in-structure",
-			"hash": "04fe6ae5f9467c4507e2913b3fa9e1aabb727fe368465ffd33a3905b5d87789a"
+			"hash": "028246bbf39cda77e8076eb1ce82a5006a48e48a3f59735b99f7ad60adbc047a"
 		},
 		"principle-exhaust-the-design-space": {
 			"bundle": "pstack",
 			"directory": "principle-exhaust-the-design-space",
-			"hash": "7666261761c2ad6689830f71e54b1fd358d72f54535073c3c86d0facb505039c"
+			"hash": "acccf9bd80ab64fe535178701d2e2e07082ab3af5180fec3e410e1891193528c"
 		},
 		"principle-experience-first": {
 			"bundle": "pstack",
 			"directory": "principle-experience-first",
-			"hash": "495e959753fa0756da988d5766972e1527253c5a2a1a3375d5449fd66443a73b"
+			"hash": "65f1efe254dd841b6ec863d6c33ba38054b6f483681518ad8e644a18bbcb77a3"
 		},
 		"principle-explain-the-number": {
 			"bundle": "pstack",
 			"directory": "principle-explain-the-number",
-			"hash": "4c49eca2d83ca0da866f5240f69dd2452676215d5006b66b1da78d12be8c123b"
+			"hash": "5740c713605ced2547fb75f8ef5f39102c89534e9d0ebd132bc08b15380e281a"
 		},
 		"principle-fix-root-causes": {
 			"bundle": "pstack",
 			"directory": "principle-fix-root-causes",
-			"hash": "262da1419d533a03e5bb03d0665bc54f9506bde2adfe9da21f0cd017d049b01e"
+			"hash": "358a97f4d53d7b401bb537e887693f4061c4e0d57a1348da6a8df74feb93a95e"
 		},
 		"principle-foundational-thinking": {
 			"bundle": "pstack",
 			"directory": "principle-foundational-thinking",
-			"hash": "aae550cbc29854e124c43c83b97d70c8f64ba935e386368809e809407a26813e"
+			"hash": "ba1faf8f6443d74f586a11b36c4576ba9cc70a48c5a2ca75d5c6309e8f0442ea"
 		},
 		"principle-guard-the-context-window": {
 			"bundle": "pstack",
 			"directory": "principle-guard-the-context-window",
-			"hash": "0006432a4f8b3f1f6c04330a357c27f319457605f3e6b56c14cd9a762540390e"
+			"hash": "5bcdaf07f77acc1cec299b9187a9dd424bce5d07c229c1782abb5d762b1ec7e1"
 		},
 		"principle-laziness-protocol": {
 			"bundle": "pstack",
 			"directory": "principle-laziness-protocol",
-			"hash": "8a7a2a448b7704f907d52aa1fa2bc2184fab9ea1f2af8011fc104b104b2dffcb"
+			"hash": "bdf90d60d0e29f4ae4f09a51ff864a394094fc83237b25f48519fce776cf7242"
 		},
 		"principle-make-operations-idempotent": {
 			"bundle": "pstack",
 			"directory": "principle-make-operations-idempotent",
-			"hash": "88e812e114c1d394f1381f1f5696877059e2c7db075b3720b00ac498dc5eed5f"
+			"hash": "7ff4d7a2eb60253459100c7611042ccc279dda7b717d501dc09d7ff540b59c6f"
 		},
 		"principle-migrate-callers-then-delete-legacy-apis": {
 			"bundle": "pstack",
 			"directory": "principle-migrate-callers-then-delete-legacy-apis",
-			"hash": "1da88cf7159d9ccceb2ca484b55a758da4bf66fee38623914aa7b9a0d13fc616"
+			"hash": "290eb3df8a6d413e9a0594f2a63cdc27599d434658acbaee657ea353db72d182"
 		},
 		"principle-minimize-reader-load": {
 			"bundle": "pstack",
 			"directory": "principle-minimize-reader-load",
-			"hash": "346674ff176d76a85dc8227f63277fa99a6b3a01b98a4a5f56be24738c2ca653"
+			"hash": "41253047c68cf3c5e28aaa8d47b54e424f55cd4190ed2911e345f685d66599e0"
 		},
 		"principle-model-the-domain": {
 			"bundle": "pstack",
 			"directory": "principle-model-the-domain",
-			"hash": "3226346863a4701e646d80aec50e3c20f4b0c0ee91ee6e554f1b7ac02caa8089"
+			"hash": "9a235bafabbdf17b2cf46266826a56373e07e5edf8d32be1c3848c7c1f707a34"
 		},
 		"principle-never-block-on-the-human": {
 			"bundle": "pstack",
 			"directory": "principle-never-block-on-the-human",
-			"hash": "7b31c1c49743909874c04e9fdc25c30ecd79295b138cc3a59f9fe80480e0f574"
+			"hash": "63671a5a97aa1bfe03fc89b0af164791e02769cc6bf5eef071b7189857d51eb0"
 		},
 		"principle-outcome-oriented-execution": {
 			"bundle": "pstack",
 			"directory": "principle-outcome-oriented-execution",
-			"hash": "7607f5ab04a9fdf9ef5f21ae18315a9c3c11de3149b6c01fb19d46c0b1a33136"
+			"hash": "c8c4ee16952136d7b68e5d4b4eb6d0b49ed30e667a20ae8b5a8c09c9a613cb68"
 		},
 		"principle-prove-it-works": {
 			"bundle": "pstack",
 			"directory": "principle-prove-it-works",
-			"hash": "16c01872fe3971931d1dee4b6bde3ca51f9706b8530616f9b0cdfb77dbaeb4c0"
+			"hash": "a00603824160356229a8a6acab1828646d4cee4ebff93d6260fb2724aed39165"
 		},
 		"principle-redesign-from-first-principles": {
 			"bundle": "pstack",
 			"directory": "principle-redesign-from-first-principles",
-			"hash": "8a29467033b12b21022262b656f00384775ce36945ccb488cf3e489dfd27feff"
+			"hash": "4427cfcce05ae86b10f3d9c853ff540517ac7460c6fdca06c7d49e54b527caab"
 		},
 		"principle-separate-before-serializing-shared-state": {
 			"bundle": "pstack",
 			"directory": "principle-separate-before-serializing-shared-state",
-			"hash": "7c2f4335852b7b9435c39143b25c639a4016ccadaf2290ff2d229dab3a88cf82"
+			"hash": "f9003a3d3880822643742c57676a2a06339ffdf52960e67e37f39ea92ff9dc91"
 		},
 		"principle-sequence-verifiable-units": {
 			"bundle": "pstack",
 			"directory": "principle-sequence-verifiable-units",
-			"hash": "0d478b25422abe5bd55f007b5d58317e75ca785c5f2f5f51d757b994e125912c"
+			"hash": "5637cadffc91ef60a8459139be20182477ed151a164ca1d1e80c2ef617b7c8bf"
 		},
 		"principle-subtract-before-you-add": {
 			"bundle": "pstack",
 			"directory": "principle-subtract-before-you-add",
-			"hash": "4f448416b9105d78b86ff979400fc2548fcf1aff7425e158160a11906b25ade8"
+			"hash": "0200f37bf0d3fffe270802b279c989931b78562c41438742d3c99c5651440fae"
 		},
 		"principle-test-behavior-not-implementation": {
 			"bundle": "pstack",
 			"directory": "principle-test-behavior-not-implementation",
-			"hash": "5f659664d00ca1595a297d6582bc36555c43ce3757816bb26738f033844b82af"
+			"hash": "10a718fd59726e6a519faab02ab6c9768b84859caa106fbaaf162fc8dc089dc0"
 		},
 		"principle-type-system-discipline": {
 			"bundle": "pstack",
 			"directory": "principle-type-system-discipline",
-			"hash": "914070bd545c6a5081c8e69a62b0f969fce1b73bc919d9ffa8acb2bcc1793944"
+			"hash": "57e5b1684cc1aec0baa8ff9821bed6d853509e29c56c9be6eb3a62eb7798fb9a"
 		},
 		"recall": {
 			"bundle": "pstack",
 			"directory": "recall",
-			"hash": "a78ae53b7e0a1d76277be2260709f715bba8a8ba30bcf01c4b05ee8969f9f8b0"
+			"hash": "8fe768eb3a8d737fd9cb3b262bf43f775b243615430db0fe954c541eaec7cb43"
 		},
 		"reflect": {
 			"bundle": "pstack",
 			"directory": "reflect",
-			"hash": "c4ee9231e01401f6a09dff900d88e2b2a17f92a57f8455ccfb71bf636717ecb8"
+			"hash": "5f531f7cf2d9963fd1fc5905383f20942b0e77d08e82ca6d470919ed140311a6"
 		},
 		"sharpen": {
 			"bundle": "pstack",
 			"directory": "sharpen",
-			"hash": "9024550ce3cecc04b34c5b9054414f269281a1c62078adb27f8463c2e79bdd3f"
+			"hash": "10e575bae2f2b366a5df0f1df951eaaf29295397656c29acc64af55d92efa2d7"
 		},
 		"show-me-your-work": {
 			"bundle": "pstack",
 			"directory": "show-me-your-work",
-			"hash": "de66e99060aedb771e221e6896b01bf5ee713a308f96087eff470a7dc4b79d0d"
+			"hash": "ff30e893da5dbbed74f46c4214d5b85e61e824499ee6e76dd9d20b5fa388cfcd"
 		},
 		"statechart": {
 			"bundle": "pstack",
 			"directory": "statechart",
-			"hash": "c2856661b6f74e0028ebd3fc2c0291fb69ae4257323f7bcd8c4f8bbde91880ad"
+			"hash": "7c64b9c2f3b10b03aa21f4e7104caa33e0b2b61adf21228bd51160fbe5e59ee0"
 		},
 		"swarm": {
 			"bundle": "pstack",
 			"directory": "swarm",
-			"hash": "bb7db9f0f73102b5aa61034a5e315b2be8b432ad73bfe532855c46c6b46b4fdd"
+			"hash": "3ab10addb186ff2280b8a511f944df16d6fe67090900f72226ecc22e4e9919ae"
 		},
 		"tdd": {
 			"bundle": "pstack",
 			"directory": "tdd",
-			"hash": "00f573aecfc46c785cce01076b126ec679b86d8181c7220c6a72fce8094ea29d"
+			"hash": "d50f3c1a901934e6ec563aaae5d7cf11bc47fc733aaff12bd746127e38d963cb"
 		},
 		"teach": {
 			"bundle": "pstack",
 			"directory": "teach",
-			"hash": "cd343c24cb95c6a7e180e5e7eeecf98e6b5eb77cdd885ec7e0a2312b30970d42"
+			"hash": "57ba410f22e4f1a4a28786b1440d2c2dd501f03e411b01045bd6368425176788"
 		},
 		"technical-writing": {
 			"bundle": "pstack",
 			"directory": "technical-writing",
-			"hash": "82d111c8ac91196e9721874ceade9f9e9739a7727d1f91654c6968daf87a345d"
+			"hash": "29a4d4cd2de269dc4f4158f4cf168e88758474db5e382dae5b88478b6a44e214"
 		},
 		"typescript-best-practices": {
 			"bundle": "pstack",
 			"directory": "typescript-best-practices",
-			"hash": "a8debf8cffc0e163380cead1f55ce290f17c64d9df9824e90f19d727d0fc8be2"
+			"hash": "3868c9d06b7a5a6f17be7ad99d8b33e37a16e334eb79d38fd09db8a578477a59"
 		},
 		"unslop": {
 			"bundle": "pstack",
 			"directory": "unslop",
-			"hash": "b78ea25581276c314610fe7d075a1722f877ab38e663fd5055aa85314605864a"
+			"hash": "a631da307f47ea4dda0152280889d4656f644bff872dede41e54056c80ec6b11"
 		},
 		"why": {
 			"bundle": "pstack",
 			"directory": "why",
-			"hash": "2b2f7096dae31c1b12fcf2b03ebf7231025e4136e5651dd987e8fbfde00cbe74"
+			"hash": "cc378975033d0703532b6fce4cb2bc5604094ff78e495f724651262ae78a005c"
 		}
 	}
 }
