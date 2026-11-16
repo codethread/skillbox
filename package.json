@@ -1,6 +1,6 @@
 {
 	"name": "@codethread/skillbox",
-	"version": "0.2.2",
+	"version": "0.3.0",
 	"description": "Repository-local agent skill bundles with config and lockfile tracking",
 	"homepage": "https://github.com/codethread/skillbox#readme",
 	"bugs": {
@@ -45,7 +45,7 @@
 		"prepack": "bun run build:npm"
 	},
 	"devDependencies": {
-		"@codethread/cli-changelog": "github:codethread/cli-changelog#c457e0a28686ce6349ce0956b1375635d53148d8",
+		"@codethread/cli-changelog": "0.1.1",
 		"@types/bun": "^1.4.4",
 		"commander": "^15.1.0",
 		"husky": "9.1.7",

@@ -226,7 +226,7 @@ async function smokeInstall(directory: string, target: string): Promise<void> {
 	await writeFile(join(client, "skills-lock.json"), unrelatedLock);
 	const invoke = (...args: string[]) => response(["node", cli, ...args], client);
 	z.object({ installed: z.literal(1) }).parse(
-		invoke("add", join(directory, "source"), "testing"),
+		invoke("add", "skillbox", join(directory, "source"), "testing", "--bundle", "testing"),
 	);
 	const config = await readFile(join(client, "skillbox/config.json"), "utf8");
 	const lock = await readFile(join(client, "skillbox/lock.json"), "utf8");
