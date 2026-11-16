@@ -22,6 +22,7 @@ import {
 	localPaths,
 	type WorkspaceContext,
 } from "../workspace/context.ts";
+import { applyInvocationPolicy } from "../workspace/invocation.ts";
 import { readOptional, regularPath, statOptional } from "../workspace/paths.ts";
 import { publish } from "../workspace/publish.ts";
 
@@ -120,16 +121,17 @@ export async function reconcile(
 						`Installed skill collision: ${member.name}.`,
 						{ skill: member.name },
 					);
-				const skill = join(directory, member.directory);
-				next.installed[member.name] = {
-					bundle: id,
-					directory: member.directory,
-					hash: await hashTree(skill),
-				};
-				await cp(skill, join(staging, ".agents/skills", member.name), {
+				const installed = join(staging, ".agents/skills", member.name);
+				await cp(join(directory, member.directory), installed, {
 					recursive: true,
 					preserveTimestamps: true,
 				});
+				await applyInvocationPolicy(installed);
+				next.installed[member.name] = {
+					bundle: id,
+					directory: member.directory,
+					hash: await hashTree(installed),
+				};
 			}
 		}
 		let unchanged = 0;

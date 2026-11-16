@@ -21,6 +21,8 @@ Skills and their supporting files install into `.agents/skills/`; `.claude/skill
 npx skillbox sync
 ```
 
+Skills with `disable-model-invocation: true` in their final, patched `SKILL.md` install with `policy.allow_implicit_invocation: false` in `agents/openai.yaml`. Sync preserves other metadata and leaves authored sources and patch exports unchanged. If the flag is absent or false, it copies authored metadata unchanged and creates no policy file.
+
 Below, use `npx skillbox` in a terminal or `skillbox` in package scripts, such as `"skills:sync": "skillbox sync"`.
 
 ## Compose a bundle

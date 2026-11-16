@@ -14,10 +14,10 @@ import {
 } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
-import { parse } from "yaml";
 import { z } from "zod";
 import { xdgCache } from "xdg-basedir";
 import { ResponseError, responseError } from "../response.ts";
+import { parseFrontmatter } from "../skills/frontmatter.ts";
 import { bundleSchema, contributionIdentity, selectMembers } from "./config.ts";
 import { emptyLock, jsonText, pinSchema, type Lock, type Member, type Pin } from "./lock.ts";
 import { hashTree, regularTree, replayPatches, requireIntents } from "./patches.ts";
@@ -506,26 +506,29 @@ export async function discover(
 		if (text === undefined) continue;
 		bundleSchema.parse(child);
 		await regularTree(join(directory, child));
-		const frontmatter = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(text);
-		const data: unknown = frontmatter ? parse(frontmatter[1]!) : undefined;
+		const attributes: unknown = parseFrontmatter(text).data;
 		if (
-			!data ||
-			typeof data !== "object" ||
-			!("name" in data) ||
-			typeof data.name !== "string" ||
-			!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(data.name)
+			!attributes ||
+			typeof attributes !== "object" ||
+			!("name" in attributes) ||
+			typeof attributes.name !== "string" ||
+			!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(attributes.name)
 		)
 			throw responseError(
 				"INVALID_SKILL_NAME",
 				`Missing or invalid SKILL.md name: ${child}.`,
 				{ input: join(directory, child, "SKILL.md") },
 			);
-		if (members.some((member) => member.name === data.name))
-			throw responseError("SKILL_NAME_COLLISION", `Duplicate skill name: ${data.name}.`, {
-				skill: data.name,
-			});
+		if (members.some((member) => member.name === attributes.name))
+			throw responseError(
+				"SKILL_NAME_COLLISION",
+				`Duplicate skill name: ${attributes.name}.`,
+				{
+					skill: attributes.name,
+				},
+			);
 		members.push({
-			name: data.name,
+			name: attributes.name,
 			directory: child,
 			source,
 			path: `${path === "." ? "" : path + "/"}${child}`,
