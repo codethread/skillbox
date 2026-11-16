@@ -7,7 +7,9 @@ description: Customize composed Skillbox bundles with per-file patches and inten
 
 Use this workflow to change imported instructions without editing generated installations or losing upstream provenance. It works on the destination bundle composed from all its contributions. Use command `--help` for syntax and inspect each JSON result before continuing.
 
-Source registration belongs to `add skills` or `add skillbox`. For source selection, load `skillbox-configure`. An unchanged import has config and a root lock, but no patch directory.
+Source registration belongs to `add skills` or `add skillbox`. For source selection or personal setup, load `skillbox skills get skillbox-configure`. An unchanged import has config and a matching lock, but no patch directory.
+
+Check the active config before preparing or capturing. `skillbox/config.local.json` selects personal config when present; otherwise `skillbox/config.json` is active. Mutators report that path. Personal commands use `lock.local.json`, `patches.local/`, and `.prepare.local/` under `skillbox/`, leaving shared state unchanged.
 
 ## Prepare an edit
 
@@ -15,12 +17,12 @@ Source registration belongs to `add skills` or `add skillbox`. For source select
 skillbox patch prepare <id>
 ```
 
-Record the returned `workspace` and `editable` paths. The default workspace is `skillbox/.prepare/<id>/edit/`; `--output <directory>` chooses another workspace.
+Record the returned `workspace` and `editable` paths. Shared preparation uses `skillbox/.prepare/<id>/edit/`; personal preparation uses `skillbox/.prepare.local/<id>/edit/`. `--output <directory>` chooses another workspace. Capture with the same config active as when you prepared it.
 
 - Edit distributed skill files under `<workspace>/edited/skills/<original-directory>/`.
 - Do not edit `<workspace>/pristine/` or `manifest.json`; these are CLI-managed preparation state.
 - Preparation preserves original skill directory names, which can differ from frontmatter names. Selectors and installed names use frontmatter names; a capture `--skill` filter uses the original directory.
-- Ignore `skillbox/.prepare/`. Capture wanted edits before deleting or recreating a workspace.
+- Ignore both preparation directories. Capture wanted edits before deleting or recreating a workspace.
 - Treat `.agents/skills/` and `.claude/skills` as generated installations.
 
 The pristine baseline is the composed output before this workspace's patches. For a producer contribution, it already includes producer-owned adaptations. Do not copy producer patch payloads or intent into your own patch files.
@@ -33,7 +35,7 @@ Use Git to review, select, revert, and reorganize your repository changes. Skill
 skillbox patch capture <id> --from <workspace>
 ```
 
-Capture records per-file diffs and verifies replay; it does not install skills. Ordinary subsequent captures append ordered changes, including deliberate reverts. Existing file intent is preserved; newly targeted files need a reason in `skillbox/patches/<id>/<skill>/patch.toml`:
+Capture records per-file diffs and verifies replay; it does not install skills. Ordinary subsequent captures append ordered changes, including deliberate reverts. Existing file intent is preserved; newly targeted files need a reason in the reported `patch.toml` files under the active patch directory:
 
 ```toml
 schema = 1
@@ -54,13 +56,13 @@ Use the result's `pendingIntents` and `intentFiles` to find missing annotations.
 
 Intent belongs to the file, independently of its ordered patches. Capture does not infer or rewrite the reason as later edits change that file. Review its continuing accuracy. An optional collection-wide explanation in existing repository prose can give context, but cannot replace file intent or introduce a new metadata schema.
 
-Keep the existing per-skill `patch.toml` and `changes/` format. Root `skillbox/lock.json` owns source pins and flattened provenance.
+Keep the existing per-skill `patch.toml` and `changes/` format. The active config's lock owns source pins and flattened provenance.
 
 ## Sync and commit
 
 After every required intent is nonblank, run `skillbox sync`. Sync replays recorded patches; it does not ask an agent to reinterpret the intent each time. Missing intent blocks sync/export.
 
-Commit config, root lock, authored sources, and your per-skill patch metadata/payloads. Never commit fetched upstream copies, preparation workspaces, or generated installations. Producer changes remain producer-owned; a consumer records only its additional changes against the pinned producer output.
+For shared changes, commit config, lock, authored sources, and per-skill patch metadata and payloads. Keep personal config, lock, and patches private. Never commit fetched upstream copies, preparation workspaces, or generated installations. Producer changes remain producer-owned; a consumer records only its additional changes against the pinned producer output.
 
 ## Review updates
 

@@ -41,13 +41,13 @@ export type Lock = z.infer<typeof lockSchema>;
 export function emptyLock(): Lock {
 	return { version: 2, sources: {}, bundles: {}, installed: {} };
 }
-export async function readLock(root: string): Promise<Lock | undefined> {
-	const text = await readOptional(join(root, lockPath));
+export async function readLock(root: string, path: string): Promise<Lock | undefined> {
+	const text = await readOptional(join(root, path));
 	if (text === undefined) return undefined;
 	try {
 		return lockSchema.parse(JSON.parse(text));
 	} catch (cause) {
-		throw responseError("LOCK_INVALID", `Invalid ${lockPath}.`, { input: lockPath }, cause);
+		throw responseError("LOCK_INVALID", `Invalid ${path}.`, { input: path }, cause);
 	}
 }
 export function jsonText(value: unknown): string {

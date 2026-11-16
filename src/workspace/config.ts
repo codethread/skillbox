@@ -50,7 +50,7 @@ export const contributionSchema = z.discriminatedUnion("type", [
 		.strictObject({
 			type: z.literal("skillbox"),
 			...common,
-			bundles: names,
+			bundles: names.optional(),
 			pick: z.record(bundleSchema, names).optional(),
 			omit: z.record(bundleSchema, names).optional(),
 		})
@@ -59,7 +59,7 @@ export const contributionSchema = z.discriminatedUnion("type", [
 				...Object.keys(value.pick ?? {}),
 				...Object.keys(value.omit ?? {}),
 			])) {
-				if (!value.bundles.includes(key))
+				if (value.bundles && !value.bundles.includes(key))
 					ctx.addIssue({
 						code: "custom",
 						message: `Selector for unrequested bundle: ${key}.`,
@@ -96,16 +96,16 @@ export function contributionIdentity(value: Contribution): string {
 	]);
 }
 
-export async function readConfig(root: string): Promise<Config | undefined> {
-	const text = await readOptional(join(root, configPath));
+export async function readConfig(root: string, path: string): Promise<Config | undefined> {
+	const text = await readOptional(join(root, path));
 	if (text === undefined) return undefined;
 	try {
 		return configSchema.parse(JSON.parse(text));
 	} catch (cause) {
 		throw responseError(
 			"CONFIG_INVALID",
-			`Invalid ${configPath}: ${cause instanceof Error ? cause.message : String(cause)}`,
-			{ input: configPath },
+			`Invalid ${path}: ${cause instanceof Error ? cause.message : String(cause)}`,
+			{ input: path },
 			cause,
 		);
 	}
@@ -117,9 +117,9 @@ export function withContribution(config: Config, incoming: Contribution, install
 	const current = config.sources.find((value) => contributionIdentity(value) === key);
 	let next = { ...incoming, ref: incoming.ref ?? current?.ref };
 	if (incoming.type === "skillbox" && current?.type === "skillbox") {
-		const pick = { ...current.pick };
-		const omit = { ...current.omit };
-		for (const bundle of incoming.bundles) {
+		const pick = incoming.bundles ? { ...current.pick } : { ...incoming.pick };
+		const omit = incoming.bundles ? { ...current.omit } : { ...incoming.omit };
+		for (const bundle of incoming.bundles ?? []) {
 			delete pick[bundle];
 			delete omit[bundle];
 			if (incoming.pick?.[bundle]) pick[bundle] = incoming.pick[bundle];
@@ -128,9 +128,12 @@ export function withContribution(config: Config, incoming: Contribution, install
 		next = {
 			...incoming,
 			ref: incoming.ref ?? current.ref,
-			bundles: [...new Set([...current.bundles, ...incoming.bundles])],
-			...(Object.keys(pick).length ? { pick } : {}),
-			...(Object.keys(omit).length ? { omit } : {}),
+			bundles:
+				current.bundles && incoming.bundles
+					? [...new Set([...current.bundles, ...incoming.bundles])]
+					: undefined,
+			pick: Object.keys(pick).length ? pick : undefined,
+			omit: Object.keys(omit).length ? omit : undefined,
 		};
 	}
 	return {

@@ -9,7 +9,6 @@ import {
 	lstat,
 	writeFile,
 } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -23,7 +22,7 @@ export interface Outcome {
 	};
 }
 export async function fixture() {
-	const root = await realpath(await mkdtemp(join(tmpdir(), "skillbox-compose-")));
+	const root = await realpath(await mkdtemp("/tmp/skillbox-compose-"));
 	const client = join(root, "client");
 	const cache = join(root, "cache");
 	await mkdir(client);
