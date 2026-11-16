@@ -11,7 +11,15 @@
 			"id": "development",
 			"source": "https://github.com/codethread/agents",
 			"path": "skillbox/dev"
+		},
+		{
+			"type": "skills",
+			"id": "deslop",
+			"source": "https://github.com/cursor/plugins",
+			"ref": "main",
+			"path": "cursor-team-kit/skills",
+			"pick": ["deslop"]
 		}
 	],
-	"install": ["development", "local"]
+	"install": ["development", "local", "deslop"]
 }

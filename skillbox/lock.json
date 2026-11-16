@@ -26,9 +26,36 @@
 				"revision": "d690623302b6dc125a20fc33ea98811612bdf9e5",
 				"tree": "adfcc89fb377463c6615123aced8719611f09749"
 			}
+		},
+		"[\"skills\",\"deslop\",\"https://github.com/cursor/plugins\",\"cursor-team-kit/skills\"]": {
+			"contribution": {
+				"type": "skills",
+				"id": "deslop",
+				"source": "https://github.com/cursor/plugins",
+				"ref": "main",
+				"path": "cursor-team-kit/skills",
+				"pick": ["deslop"]
+			},
+			"pin": {
+				"type": "git",
+				"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
+				"tree": "811070ab62bbbb6af848245cb93e1d7da886cea9"
+			}
 		}
 	},
 	"bundles": {
+		"deslop": {
+			"members": [
+				{
+					"name": "deslop",
+					"directory": "deslop",
+					"source": "https://github.com/cursor/plugins",
+					"path": "cursor-team-kit/skills/deslop",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				}
+			],
+			"sourceHash": "e6559693dcf9c2c518ba90487cab30750964a333e7c6ee4f13ecbf0dad5dccbf"
+		},
 		"development": {
 			"members": [
 				{
@@ -109,6 +136,11 @@
 		}
 	},
 	"installed": {
+		"deslop": {
+			"bundle": "deslop",
+			"directory": "deslop",
+			"hash": "4bff01f3e5e68b17ef1177193f6caa5a8c1ad28eec7ab9bb18887ccd3384b539"
+		},
 		"blackbox-testing": {
 			"bundle": "development",
 			"directory": "blackbox-testing",
