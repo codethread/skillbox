@@ -1,58 +1,48 @@
 # Skillbox acceptance criteria
 
-This document records the approved contract, including composable bundles. The historical first-slice notes below are not the current config, lock, or CLI specification. Public CLI coverage verifies [composition and installation](../../tests/composition.test.ts), [patch capture and updates](../../tests/patch.test.ts), [pin, provenance, and conflict regressions](../../tests/regressions.test.ts), and the [packaged Node CLI](../../tests/packaging.test.ts).
-
-Offline agent guidance is available through `skillbox skills list/get/file`; it is distinct from searching installed workspace skills. Recorded release history is available through `skillbox changelog` and [CHANGELOG.md](../../CHANGELOG.md).
+These criteria define Skillbox's intended behavior. Release history belongs in [CHANGELOG.md](../../CHANGELOG.md).
 
 ## User goal
 
 As a user, I want to compose publishable bundles from upstream and locally authored skills, independently choose which bundles my project installs, and reproduce or explicitly update pinned sources with minimal effort. I want to customize upstream skills while retaining both my concrete changes and the intent behind them.
 
-## First shipped slice — 0.1.0
-
-Release: [npm package](https://www.npmjs.com/package/@codethread/skillbox/v/0.1.0) and [MIT-licensed source tag](https://github.com/codethread/skillbox/tree/v0.1.0).
-
-These are historical observations from 0.1.0, not verification of the current composable-bundle model. That release used source/bundle selections and SDK-format hashes, not the current contribution schema and immutable Git pins.
-
-The first slice exercised repository-local add/sync, workspace selection, concise JSON, repeated no-op operations, separate Skillbox lock ownership, preservation of existing skills, and fresh-checkout restoration of matching source contents. Its persisted fixtures and counts described that release only.
-
-Release smoke checks additionally verified tarball installation through npm, `"skills:sync": "skillbox sync"` in a consuming project's scripts, and published `bunx @codethread/skillbox sync` without `package.json`. Those manual checks were recorded in Botlake publish task `225-slab-send`.
-
-### First-slice limits (historical)
-
-- The SDK-format lock guarded contents, not immutable source replay. Moving-source drift failed rather than recovering an older revision.
-- Unchanged sync avoided rewriting installed/tracking files but still fetched and staged sources; offline cache replay was not implemented in that slice.
-- Managed-directory edits could be replaced; broader direct-edit and failure policies were not settled by those checks.
-
 ## Common CLI contract
 
-Operational commands retain workspace selection and default JSON success/error responses. Explicit detail expansion and growing-inventory pagination are not implemented. Partial-result data plumbing exists, but reporting real partial mutations has no public CLI fixture; the failure-policy decisions below remain open.
+### Run in a project
+
+- **Given** my project uses npm, Bun, or pnpm,
+- **When** I install `@codethread/skillbox` as a development dependency,
+- **Then** I can run Skillbox through project scripts without a global installation.
+
+- **Given** my project has no `package.json`,
+- **When** I invoke Skillbox through `npx @codethread/skillbox` or `bunx @codethread/skillbox`,
+- **Then** I can manage repository-local skills without creating an npm project.
 
 ### Select a workspace
 
 - **When** I run an operational command with `--workspace <dir>`,
-- [x] **Then** `<dir>` selects the workspace for installed skills, `skillbox/config.json`, and lockfiles, rather than selecting a config file,
-- [x] **And** relative directories are resolved from the invocation directory; absolute directories are supported,
-- [x] **And** omitting the option selects the current directory.
+- **Then** `<dir>` selects the workspace for installed skills, `skillbox/config.json`, and lockfiles, rather than selecting a config file,
+- **And** relative directories are resolved from the invocation directory; absolute directories are supported,
+- **And** omitting the option selects the current directory.
 
 ### Keep lock ownership separate
 
 - **When** Skillbox manages a workspace installation,
-- [x] **Then** Skillbox stores its lockfile within that workspace's `skillbox/` directory,
-- [x] **And** it does not read or modify the root `skills-lock.json` used by `npx skills`.
+- **Then** Skillbox stores its lockfile within that workspace's `skillbox/` directory,
+- **And** it does not read or modify the root `skills-lock.json` used by `npx skills`.
 
 ### Return explicit JSON outcomes
 
 - **When** an operational command completes, including when it fails,
-- [x] **Then** stdout contains a concise JSON response with an explicit `success: true` or `success: false`,
-- [ ] **And** failures include structured errors identifying the affected source, skill, or input where applicable,
-- [x] **And** failure information is never available solely through prose diagnostics or an exit code.
+- **Then** stdout contains a concise JSON response with an explicit `success: true` or `success: false`,
+- **And** failures include structured errors identifying the affected source, skill, or input where applicable,
+- **And** failure information is never available solely through prose diagnostics or an exit code.
 
 ### Report confirmed mutation effects
 
 - **When** a command changes project state or determines that no changes are needed,
-- [x] **Then** its JSON response reports confirmed effects, including unchanged or no-op outcomes, and identifiers needed for the next action,
-- [x] **And** it does not dump configuration or lockfile contents by default.
+- **Then** its JSON response reports confirmed effects, including unchanged or no-op outcomes, and identifiers needed for the next action,
+- **And** it does not dump configuration or lockfile contents by default.
 
 ### Disclose detail on demand
 
@@ -74,7 +64,24 @@ Operational commands retain workspace selection and default JSON success/error r
 - **Then** it returns `success: false`, preserves available result data, and identifies failed or incomplete items,
 - **And** it does not present partial completion as complete success.
 
-This response contract does not define rollback or transaction boundaries, or authorize continuing mutations after a failure. Those failure-policy decisions remain open.
+Partial-result reporting does not authorize continuing mutations after a failure or imply rollback.
+
+## Agent guidance and release history
+
+### Read offline agent guidance
+
+- **When** I use `skillbox skills list/get/file`,
+- **Then** I can discover bundled configuration, authoring, migration, and patch guidance without network access,
+- **And** listing returns bounded metadata while skill bodies and supporting files are retrieved explicitly,
+- **And** bundled guidance is distinct from searching installed workspace skills.
+
+### Read recorded release history
+
+- **When** I run `skillbox changelog`,
+- **Then** I can read offline release history, select a version, and retrieve changes in bounded pages,
+- **And** breaking changes and adoption steps are explicit,
+- **And** JSON responses, response schemas, and optional text rendering are available,
+- **And** the packaged `CHANGELOG.md` is generated from the same recorded history.
 
 ## Repository-local composition, installation, and provenance
 
@@ -127,6 +134,20 @@ Config defines composition/publication as well as installation.
 - **And** deselecting a bundle removes its managed installation without removing its export,
 - **And** collisions between installed bundles fail rather than overwriting skills.
 
+### Reconcile configuration edits
+
+- **Given** I edit source contributions or the installation list in `skillbox/config.json`,
+- **When** I run sync,
+- **Then** Skillbox installs newly selected skills, removes deselected managed skills, and reconciles its lock with that configuration,
+- **And** retained Git sources keep their pins unless I explicitly update them.
+
+### Preserve unrelated skills
+
+- **Given** my workspace contains skills outside the managed installation,
+- **When** I add or sync bundles,
+- **Then** those skills remain unchanged,
+- **And** a collision with an unmanaged skill fails rather than overwriting it.
+
 ### Publish an external skill by reference
 
 - **Given** an external Git source contains a skill I want to publish,
@@ -153,9 +174,24 @@ Filesystem-path sources are live local worktrees for owned authoring. Remote Git
 - **And** a pinned Skillbox producer contributes its native members, locked dependencies, and producer patches independently of its installation list,
 - **And** consumer patches and intent remain consumer-owned rather than copying producer patch metadata.
 
-## Search installed skills
+## Skill information and migration
 
-These criteria describe intended behavior; search is not implemented.
+### Inspect a skill's provenance and original contents
+
+- **Given** my project records a skill's source and revision,
+- **When** I request information about that skill,
+- **Then** I receive concise provenance identifying its source, location, and revision,
+- **And** I can explicitly retrieve the original skill body and supporting files at that revision.
+
+### Migrate existing authored skills
+
+- **Given** my project contains authored skill directories or symlinks,
+- **When** I migrate them into Skillbox management,
+- **Then** my authored content is preserved as repository-local source,
+- **And** tracked source is distinct from generated agent installations,
+- **And** the migration accounts for Git tracking and ignore setup for those sources and generated outputs.
+
+## Search installed skills
 
 ### Search the current workspace by default
 
@@ -225,6 +261,12 @@ These criteria describe intended behavior; search is not implemented.
 
 ## Sync and updates
 
+### Repeat an add without changes
+
+- **Given** a contribution and its installation selection are already recorded,
+- **When** I repeat the same add without changing its inputs,
+- **Then** Skillbox reports an unchanged outcome without duplicate contributions or unnecessary file writes.
+
 ### Repeat sync without changes
 
 - **Given** my installed skills match their pins and recorded patches,
@@ -284,7 +326,7 @@ These criteria describe intended behavior; search is not implemented.
 
 ## Intent-backed patches
 
-Source registration uses `add`. Prepare/capture/update operate on the composed destination bundle. Per-skill `skillbox/patches/<id>/<skill>/patch.toml` and `changes/` retain their existing file-intent and ordered-payload format. Pins and flattened provenance belong in root `skillbox/lock.json`, not a `bundle.toml` or per-source lock under patches.
+Source registration uses `add`. Prepare/capture/update operate on the composed destination bundle. Per-skill `skillbox/patches/<id>/<skill>/patch.toml` records file intent, and `changes/` stores ordered patch payloads. Pins and flattened provenance belong in root `skillbox/lock.json`.
 
 Producer intent describes producer-owned changes; consumers keep only their additional changes and reasons. Optional collection-wide rationale belongs in ordinary repository prose and does not replace per-file intent or introduce another schema.
 
@@ -330,7 +372,7 @@ Producer intent describes producer-owned changes; consumers keep only their addi
 
 ## Open design decisions
 
-- Remaining command/flag design for info, automated migration, search retrieval, and detailed disclosure. Source-specific add, composed-bundle prepare/capture/update, and optional `--workspace` are specified above.
-- Freshness checks, cache selection, and user-visible reporting when a new add uses cached data without verifying the latest upstream version.
-- Failure boundaries: whether an unsuccessful update leaves the previous pin and installation untouched, and how failures affect other skills in the same operation.
+- Command/flag design for info, automated migration, search retrieval, and detailed disclosure.
+- Freshness checks and cache selection for a new add; cached-but-not-verified reporting follows the criteria above.
+- Transaction and rollback boundaries for mutations, and how failures affect other skills in the same operation. Staged updates do not accept pins or change installations; capture accepts reviewed candidates.
 - How to handle edits made directly to installed files rather than through recorded patches.
