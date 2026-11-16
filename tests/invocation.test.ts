@@ -71,6 +71,93 @@ test("sync converts only boolean true and preserves authored metadata for absent
 	expect(await snapshot(f.source)).toEqual(sourceBefore);
 });
 
+test("sync parses BOM and CRLF frontmatter without treating body examples as invocation metadata", async () => {
+	const f = await setup();
+	const body = "# Instructions\n\n---\nname: example\ndisable-model-invocation: true\n---\n";
+	for (const [name, text] of [
+		["bom", `\ufeff${disabled("bom")}`],
+		["bom-crlf", `\ufeff${disabled("bom-crlf").replaceAll("\n", "\r\n")}`],
+		["body-example", skill("body-example", body)],
+	] as const)
+		await put(f.source, `skills/${name}/SKILL.md`, text);
+	success(await run(f.client, f.cache, "add", "skills", f.source, "team", "--path", "skills"));
+	for (const name of ["bom", "bom-crlf"])
+		expect(
+			await readFile(join(f.client, ".agents/skills", name, "agents/openai.yaml"), "utf8"),
+		).toBe("policy:\n  allow_implicit_invocation: false\n");
+	expect(await readdir(join(f.client, ".agents/skills/body-example"))).toEqual(["SKILL.md"]);
+	expect(await readFile(join(f.client, ".agents/skills/body-example/SKILL.md"), "utf8")).toBe(
+		skill("body-example", body),
+	);
+});
+
+test("add rejects body-only frontmatter lookalikes and invalid skill names without publishing", async () => {
+	for (const text of [
+		"# Instructions\n\n---\nname: example\ndisable-model-invocation: true\n---\n",
+		"# Notes --- example\n\n---\nname: example\ndisable-model-invocation: true\n---\n",
+		skill("Invalid_Name"),
+	]) {
+		const f = await setup();
+		await put(f.source, "skills/example/SKILL.md", text);
+		const before = await snapshot(f.client);
+		failure(
+			await run(f.client, f.cache, "add", "skills", f.source, "team", "--path", "skills"),
+			"INVALID_SKILL_NAME",
+		);
+		expect(await snapshot(f.client)).toEqual(before);
+	}
+});
+
+test("sync rejects malformed and duplicate-key YAML frontmatter without publishing", async () => {
+	const f = await setup();
+	await put(f.source, "skills/alpha/SKILL.md", disabled("alpha"));
+	success(await run(f.client, f.cache, "add", "skills", f.source, "team", "--path", "skills"));
+	const before = await snapshot(f.client);
+	for (const metadata of [
+		"description: [unterminated",
+		"disable-model-invocation: true\ndisable-model-invocation: false",
+	]) {
+		await put(
+			f.source,
+			"skills/alpha/SKILL.md",
+			`---\nname: alpha\n${metadata}\n---\nchanged body\n`,
+		);
+		const result = await run(f.client, f.cache, "sync");
+		expect(result.exitCode).not.toBe(0);
+		expect(result.response.success).toBe(false);
+		expect(result.response.errors.length).toBeGreaterThan(0);
+		expect(await snapshot(f.client)).toEqual(before);
+	}
+});
+
+test("add never evaluates JavaScript frontmatter engines", async () => {
+	const f = await setup();
+	const marker = join(f.client, "executed");
+	const before = await snapshot(f.client);
+	for (const language of ["js", "javascript", "JavaScript"]) {
+		await put(
+			f.source,
+			"skills/alpha/SKILL.md",
+			`---${language}\n(() => { require("node:fs").writeFileSync(${JSON.stringify(marker)}, "executed"); return { name: "alpha" }; })()\n---\nbody\n`,
+		);
+		const result = await run(
+			f.client,
+			f.cache,
+			"add",
+			"skills",
+			f.source,
+			"team",
+			"--path",
+			"skills",
+		);
+		expect(result.exitCode).not.toBe(0);
+		expect(result.response.success).toBe(false);
+		expect(result.response.errors.length).toBeGreaterThan(0);
+		expect(await snapshot(f.client)).toEqual(before);
+		await expect(lstat(marker)).rejects.toMatchObject({ code: "ENOENT" });
+	}
+});
+
 test("sync overrides permissive policy, preserves other metadata, and keeps existing false bytes", async () => {
 	const f = await setup();
 	const authored = {

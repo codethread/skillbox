@@ -3,6 +3,7 @@ import { basename, dirname, join } from "node:path";
 import { parseDocument, stringify } from "yaml";
 import { z } from "zod";
 import { responseError } from "../response.ts";
+import { parseFrontmatter } from "../skills/frontmatter.ts";
 import { readOptional } from "./paths.ts";
 
 const metadataSchema = z.looseObject({
@@ -11,9 +12,8 @@ const metadataSchema = z.looseObject({
 
 export async function applyInvocationPolicy(directory: string): Promise<void> {
 	const text = await readFile(join(directory, "SKILL.md"), "utf8");
-	const frontmatter = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(text);
-	if (!frontmatter || parseDocument(frontmatter[1]!).get("disable-model-invocation") !== true)
-		return;
+	const { data: attributes } = parseFrontmatter(text);
+	if (attributes["disable-model-invocation"] !== true) return;
 
 	const path = join(directory, "agents/openai.yaml");
 	const authored = await readOptional(path);

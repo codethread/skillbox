@@ -1,6 +1,6 @@
-import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 import { responseError } from "../response.ts";
+import { parseFrontmatter } from "./frontmatter.ts";
 import configure from "./skillbox-configure/SKILL.md" with { type: "text" };
 import configuration from "./skillbox-configure/references/configuration.md" with { type: "text" };
 import author from "./skillbox-author/SKILL.md" with { type: "text" };
@@ -107,11 +107,11 @@ function findBundledSkill(name: string): BundledSkill {
 }
 
 function parseBundledSkill(raw: string, files: ReadonlyMap<string, string>): BundledSkill {
-	const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/.exec(raw);
-	if (!match) throw new Error("Bundled skill is missing YAML frontmatter.");
+	const { data: attributes, content: body, matter: frontmatter } = parseFrontmatter(raw);
+	if (!frontmatter) throw new Error("Bundled skill is missing YAML frontmatter.");
 	return {
-		...metadataSchema.parse(parseYaml(match[1]!)),
-		body: match[2]!.trimStart(),
+		...metadataSchema.parse(attributes),
+		body: body.trimStart(),
 		files,
 	};
 }
