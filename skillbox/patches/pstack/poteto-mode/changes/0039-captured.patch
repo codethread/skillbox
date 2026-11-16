@@ -1,0 +1,13 @@
+diff --git a/scripts/bun.lock b/scripts/bun.lock
+index 65f0c662f300a0f72b319ca93ea18f56219c2581..5d464f53ffb9c6e3e8e81bc447ad5c7295b42f9e 100644
+--- a/scripts/bun.lock
++++ b/scripts/bun.lock
+@@ -3,7 +3,7 @@
+   "configVersion": 1,
+   "workspaces": {
+     "": {
+-      "name": "@cursor-skill/poteto-mode-tools",
++      "name": "@pstack/poteto-mode-tools",
+       "dependencies": {
+         "commander": "14.0.0",
+       },

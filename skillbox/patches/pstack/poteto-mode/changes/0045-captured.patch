@@ -1,0 +1,13 @@
+diff --git a/SKILL.md b/SKILL.md
+index 891e5f6b6a3393a47df95478f93946cd72b15a24..f8f6471d4501c32ce0162c88ce84601501db80b8 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -26,7 +26,7 @@ Remaining triggers:
+ - Nontrivial multi-step → write the throughput checkpoint (Feature step 3).
+ - Any prose surface, your reply to the user included → the **unslop** skill. Write the reply per **Writing the reply**. Agent-facing prose also follows the project's available skill-authoring guidance.
+ - Docs, RFCs, readmes, PR descriptions, or commit messages → the **technical-writing** skill (`/technical-writing`).
+-- Before commit → strip narration and dead weight from the diff per **Comments** and the **unslop** skill.
++- Before commit → the [`deslop`](../deslop/SKILL.md) skill from the deslop companion bundle for code cleanup.
+ - Before review → the **no-comments** skill (`/no-comments`).
+ - Shipping UI / IDE / CLI → the matching project verification skill or named driver. When none exists, use **create-verification-skill**. For bug fixes, reproduce first on the same surface yourself. Hand to the user only under the narrow Bug fix step 1 exception.
+ - Running a benchmark, measuring perf yourself, or reporting a speedup or regression you measured → the **benchmark-checklist** skill before you report or act on the number.

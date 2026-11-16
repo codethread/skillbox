@@ -1,0 +1,15 @@
+schema = 1
+
+[files."./references/render.md"]
+intent = "Document deterministic statechart rendering with Pele, including output placement, limits, error handling, and viewer-responsive SVG colors. Keep the color guidance native and avoid historical commentary that does not affect rendering."
+
+[files."./scripts/package.json"]
+intent = "Name the private renderer package `@pstack/statechart` so the helper uses the bundle's native package identity. Preserve its private status, module type, scripts, and dependencies."
+
+[[patches]]
+target = "./references/render.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./scripts/package.json"
+patch = "changes/0002-captured.patch"

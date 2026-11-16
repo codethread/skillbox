@@ -1,0 +1,61 @@
+diff --git a/SKILL.md b/SKILL.md
+index bf66c89089cc98f1df32008011fc7ba93a2c4c53..6dba24308c271d26050a9c3ac26736e963dffa0d 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -8,7 +8,7 @@ disable-model-invocation: true
+ 
+ A guided flow for turning the user's working conventions into a skill agents will follow. The output is one `-mode` skill tailored to them (e.g. `jay-mode`, `priya-mode`).
+ 
+-This skill sequences an inline mining pass (see step 1), the project's skill-authoring guidance, and the **unslop** skill (prose discipline). For Skillbox-managed skills, retrieve authoring guidance with `skillbox skills get skillbox-author`.
++Follow the consuming project's skill-authoring guidance and the **unslop** skill (prose discipline) when drafting or revising the mode skill. In a Skillbox-managed project, retrieve the applicable guidance with `skillbox skills get skillbox-author` for an owned skill or `skillbox skills get skillbox-patch` for a consumer-owned patch.
+ 
+ ## Flow
+ 
+@@ -26,12 +26,12 @@ Update mode changes the rest of the flow:
+ 
+ ### 1. Mine their history
+ 
+-Locate the active workspace's conversation history through the harness and its task and agent records before fanning out. Use only that workspace's records. Do not read private chats from unrelated projects.
++Use the active harness for conversation history and Botlake for task, agent, and activity records. Stay within the active workspace. Do not read private chats from unrelated projects.
+ 
+-Survey recent agent conversations within that scope for recurring patterns. Run multiple parallel agents across slices of history (e.g. last 2-4 weeks, split into 3 slices so each has enough material). Each mining agent reads the workspace-scoped records the parent provides, looks for the signals below, and returns a short structured list of patterns it saw with evidence pointers. Default signals worth hunting:
++Survey recent agent conversations within that scope for recurring patterns. Create a Botlake task under the current context group for each independently delegated mining lane, then choose agents from Botlake's agent catalog and dispatch parallel runs across slices of history (for example, split the last 2 to 4 weeks into three slices). Use a Botlake shared context group when the agents need the same durable context. Give each agent only workspace-scoped records. Ask each to return a short, structured list of patterns with evidence pointers. Default signals worth hunting:
+ 
+ - Response preferences (length, tone, format, "dumb it down" corrections)
+-- Delegation habits (subagents, models, specialized workflows, parallelism)
++- Delegated-agent habits (models, specialized workflows, parallelism)
+ - Verification posture (what "done" means, unit tests vs live repro, reviewers)
+ - Code and prose discipline (style, principles cited, lint/format tools)
+ - Process conventions (worktrees, commits, PRs, review/merge tooling)
+@@ -52,9 +52,9 @@ Don't dump 20 questions.
+ Group the combined signals into sections. Common ones (use only what applies):
+ 
+ - **Response style**: length, tone, format.
+-- **Autonomy**: how much to do without asking, MCP tool use.
++- **Autonomy**: how much to do without asking, and which tools or integrations the user prefers.
+ - **Understand first**: which skills to reach for when scoping or investigating a change.
+-- **Subagents**: default, parallelism, model-to-task, specialized workflows.
++- **Delegated agents**: defaults, parallelism, model choices, specialized workflows.
+ - **Prose / code discipline**: principles, lint tools, style guides.
+ - **Review and verify**: repro posture, verification skills, live-testing tools.
+ - **Process**: git worktrees, commits, PRs, review/merge tooling.
+@@ -64,9 +64,7 @@ The **poteto-mode** skill shows the shape. Read it for granularity. Don't copy i
+ 
+ ### 4. Draft the skill
+ 
+-Use the project's skill-authoring guidance to author the skill. Placement:
+-
+-- Path: preserve an existing mode skill's source location and category. For a new mode, use `<handle>-mode/SKILL.md` in the project's skill source directory, or the personal skill source if the user prefers. Keep an established personal category for that handle. Edit the source, not a generated installation. Personal preferences belong to the user's project or personal source, not the shared PSTACK adaptation. If the existing mode comes from an imported adapted bundle, use `skillbox skills get skillbox-patch` for a consumer-owned patch. Native imports have no such pack; edit an owned source or route the change to its owner.
++Follow the consuming project's skill-authoring guidance. Preserve an existing mode skill's source location and category. For a new mode, use `<handle>-mode/SKILL.md` in a project or personal skill source. Keep an established personal category for that handle. Edit the owned source, not an installed copy. Keep personal preferences in the user's own skill or an optional local overlay, not in the shared bundle. For a Skillbox imported adapted bundle, use `skillbox skills get skillbox-patch` and make a consumer-owned patch. For another imported bundle, use its supported patch mechanism or route the change to the bundle maintainer. For a native skill, edit a source you own or ask its owner.
+ - Handle: the user's first name or chosen identifier.
+ - Frontmatter `description`: trigger on their name + `/<handle>-mode` + "work in their style", not on generic keywords like "write code" or "review PR".
+ - Frontmatter formatting: follow the skill-authoring guidance's YAML rules. Keep `description` as one YAML scalar. Quote it or use `description: >-` with indented continuation lines when punctuation or wrapping requires it.
+@@ -80,7 +78,7 @@ Show the draft to the user and take feedback. Expect multiple iterations. Cut ru
+ 
+ ### 6. Land it
+ 
+-Work in a worktree off main. Commit and open a PR. Don't push to main directly.
++Use the project's worktree and forge workflows. Commit the change and open a PR. Do not push directly to the main branch.
+ 
+ ## Guardrails
+ 

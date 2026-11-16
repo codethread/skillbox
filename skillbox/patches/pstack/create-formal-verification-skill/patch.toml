@@ -1,0 +1,12 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Author formal-verification guidance in the consuming project's owned skill source. Derive properties from code, state proof bounds honestly, demonstrate failures, and verify the resulting skill before handoff without editing generated installs or the shared bundle."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

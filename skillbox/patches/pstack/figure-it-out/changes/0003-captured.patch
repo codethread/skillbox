@@ -1,0 +1,13 @@
+diff --git a/SKILL.md b/SKILL.md
+index da1d86f1aa126e29e117d54fbf9026267e2946a1..b7d89aac8b0af0f8d2ebf635f2f9db925a05c228 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -28,7 +28,7 @@ Decompose into atomic, independently-landable units. Sequence riskiest-unknown-f
+ 
+ - Build the verification harness before the work, with the baseline captured from the pre-change state, so the check reads as "old value vs new value".
+ - For one-way-door design decisions, run the **architect** skill (it runs **arena**). Skip it for mechanical work whose shape is already concrete. A second arena over a settled design is over-engineering (the **laziness-protocol** principle skill).
+-- Decide what fans out. Create a Botlake task under the current context group for each independently delegated lane. Choose workers from Botlake's agent catalog and dispatch their runs through Botlake. Use a Botlake shared context group when multiple workers need the same durable context. Parallelize only across seams, and give each worker its own worktree or branch (the **separate-before-serializing-shared-state** principle skill). Don't over-fan.
++- Decide what fans out. Use Botlake to run the workers and track each independent lane as a task under the current context group. Record each lane's findings and integration status. Parallelize only across seams, and give each worker its own worktree or branch (the **separate-before-serializing-shared-state** principle skill). Don't over-fan.
+ - Write the designed phase list down. That list is what the human reviews.
+ 
+ Then execute the design. Add its steps as concrete checklist items between Phase C and Phase D. Run each under the Phase C loop discipline, and add a row to the Phase D log as each step lands rather than saving the whole trail for the end.

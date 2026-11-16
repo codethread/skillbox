@@ -1,0 +1,13 @@
+diff --git a/references/sources/sentry.md b/references/sources/sentry.md
+index 8200fd9f3abbb7fca76d0079663502b33524bd09..c2c5535045d99b992d8a39b193351135fdab9cd5 100644
+--- a/references/sources/sentry.md
++++ b/references/sources/sentry.md
+@@ -2,7 +2,7 @@
+ 
+ ## How to search it
+ 
+-Use the Sentry MCP.
++If Sentry access is available, use its issue-search and event-retrieval operations. The operation names below are examples. Check the available instructions for exact names and fields.
+ 
+ 1. **Orient.** If you don't know the project slug and organization:
+ 

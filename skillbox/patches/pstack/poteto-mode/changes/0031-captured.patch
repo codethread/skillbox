@@ -1,0 +1,13 @@
+diff --git a/playbooks/eval.md b/playbooks/eval.md
+index 65abf2691a8100ae612f9471536b77b5357c553d..05d9354e7d024c55c67c64788552c67af1e1f10d 100644
+--- a/playbooks/eval.md
++++ b/playbooks/eval.md
+@@ -19,7 +19,7 @@
+ 3. **Author one organic prompt.** What a user would type. No leakage of what's being measured.
+ 4. **Spawn N parallel candidates** on different models per the **arena** skill's Phase B. Each works in its own sanitized dir. Same prompt to each. Match each subagent to the job per the Subagents section.
+ 5. **Spawn one blinded judge** on a different model family per the **arena** skill's Phase C. Judge sees outputs by sanitized label and the rubric, never a model name.
+-6. **Verify the chain from transcripts, not self-report.** Read each candidate's activity record or harness-provided transcript. Stay within this experiment's records; do not read private chats from unrelated projects. Look at which files each candidate actually opened. Grade chain-following from the files it really read plus the shape of the code, never from the candidate's own claims.
++6. **Verify the chain from transcripts, not self-report.** Read each candidate's full harness-provided transcript, including tool calls and results. Botlake agent activity can locate the run and show recent progress, but does not replace its transcript. Stay within this experiment's records. Do not read private chats from unrelated projects. Check which files each candidate actually opened and grade chain-following from those reads plus the code's shape, never from the candidate's claims. If the transcript is unavailable or incomplete, report the affected criteria as unverified.
+ 7. **Read every candidate output yourself** end to end. Compare to the judge's verdict. Disagreement means a model is biased or the rubric is ambiguous. Synthesize.
+ 
+ **Reply:** variant under test, rubric, per-candidate notes, judge's verdict, your synthesis, and a recommendation for whether to promote the variant.

@@ -1,0 +1,16 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Dispatch validated UI actions through a Botlake task and an explicit agent run, with server-side credentials and real action proof. Remove copied priming instructions because Botlake injects its current operating guidance. Preserve the task/run distinction, restricted actions, client checks and optional tailnet access without building a second agent runtime or manual."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0003-captured.patch"

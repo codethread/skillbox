@@ -1,0 +1,31 @@
+diff --git a/SKILL.md b/SKILL.md
+index 122f43045f7f8d076e9768dc63bec564023742c0..ae2928544e814a00f766b647bd8f27df9a265ce4 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -8,6 +8,8 @@ disable-model-invocation: true
+ 
+ Investigate the motivation and intent behind code. The companion `how` skill answers what the code does and how it works. `why` answers what forces led to its shape.
+ 
++Use Botlake to run the investigators and the synthesizer. Track each independent lane as a task under the current context group, with its findings and integration status.
++
+ Investigators and the synthesizer may use available evidence tools, but must not edit files or modify external state. Include that constraint in their briefs.
+ 
+ ## Operating Posture
+@@ -44,7 +46,7 @@ Map each available evidence tool to one evidence category:
+ 
+ When the target is in a Git checkout, source control is available through `git`; use `gh` only when the forge is GitHub and the command is installed and authenticated. For the other six, classify using the tool or server name, its instructions, and its operations. If a tool could fit more than one category, choose the one matching its primary evidence. Record ambiguous cases in the coverage map.
+ 
+-Create a Botlake task under the current context group for each independently delegated investigator lane. Choose one investigator from Botlake's agent catalog for each available evidence category, then dispatch the runs through Botlake in parallel. Record each lane's findings and integration status on its task. Use a Botlake shared context group when investigators need the same code anchor and question. Each investigator owns one source and its tools, such as Git and forge access for source control. Do not ask one investigator to cover multiple categories.
++Launch one investigator per available evidence category in parallel. Each investigator owns one source and its tools, such as Git and forge access for source control. Do not ask one investigator to cover multiple categories.
+ 
+ Each investigator's prompt is `references/investigator-prompt.md` filled in, plus:
+ - the category playbook `references/sources/<source>.md` for the selected tool, adapted from the examples in `references/source-playbook.md`
+@@ -74,7 +76,7 @@ If your scope assessment suggests a single-commit trivial target where the PR de
+ 
+ ## Step 4. Synthesize
+ 
+-Create a Botlake task for the synthesizer lane, then dispatch its run through Botlake. It gets:
++After the investigators report, delegate a separate synthesizer. It gets:
+ 1. The investigator findings, including any null results and any categories skipped with justification
+ 2. The code anchor
+ 3. The user's original question

@@ -1,0 +1,13 @@
+diff --git a/playbooks/authoring-a-skill.md b/playbooks/authoring-a-skill.md
+index 11427d4de1115ba01218410c8969d3094ca70ccc..7e6d8933c5ef3a12944dc2f72a005e34405a2136 100644
+--- a/playbooks/authoring-a-skill.md
++++ b/playbooks/authoring-a-skill.md
+@@ -2,7 +2,7 @@
+ 
+ **You own the skill's voice.**
+ 
+-1. Use the project's available skill-authoring guidance. For Skillbox authoring, retrieve `skillbox-author` with `skillbox skills get skillbox-author`.
++1. Locate the editable source and its owner. Use the project's available skill-authoring guidance. For an owned Skillbox skill, load `skillbox skills get skillbox-author`; for a consumer-owned patch of an imported skill, load `skillbox skills get skillbox-patch`. A separate local skill can hold project preferences when changing the imported workflow is unnecessary. Propose changes meant for all consumers to the shared bundle's maintainer. Edit source, not generated installations.
+ 2. Validate the skill: frontmatter has `name` and `description`, referenced files exist, cross-skill links resolve.
+ 3. Test cases if structural. Skip if subjective.
+ 4. Run **Opening a PR**.

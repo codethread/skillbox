@@ -1,0 +1,13 @@
+diff --git a/references/upstream/guide/06-verify-and-ship.md b/references/upstream/guide/06-verify-and-ship.md
+index bef711f6ced2da626a6c3b47f9358a9598eae5a9..a4f0b0b7948c2276bbb65b309e1ebed8dd95fba5 100644
+--- a/references/upstream/guide/06-verify-and-ship.md
++++ b/references/upstream/guide/06-verify-and-ship.md
+@@ -91,7 +91,7 @@ Apps change, and feature maps go out of date. Run this at least once a day, idea
+ /maintain-verification-skill
+ ```
+ 
+-[`/maintain-verification-skill`](../../../../maintain-verification-skill/SKILL.md) audits the generated skill: one read-only source reader per feature in parallel, then one live pass that drives every mapped feature. It ends in exactly one of three outcomes. `clean` means full coverage and nothing to ship. `changed` means one PR of proven corrections, confined to the verification skill's own directory. `blocked` names the blocker. It never edits product code. If the live pass catches a product regression, it reports the regression instead of hiding it with a doc edit.
++[`/maintain-verification-skill`](../../../../maintain-verification-skill/SKILL.md) audits the generated skill: one read-only source reader per feature in parallel, then one live pass that drives every mapped feature. It ends in exactly one of three outcomes. `clean` means full coverage and nothing to ship. `changed` means one PR of proven corrections, confined to the verification skill's own directory and the patch and tracking artifacts needed to record and install those changes. `blocked` names the blocker. It never edits product code. If the live pass catches a product regression, it reports the regression instead of hiding it with a doc edit.
+ 
+ ## Prove a property with a formal verification skill
+ 

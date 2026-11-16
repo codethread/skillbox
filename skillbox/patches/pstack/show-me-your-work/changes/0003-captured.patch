@@ -1,0 +1,13 @@
+diff --git a/SKILL.md b/SKILL.md
+index 565daf49e5f8add098ba73963cac28dc6a23ee35..51f98fbaa54ffb98e4aa8434728b6326b1798020 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -64,7 +64,7 @@ Correct the log, not the story. The audit never edits or removes a row, even an
+ 
+ ## Cross-model review of the trail
+ 
+-Before handing back, create a Botlake task under the current context group for the independent review lane. Choose an independent reviewer from Botlake's agent catalog on a different model family from the one that did the work. Delegate the review through Botlake. Self-review is not a substitute. The reviewer reads the audit trail and the run's transcript, then flags what the user should pay attention to. This is a risk review, not a redo of the work. If a different-family reviewer is unavailable, report the review as blocked rather than claiming cross-model review.
++Before handing back, use Botlake to run an independent review and track it as a task under the current context group. Record its findings and integration status. The reviewer must use a different model family from the one that did the work. Self-review is not a substitute. The reviewer reads the audit trail and the run's transcript, then flags what the user should pay attention to. This is a risk review, not a redo of the work. If a different-family reviewer is unavailable, report the review as blocked rather than claiming cross-model review.
+ 
+ - Decisions logged with weak or absent evidence.
+ - Verification steps skipped or claimed without proof in the transcript.

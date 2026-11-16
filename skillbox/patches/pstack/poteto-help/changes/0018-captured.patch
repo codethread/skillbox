@@ -1,0 +1,13 @@
+diff --git a/references/upstream/guide/09-make-it-yours.md b/references/upstream/guide/09-make-it-yours.md
+index f9a8774b5fd1476f274c4010d7e7842ad99ecede..c4a14331ca6545a9ecd7ddbbe920f18da07b19f5 100644
+--- a/references/upstream/guide/09-make-it-yours.md
++++ b/references/upstream/guide/09-make-it-yours.md
+@@ -4,6 +4,8 @@ poteto-mode is one person's style. The playbooks, routing, and model roles under
+ 
+ Start smaller than you think. You don't need many skills on day one, or even this whole plugin. Prompt plainly, watch where agents fail, and add a skill or a check when the same failure shows up twice.
+ 
++Keep your preferences in your own project or personal skill source. A separate local skill can complement PSTACK; it isn't required. To change an imported Skillbox skill itself, use a consumer-owned patch through `skillbox skills get skillbox-patch`. Changes intended for every consumer belong with the shared bundle's maintainer. None of these paths requires editing a generated installation.
++
+ ## Generate your own mode with `/automate-me`
+ 
+ ```text

@@ -1,0 +1,22 @@
+diff --git a/scripts/check-plan.mjs b/scripts/check-plan.mjs
+index c3ddc398997d29d3c97a414e5c2b37172b901254..eeca958f9ace950382cb489c7acfdf436f42e89a 100755
+--- a/scripts/check-plan.mjs
++++ b/scripts/check-plan.mjs
+@@ -17,7 +17,7 @@ const SUB_BLOCKS = [
+ 	"Merge.",
+ ];
+ const PROGRAM_H3 = ["Arm the program", "Spawn owners", "PR mechanics", "Verdict and merge", "Boot recipe"];
+-const PROGRAM_MARKERS = ["git show origin/main:", "/loop 1h", "status message"];
++const PROGRAM_MARKERS = [".agents/skills/", "audit observation cycle", "status message"];
+ const HOW_TO_READ_MARKERS = [
+ 	"One box is one unit of work",
+ 	"names the evidence",
+@@ -155,7 +155,7 @@ for (const pr of prSections) {
+ 
+ 	const live = block("Verify, live.");
+ 	if (live) {
+-		if (!LANES.test(live.rest)) fail(live.n, `${pr.title}: Verify, live lacks "Ten lanes on \`<swarm workers model>\` at the PR head" with the model filled in`);
++		if (!LANES.test(live.rest)) fail(live.n, `${pr.title}: Verify, live lacks "Ten lanes on \`<verification agent>\` at the PR head" with the agent filled in`);
+ 		const lanes = boxes(live.lines).map((b) => ({ ...b, m: b.text.match(/^Lane (\d+)\. /) }));
+ 		const numbers = lanes.filter((b) => b.m).map((b) => Number(b.m[1])).sort((a, b) => a - b);
+ 		if (numbers.join(",") !== "1,2,3,4,5,6,7,8,9,10") fail(live.n, `${pr.title}: lanes are [${numbers.join(",")}], expected 1 to 10`);

@@ -1,0 +1,13 @@
+diff --git a/references/prompting.md b/references/prompting.md
+index 6b72b2e6081fdb78a3261bd77cf7334596d1ee20..2cf8f9fbfc10ec9f3032390eda56beea5eeee8f7 100644
+--- a/references/prompting.md
++++ b/references/prompting.md
+@@ -38,7 +38,7 @@ A prompt states the intent and the check for done. The playbook supplies the ste
+ ## Before stepping away
+ 
+ - Say "im going to bed" or "im stepping away" so the agent stops asking.
+-- Write done as checks every iteration can run, and give `/loop` that predicate.
++- Write done as checks every iteration can run, and give the Autonomous run playbook that predicate.
+ - Ask for a fresh worktree off a named base.
+ - Pre-answer what the agent would stop for, such as "don't ask me before committing".
+ - Ask for a decision log to audit later.

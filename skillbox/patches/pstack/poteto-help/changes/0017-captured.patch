@@ -1,0 +1,13 @@
+diff --git a/SKILL.md b/SKILL.md
+index f6b87228173dce693171e91cdf31e562ee7864b8..4b4ecead326835d28d81904cd86f9e5e3034f6dd 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -139,7 +139,7 @@ For a run that drifts, [`references/prompting.md`](references/prompting.md) has
+ 
+ ## Make pstack my own
+ 
+-- [`/automate-me`](../automate-me/SKILL.md) drafts a personal mode skill from the user's own history, to use alongside `/poteto-mode`.
++- [`/automate-me`](../automate-me/SKILL.md) drafts a personal mode skill from the user's own history, to use alongside `/poteto-mode`. Keep personal or project preferences in an owned source; use a consumer-owned patch when changing an imported skill. The [customization guide](references/upstream/guide/09-make-it-yours.md) distinguishes those choices from shared maintainer changes.
+ - [`/reflect`](../reflect/SKILL.md) after a session turns its lessons into skill edits the user approves.
+ - `/poteto-mode write a skill for <workflow>` runs the authoring playbook. The eval playbook tests a skill change blind.
+ - Fix a misbehaving skill in its own PR, not inside the feature work where it went wrong.

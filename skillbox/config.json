@@ -19,7 +19,14 @@
 			"ref": "main",
 			"path": "cursor-team-kit/skills",
 			"pick": ["deslop"]
+		},
+		{
+			"type": "skills",
+			"id": "pstack",
+			"source": "https://github.com/cursor/plugins",
+			"ref": "main",
+			"path": "pstack/skills"
 		}
 	],
-	"install": ["development", "local", "deslop"]
+	"install": ["development", "local", "deslop", "pstack"]
 }

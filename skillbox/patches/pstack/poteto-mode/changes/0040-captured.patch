@@ -1,0 +1,11 @@
+diff --git a/scripts/package.json b/scripts/package.json
+index c8839d74d9be87dc78b3af0bc6f68f935b4ecc25..a00d5351e52d4f66703672fe0d52c66d101518c7 100644
+--- a/scripts/package.json
++++ b/scripts/package.json
+@@ -1,5 +1,5 @@
+ {
+-  "name": "@cursor-skill/poteto-mode-tools",
++  "name": "@pstack/poteto-mode-tools",
+   "private": true,
+   "type": "module",
+   "scripts": {

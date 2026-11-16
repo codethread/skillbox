@@ -1,0 +1,12 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Require two independent architecture proposals from different models, followed by arena synthesis. Keep both designs isolated and preserve explicit types, boundaries, tradeoffs, and implementation guidance."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"

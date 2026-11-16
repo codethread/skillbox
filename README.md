@@ -70,13 +70,15 @@ Every composed bundle is publishable, whether or not it appears in `install`. Na
 
 `add` selects the destination for installation by default. Use `--no-install` to add a publishable contribution without changing `install`. Edit `install` and run `sync` to change what this project uses; an empty list installs no bundles without removing their exports. A local Skillbox source such as `"."` can compose other bundles in this repository; composition cycles fail.
 
-## Published cleanup skill
+## Published workflow skills
 
-This repository publishes a pinned reference to Cursor Team Kit's `deslop` skill, without copied upstream files or patches:
+This repository publishes the PSTACK workflow adaptation for CT-configured Botlake agents and an unchanged, pinned reference to Cursor Team Kit's `deslop` cleanup skill:
 
 ```sh
-skillbox add skillbox codethread/skillbox cleanup --bundle deslop
+skillbox add skillbox codethread/skillbox workflows --bundle pstack --bundle deslop
 ```
+
+Keep project-specific changes in your consumer-owned patches; the shared PSTACK patches stay with this producer.
 
 ## Customize and update
 

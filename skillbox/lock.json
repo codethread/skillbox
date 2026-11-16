@@ -41,6 +41,20 @@
 				"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
 				"tree": "811070ab62bbbb6af848245cb93e1d7da886cea9"
 			}
+		},
+		"[\"skills\",\"pstack\",\"https://github.com/cursor/plugins\",\"pstack/skills\"]": {
+			"contribution": {
+				"type": "skills",
+				"id": "pstack",
+				"source": "https://github.com/cursor/plugins",
+				"ref": "main",
+				"path": "pstack/skills"
+			},
+			"pin": {
+				"type": "git",
+				"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13",
+				"tree": "811070ab62bbbb6af848245cb93e1d7da886cea9"
+			}
 		}
 	},
 	"bundles": {
@@ -133,6 +147,410 @@
 				}
 			],
 			"sourceHash": "5b0d549b43599561fc26d8283a2eaddc3d72f671a70b671ac986678374d5b39f"
+		},
+		"pstack": {
+			"members": [
+				{
+					"name": "architect",
+					"directory": "architect",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/architect",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "arena",
+					"directory": "arena",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/arena",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "automate-me",
+					"directory": "automate-me",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/automate-me",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "benchmark-checklist",
+					"directory": "benchmark-checklist",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/benchmark-checklist",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "blast-radius",
+					"directory": "blast-radius",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/blast-radius",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "bro",
+					"directory": "bro",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/bro",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "correct",
+					"directory": "correct",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/correct",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "create-formal-verification-skill",
+					"directory": "create-formal-verification-skill",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/create-formal-verification-skill",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "create-verification-skill",
+					"directory": "create-verification-skill",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/create-verification-skill",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "figure-it-out",
+					"directory": "figure-it-out",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/figure-it-out",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "how",
+					"directory": "how",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/how",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "in-your-own-words",
+					"directory": "in-your-own-words",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/in-your-own-words",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "interrogate",
+					"directory": "interrogate",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/interrogate",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "ketchup",
+					"directory": "ketchup",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/ketchup",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "ketchup-video",
+					"directory": "ketchup-video",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/ketchup-video",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "maintain-formal-verification-skill",
+					"directory": "maintain-formal-verification-skill",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/maintain-formal-verification-skill",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "maintain-verification-skill",
+					"directory": "maintain-verification-skill",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/maintain-verification-skill",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "make-bot-ui",
+					"directory": "make-bot-ui",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/make-bot-ui",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "no-comments",
+					"directory": "no-comments",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/no-comments",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "poteto-help",
+					"directory": "poteto-help",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/poteto-help",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "poteto-mode",
+					"directory": "poteto-mode",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/poteto-mode",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-attack-the-premise",
+					"directory": "principle-attack-the-premise",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-attack-the-premise",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-boundary-discipline",
+					"directory": "principle-boundary-discipline",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-boundary-discipline",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-build-the-lever",
+					"directory": "principle-build-the-lever",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-build-the-lever",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-encode-lessons-in-structure",
+					"directory": "principle-encode-lessons-in-structure",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-encode-lessons-in-structure",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-exhaust-the-design-space",
+					"directory": "principle-exhaust-the-design-space",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-exhaust-the-design-space",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-experience-first",
+					"directory": "principle-experience-first",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-experience-first",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-explain-the-number",
+					"directory": "principle-explain-the-number",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-explain-the-number",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-fix-root-causes",
+					"directory": "principle-fix-root-causes",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-fix-root-causes",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-foundational-thinking",
+					"directory": "principle-foundational-thinking",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-foundational-thinking",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-guard-the-context-window",
+					"directory": "principle-guard-the-context-window",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-guard-the-context-window",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-laziness-protocol",
+					"directory": "principle-laziness-protocol",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-laziness-protocol",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-make-operations-idempotent",
+					"directory": "principle-make-operations-idempotent",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-make-operations-idempotent",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-migrate-callers-then-delete-legacy-apis",
+					"directory": "principle-migrate-callers-then-delete-legacy-apis",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-migrate-callers-then-delete-legacy-apis",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-minimize-reader-load",
+					"directory": "principle-minimize-reader-load",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-minimize-reader-load",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-model-the-domain",
+					"directory": "principle-model-the-domain",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-model-the-domain",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-never-block-on-the-human",
+					"directory": "principle-never-block-on-the-human",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-never-block-on-the-human",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-outcome-oriented-execution",
+					"directory": "principle-outcome-oriented-execution",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-outcome-oriented-execution",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-prove-it-works",
+					"directory": "principle-prove-it-works",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-prove-it-works",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-redesign-from-first-principles",
+					"directory": "principle-redesign-from-first-principles",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-redesign-from-first-principles",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-separate-before-serializing-shared-state",
+					"directory": "principle-separate-before-serializing-shared-state",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-separate-before-serializing-shared-state",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-sequence-verifiable-units",
+					"directory": "principle-sequence-verifiable-units",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-sequence-verifiable-units",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-subtract-before-you-add",
+					"directory": "principle-subtract-before-you-add",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-subtract-before-you-add",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-test-behavior-not-implementation",
+					"directory": "principle-test-behavior-not-implementation",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-test-behavior-not-implementation",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "principle-type-system-discipline",
+					"directory": "principle-type-system-discipline",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/principle-type-system-discipline",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "recall",
+					"directory": "recall",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/recall",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "reflect",
+					"directory": "reflect",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/reflect",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "sharpen",
+					"directory": "sharpen",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/sharpen",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "show-me-your-work",
+					"directory": "show-me-your-work",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/show-me-your-work",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "statechart",
+					"directory": "statechart",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/statechart",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "swarm",
+					"directory": "swarm",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/swarm",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "tdd",
+					"directory": "tdd",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/tdd",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "teach",
+					"directory": "teach",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/teach",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "technical-writing",
+					"directory": "technical-writing",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/technical-writing",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "typescript-best-practices",
+					"directory": "typescript-best-practices",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/typescript-best-practices",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "unslop",
+					"directory": "unslop",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/unslop",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				},
+				{
+					"name": "why",
+					"directory": "why",
+					"source": "https://github.com/cursor/plugins",
+					"path": "pstack/skills/why",
+					"revision": "3dbd22ff12742fb28c9700b9760baa29ed41dc13"
+				}
+			],
+			"sourceHash": "5936082adb374015a535a9a94124b30324c24d3312234fd08bee44b1d6591ef2"
 		}
 	},
 	"installed": {
@@ -190,6 +608,291 @@
 			"bundle": "local",
 			"directory": "release",
 			"hash": "70bacc046527023f3e3fd55597c45477eaaef03b5fed9ba991a7799612a26fe1"
+		},
+		"architect": {
+			"bundle": "pstack",
+			"directory": "architect",
+			"hash": "3d1af094821c58bb9c1f09f772d340495fd956f6395298c15c5b2d43f320ac9f"
+		},
+		"arena": {
+			"bundle": "pstack",
+			"directory": "arena",
+			"hash": "4c69a4a2a11b5ea1a3a94c755a59e75e819c037b0628c48b812210f6843c4c62"
+		},
+		"automate-me": {
+			"bundle": "pstack",
+			"directory": "automate-me",
+			"hash": "b8a2bd62475912762b268064feb2e45fb2c921115c53f00ff1ef5f04f211049e"
+		},
+		"benchmark-checklist": {
+			"bundle": "pstack",
+			"directory": "benchmark-checklist",
+			"hash": "65f528ed8a1dff669b2f96c49644183d1edeb6fc75aeb0e426db8d48e9391550"
+		},
+		"blast-radius": {
+			"bundle": "pstack",
+			"directory": "blast-radius",
+			"hash": "8c0b1c5863be9a4b3b5c19b8ae4f25a5a29d2ae85f5b112b421719aa05f78f93"
+		},
+		"bro": {
+			"bundle": "pstack",
+			"directory": "bro",
+			"hash": "81db0996922915ff0736f3b38e197519dc52d394c5126727f94f2db59f7b39b0"
+		},
+		"correct": {
+			"bundle": "pstack",
+			"directory": "correct",
+			"hash": "84dd6a2b40c45e1f75475d7abf6ea85474a919b5bb68258e37ce0fc687426521"
+		},
+		"create-formal-verification-skill": {
+			"bundle": "pstack",
+			"directory": "create-formal-verification-skill",
+			"hash": "c926a874117863304aff21e0b9148065d68ebc648e75f9097da2a6428747ca16"
+		},
+		"create-verification-skill": {
+			"bundle": "pstack",
+			"directory": "create-verification-skill",
+			"hash": "6312335c771f6b0f93961d6011c8effaeadf41a8700fcdec1cd1aa52e976edf3"
+		},
+		"figure-it-out": {
+			"bundle": "pstack",
+			"directory": "figure-it-out",
+			"hash": "63cf30a506c2c52f35ec789fd43725cead189ee94d8a96cee3b1974fda843183"
+		},
+		"how": {
+			"bundle": "pstack",
+			"directory": "how",
+			"hash": "d13279ee601ee48166530c2b4f1811e562f8a5a3116504307264c84c0e40e389"
+		},
+		"in-your-own-words": {
+			"bundle": "pstack",
+			"directory": "in-your-own-words",
+			"hash": "00ea4e9055cea813bd0d7910e2a2fdf712d8e3d695a1fa8b0491c396bdb9076b"
+		},
+		"interrogate": {
+			"bundle": "pstack",
+			"directory": "interrogate",
+			"hash": "3d19060fb737e9cf1ad20df474c26cc5e11e48e4374953f247398f402dbb8e7c"
+		},
+		"ketchup": {
+			"bundle": "pstack",
+			"directory": "ketchup",
+			"hash": "3313391d9fd64320264fb462be848decb1b00f185eee87877a9828fcc32ccc8e"
+		},
+		"ketchup-video": {
+			"bundle": "pstack",
+			"directory": "ketchup-video",
+			"hash": "6be7106b20f7ab67dea6d8d4ca1da874d7cb618150e2bb50f6a13c746b39eb89"
+		},
+		"maintain-formal-verification-skill": {
+			"bundle": "pstack",
+			"directory": "maintain-formal-verification-skill",
+			"hash": "a18537c09e63e224efa45baa375d8a5fc470fa9edfa86cc5a780b023fb721a07"
+		},
+		"maintain-verification-skill": {
+			"bundle": "pstack",
+			"directory": "maintain-verification-skill",
+			"hash": "e6090c7a7d6478c06b758ee048d2a2b15db151e67785472a15da8c5a3e539996"
+		},
+		"make-bot-ui": {
+			"bundle": "pstack",
+			"directory": "make-bot-ui",
+			"hash": "4f2e6a4aae64c35914bfbde87fe83e72644efe1b80f48afb00a4c37b01fcc218"
+		},
+		"no-comments": {
+			"bundle": "pstack",
+			"directory": "no-comments",
+			"hash": "2a6c86abee70b7c2a9b9a8637fe492a820d8a9f8db78d55e11e090996eead9d6"
+		},
+		"poteto-help": {
+			"bundle": "pstack",
+			"directory": "poteto-help",
+			"hash": "0ea03c857af9b43f53c36cbba3b964aea8efc55a4b43d26818f3435d55bd524f"
+		},
+		"poteto-mode": {
+			"bundle": "pstack",
+			"directory": "poteto-mode",
+			"hash": "db79cb1247f8c04ba0b38a4048f9a2ae4cbd6996749b83440c2b1a83639da875"
+		},
+		"principle-attack-the-premise": {
+			"bundle": "pstack",
+			"directory": "principle-attack-the-premise",
+			"hash": "26e6db9f3a2e8f9a15ea02f26b23da8ac3f2c1ef62259c19ccdccbd0e016dcca"
+		},
+		"principle-boundary-discipline": {
+			"bundle": "pstack",
+			"directory": "principle-boundary-discipline",
+			"hash": "ca9a876639c19e19bd505ed1003bdfe796b0b45a98ae6a83fa0d7695a1a343dd"
+		},
+		"principle-build-the-lever": {
+			"bundle": "pstack",
+			"directory": "principle-build-the-lever",
+			"hash": "aa25aaa616f0438c30bb7cb1173623a474d523714471940aef561cd0d50b291b"
+		},
+		"principle-encode-lessons-in-structure": {
+			"bundle": "pstack",
+			"directory": "principle-encode-lessons-in-structure",
+			"hash": "04fe6ae5f9467c4507e2913b3fa9e1aabb727fe368465ffd33a3905b5d87789a"
+		},
+		"principle-exhaust-the-design-space": {
+			"bundle": "pstack",
+			"directory": "principle-exhaust-the-design-space",
+			"hash": "7666261761c2ad6689830f71e54b1fd358d72f54535073c3c86d0facb505039c"
+		},
+		"principle-experience-first": {
+			"bundle": "pstack",
+			"directory": "principle-experience-first",
+			"hash": "495e959753fa0756da988d5766972e1527253c5a2a1a3375d5449fd66443a73b"
+		},
+		"principle-explain-the-number": {
+			"bundle": "pstack",
+			"directory": "principle-explain-the-number",
+			"hash": "4c49eca2d83ca0da866f5240f69dd2452676215d5006b66b1da78d12be8c123b"
+		},
+		"principle-fix-root-causes": {
+			"bundle": "pstack",
+			"directory": "principle-fix-root-causes",
+			"hash": "262da1419d533a03e5bb03d0665bc54f9506bde2adfe9da21f0cd017d049b01e"
+		},
+		"principle-foundational-thinking": {
+			"bundle": "pstack",
+			"directory": "principle-foundational-thinking",
+			"hash": "aae550cbc29854e124c43c83b97d70c8f64ba935e386368809e809407a26813e"
+		},
+		"principle-guard-the-context-window": {
+			"bundle": "pstack",
+			"directory": "principle-guard-the-context-window",
+			"hash": "0006432a4f8b3f1f6c04330a357c27f319457605f3e6b56c14cd9a762540390e"
+		},
+		"principle-laziness-protocol": {
+			"bundle": "pstack",
+			"directory": "principle-laziness-protocol",
+			"hash": "8a7a2a448b7704f907d52aa1fa2bc2184fab9ea1f2af8011fc104b104b2dffcb"
+		},
+		"principle-make-operations-idempotent": {
+			"bundle": "pstack",
+			"directory": "principle-make-operations-idempotent",
+			"hash": "88e812e114c1d394f1381f1f5696877059e2c7db075b3720b00ac498dc5eed5f"
+		},
+		"principle-migrate-callers-then-delete-legacy-apis": {
+			"bundle": "pstack",
+			"directory": "principle-migrate-callers-then-delete-legacy-apis",
+			"hash": "1da88cf7159d9ccceb2ca484b55a758da4bf66fee38623914aa7b9a0d13fc616"
+		},
+		"principle-minimize-reader-load": {
+			"bundle": "pstack",
+			"directory": "principle-minimize-reader-load",
+			"hash": "346674ff176d76a85dc8227f63277fa99a6b3a01b98a4a5f56be24738c2ca653"
+		},
+		"principle-model-the-domain": {
+			"bundle": "pstack",
+			"directory": "principle-model-the-domain",
+			"hash": "3226346863a4701e646d80aec50e3c20f4b0c0ee91ee6e554f1b7ac02caa8089"
+		},
+		"principle-never-block-on-the-human": {
+			"bundle": "pstack",
+			"directory": "principle-never-block-on-the-human",
+			"hash": "7b31c1c49743909874c04e9fdc25c30ecd79295b138cc3a59f9fe80480e0f574"
+		},
+		"principle-outcome-oriented-execution": {
+			"bundle": "pstack",
+			"directory": "principle-outcome-oriented-execution",
+			"hash": "7607f5ab04a9fdf9ef5f21ae18315a9c3c11de3149b6c01fb19d46c0b1a33136"
+		},
+		"principle-prove-it-works": {
+			"bundle": "pstack",
+			"directory": "principle-prove-it-works",
+			"hash": "16c01872fe3971931d1dee4b6bde3ca51f9706b8530616f9b0cdfb77dbaeb4c0"
+		},
+		"principle-redesign-from-first-principles": {
+			"bundle": "pstack",
+			"directory": "principle-redesign-from-first-principles",
+			"hash": "8a29467033b12b21022262b656f00384775ce36945ccb488cf3e489dfd27feff"
+		},
+		"principle-separate-before-serializing-shared-state": {
+			"bundle": "pstack",
+			"directory": "principle-separate-before-serializing-shared-state",
+			"hash": "7c2f4335852b7b9435c39143b25c639a4016ccadaf2290ff2d229dab3a88cf82"
+		},
+		"principle-sequence-verifiable-units": {
+			"bundle": "pstack",
+			"directory": "principle-sequence-verifiable-units",
+			"hash": "0d478b25422abe5bd55f007b5d58317e75ca785c5f2f5f51d757b994e125912c"
+		},
+		"principle-subtract-before-you-add": {
+			"bundle": "pstack",
+			"directory": "principle-subtract-before-you-add",
+			"hash": "4f448416b9105d78b86ff979400fc2548fcf1aff7425e158160a11906b25ade8"
+		},
+		"principle-test-behavior-not-implementation": {
+			"bundle": "pstack",
+			"directory": "principle-test-behavior-not-implementation",
+			"hash": "5f659664d00ca1595a297d6582bc36555c43ce3757816bb26738f033844b82af"
+		},
+		"principle-type-system-discipline": {
+			"bundle": "pstack",
+			"directory": "principle-type-system-discipline",
+			"hash": "914070bd545c6a5081c8e69a62b0f969fce1b73bc919d9ffa8acb2bcc1793944"
+		},
+		"recall": {
+			"bundle": "pstack",
+			"directory": "recall",
+			"hash": "a78ae53b7e0a1d76277be2260709f715bba8a8ba30bcf01c4b05ee8969f9f8b0"
+		},
+		"reflect": {
+			"bundle": "pstack",
+			"directory": "reflect",
+			"hash": "c4ee9231e01401f6a09dff900d88e2b2a17f92a57f8455ccfb71bf636717ecb8"
+		},
+		"sharpen": {
+			"bundle": "pstack",
+			"directory": "sharpen",
+			"hash": "9024550ce3cecc04b34c5b9054414f269281a1c62078adb27f8463c2e79bdd3f"
+		},
+		"show-me-your-work": {
+			"bundle": "pstack",
+			"directory": "show-me-your-work",
+			"hash": "de66e99060aedb771e221e6896b01bf5ee713a308f96087eff470a7dc4b79d0d"
+		},
+		"statechart": {
+			"bundle": "pstack",
+			"directory": "statechart",
+			"hash": "c2856661b6f74e0028ebd3fc2c0291fb69ae4257323f7bcd8c4f8bbde91880ad"
+		},
+		"swarm": {
+			"bundle": "pstack",
+			"directory": "swarm",
+			"hash": "bb7db9f0f73102b5aa61034a5e315b2be8b432ad73bfe532855c46c6b46b4fdd"
+		},
+		"tdd": {
+			"bundle": "pstack",
+			"directory": "tdd",
+			"hash": "00f573aecfc46c785cce01076b126ec679b86d8181c7220c6a72fce8094ea29d"
+		},
+		"teach": {
+			"bundle": "pstack",
+			"directory": "teach",
+			"hash": "cd343c24cb95c6a7e180e5e7eeecf98e6b5eb77cdd885ec7e0a2312b30970d42"
+		},
+		"technical-writing": {
+			"bundle": "pstack",
+			"directory": "technical-writing",
+			"hash": "82d111c8ac91196e9721874ceade9f9e9739a7727d1f91654c6968daf87a345d"
+		},
+		"typescript-best-practices": {
+			"bundle": "pstack",
+			"directory": "typescript-best-practices",
+			"hash": "a8debf8cffc0e163380cead1f55ce290f17c64d9df9824e90f19d727d0fc8be2"
+		},
+		"unslop": {
+			"bundle": "pstack",
+			"directory": "unslop",
+			"hash": "b78ea25581276c314610fe7d075a1722f877ab38e663fd5055aa85314605864a"
+		},
+		"why": {
+			"bundle": "pstack",
+			"directory": "why",
+			"hash": "2b2f7096dae31c1b12fcf2b03ebf7231025e4136e5651dd987e8fbfde00cbe74"
 		}
 	}
 }

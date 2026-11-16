@@ -1,0 +1,16 @@
+schema = 1
+
+[files."./SKILL.md"]
+intent = "Omit this skill because Botlake already owns agent selection and configuration, and the stack workflows do not consume its named role map or effort-budget tiers. Do not regenerate a separate configuration interview, setup prerequisite, alias or stub. Keep requested agent changes in Botlake, preserve approval for persistent shared changes, and retain optional verification offers in help and onboarding."
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0001-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0002-captured.patch"
+
+[[patches]]
+target = "./SKILL.md"
+patch = "changes/0003-captured.patch"

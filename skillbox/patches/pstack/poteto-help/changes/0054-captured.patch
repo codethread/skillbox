@@ -1,0 +1,13 @@
+diff --git a/references/guide/06-verify-and-ship.md b/references/guide/06-verify-and-ship.md
+index abebda51983947d50b51290a6f6efe7730d89efc..b6287ae77d30062d073ca41093541480e39c03e1 100644
+--- a/references/guide/06-verify-and-ship.md
++++ b/references/guide/06-verify-and-ship.md
+@@ -85,7 +85,7 @@ While you're there, make the dev setup repeatable too: seeded data, test users,
+ 
+ ## Keep the verification skill honest
+ 
+-Apps change, and feature maps go out of date. Run this at least once a day, ideally from a scheduled automation so nobody has to remember:
++Apps change, and feature maps go out of date.
+ 
+ ```text
+ /maintain-verification-skill

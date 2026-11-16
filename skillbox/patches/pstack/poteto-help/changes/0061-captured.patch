@@ -1,0 +1,13 @@
+diff --git a/references/guide/06-verify-and-ship.md b/references/guide/06-verify-and-ship.md
+index b6287ae77d30062d073ca41093541480e39c03e1..ee336d9266472ef665749e7d31cee044b28abba3 100644
+--- a/references/guide/06-verify-and-ship.md
++++ b/references/guide/06-verify-and-ship.md
+@@ -131,7 +131,7 @@ A counterexample in model terms convinces you. The PM or designer who owns the b
+ /poteto-mode open the pr. small ordered commits, evidence in the description.
+ ```
+ 
+-The [Opening a PR playbook](../../../poteto-mode/playbooks/opening-a-pr.md) works from a worktree, rebases the work into small ordered commits, cleans the diff, unslops the prose, and returns the PR link. Five narrow PRs beat one fat one, and stacked follow-ups beat a growing branch.
++The [Opening a PR playbook](../../../poteto-mode/playbooks/opening-a-pr.md) works from a worktree and rebases the work into small ordered commits. It runs [`/deslop`](../../../deslop/SKILL.md) on the code diff and [`/unslop`](../../../unslop/SKILL.md) on the prose, then returns the PR link. Five narrow PRs beat one fat one, and stacked follow-ups beat a growing branch.
+ 
+ ## Drive the PR to merge-ready with Babysit
+ 

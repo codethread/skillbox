@@ -1,0 +1,41 @@
+diff --git a/SKILL.md b/SKILL.md
+index b1581e5243453969a9eee8a8afd2c96d141d65d7..c8080dbb6c3744aa64996709ad91a8902aa78ce3 100644
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -1,12 +1,12 @@
+ ---
+ name: arena
+-description: "Spawn N parallel candidates at the same task, pick a base, graft the strongest parts of the losers into it. Use for /arena, 'arena this', 'throw it in the arena', or when one attempt at a non-trivial artifact would lock in the wrong shape."
++description: "Delegate N agents to produce competing versions of one artifact, choose a base, and graft the strongest parts of the others into it. Use for /arena, 'arena this', 'throw it in the arena', or when one attempt at a non-trivial artifact would lock in the wrong shape."
+ disable-model-invocation: true
+ ---
+ 
+ # Arena
+ 
+-Open a todolist with one entry per phase (Frame, Fan out, Cross-judge, Pick, Graft, Verify) before launching anything.
++Open a phase checklist for Frame, Fan out, Cross-judge, Pick, Graft, and Verify before launching workers. Under the current Botlake context group, create one task for each independently delegated candidate and judge lane. Record each lane's findings and integration status on its task. Task state is tracking, not proof that the lane ran.
+ 
+ ## Phase A: Frame
+ 
+@@ -14,18 +14,18 @@ Every candidate gets the same prompt, so the prompt is the contract.
+ 
+ 1. State the artifact each candidate is producing.
+ 2. Derive the rubric, 3-6 concrete gradeable criteria for what success looks like on *this* task. It is the picker's tool in Phase D. Candidates only see the task.
+-3. Pick independent agents suited to the task. Use at least two runners unless the caller explicitly requests one, and different models when judgment diversity matters. Spawn more runners when the arena covers multiple design directions. Use the same model N times when the work is generation-bound rather than judgment-sensitive. If model diversity is unavailable, say so.
++3. Choose independent agents from Botlake's agent catalog. Use at least two runners unless the caller explicitly requests one, and different models when judgment diversity matters. Choose more runners when the arena covers multiple design directions. Use the same model N times when the work is generation-bound rather than judgment-sensitive. If model diversity is unavailable, say so.
+ 4. Give each candidate its own output location (a git worktree where possible, otherwise `/tmp/arena-<slug>/candidate-<n>/`), per the **separate-before-serializing-shared-state** principle skill. When candidates need uncommitted state, give each the same scoped snapshot.
+ 
+ ## Phase B: Fan out
+ 
+-Spawn all N agents in parallel, each with the task, the path to the shared grounding, its own output path, and instructions to produce the artifact and a short rationale naming the alternatives it considered and what it rejected.
++Dispatch all N agent runs through Botlake in parallel. Give each the task, the shared grounding, its own output path, and instructions to produce the artifact and a short rationale naming the alternatives it considered and what it rejected. Use a Botlake shared context group when several agents need the same durable context.
+ 
+ If a candidate produces no output, proceed with N-1 and note the dropout.
+ 
+ ## Phase C: Cross-judge
+ 
+-After all Phase B candidates complete, spawn one read-only judge on a different model family from the parent. If no such judge is available, skip the judge, pick the base alone in Phase D, and say so. If the parent's model is unknown, use an independent judge and say the family check did not run. The judge sees the rubric and the candidates by path label, scores each criterion, and recommends a base with rationale. It runs in parallel with your reading in Phase D. Don't spawn it while candidates are still writing.
++After all Phase B candidates complete, delegate one read-only judge from a different model family through Botlake. If no such judge is available, skip the judge, pick the base alone in Phase D, and say so. If the parent's model is unknown, use an independent judge and say the family check did not run. Give the judge the rubric and candidates by path label. Ask it to score each criterion and recommend a base with rationale. Run the judge in parallel with your reading in Phase D, after all candidates have finished.
+ 
+ ## Phase D: Pick a base
+ 
