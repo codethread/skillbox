@@ -146,7 +146,7 @@
 					"path": "skillbox/local/release"
 				}
 			],
-			"sourceHash": "5b0d549b43599561fc26d8283a2eaddc3d72f671a70b671ac986678374d5b39f"
+			"sourceHash": "e97dd6d8b19aa63aa2edf56d951766317f9996c9537adef5ecb2909dcad3f6d2"
 		},
 		"pstack": {
 			"members": [
@@ -607,7 +607,7 @@
 		"release": {
 			"bundle": "local",
 			"directory": "release",
-			"hash": "70bacc046527023f3e3fd55597c45477eaaef03b5fed9ba991a7799612a26fe1"
+			"hash": "bd08570da20c0475dcee2f9ef0650be96435a49910c174ece5eb49dfc688ef12"
 		},
 		"architect": {
 			"bundle": "pstack",
