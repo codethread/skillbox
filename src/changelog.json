@@ -1,5 +1,51 @@
 [
 	{
+		"version": "0.3.0",
+		"changes": [
+			{
+				"commit": "d1cf4ad",
+				"summary": "Compose publishable bundles from imported and locally authored skills.",
+				"body": "Combine raw skill directories, selected Skillbox bundles, and native skills under a destination bundle. Select incoming skills with pick/omit, and choose local installation independently from publication with the install list. Bundled offline guidance covers configuration, authoring, and customization.",
+				"breaking": [
+					"The add command now requires add skills <source> <id> --path <directory> or add skillbox <source> <id> --bundle <bundle>.",
+					"Configuration now uses typed source contributions with destination ids and a separate install list. The version 2 Skillbox lock replaces the previous SDK-format lock; old tracking files are not migrated automatically."
+				],
+				"adoption": [
+					{
+						"requirement": "required",
+						"text": "Before upgrading a 0.2.x workspace, back up skillbox/config.json, skillbox/lock.json, authored sources, and installed skills including local edits. Recreate the source selections in an empty disposable workspace with the new add commands, verify the installed files, then cut over to the new configuration and version 2 lock. Keep any unrelated root skills-lock.json unchanged. Update scripts that use the old add syntax."
+					}
+				]
+			},
+			{
+				"commit": "d1cf4ad",
+				"summary": "Pin Git sources and customize bundles with intent-backed patches.",
+				"body": "Git imports record immutable revisions and reuse a shared local cache. Ordinary sync retains pins. Prepare and capture per-skill patches with per-file intent; update stages an upstream candidate for review, capture accepts it, and sync installs it. Consumers receive producer patches and keep their own additional patches separately.",
+				"breaking": [],
+				"adoption": [
+					{
+						"requirement": "optional",
+						"text": "Use patch prepare <id>, patch capture <id> --from <workspace>, and update <id> for reviewed customization and updates. Commit patch.toml files and their changes payloads; ignore skillbox/.prepare/. Filesystem-path sources remain live authored worktrees rather than immutable Git pins."
+					}
+				]
+			},
+			{
+				"commit": "f715f3a",
+				"summary": "Publish shared PSTACK workflows and a pinned deslop skill through the repository.",
+				"body": "Import the repository's pstack and deslop bundles with add skillbox codethread/skillbox workflows --bundle pstack --bundle deslop. Producer-owned workflow patches remain in the producer; consumer customizations remain consumer-owned. These bundles are distributed from Git, separately from the npm CLI.",
+				"breaking": [],
+				"adoption": []
+			},
+			{
+				"commit": "368e448",
+				"summary": "Consume @codethread/cli-changelog@0.1.1 from npm.",
+				"body": "Replace the Git dependency with the latest published npm version, retain local Markdown changelog generation, and verify release installation with the current add syntax.",
+				"breaking": [],
+				"adoption": []
+			}
+		]
+	},
+	{
 		"version": "0.2.2",
 		"changes": [
 			{
