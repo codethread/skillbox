@@ -5,7 +5,7 @@
     "": {
       "name": "@codethread/skillbox",
       "devDependencies": {
-        "@codethread/cli-changelog": "github:codethread/cli-changelog#c457e0a28686ce6349ce0956b1375635d53148d8",
+        "@codethread/cli-changelog": "0.1.1",
         "@types/bun": "^1.4.4",
         "commander": "^15.1.0",
         "husky": "9.1.7",
@@ -71,7 +71,7 @@
 
     "@botlake/native-session": ["@botlake/native-session@0.5.3", "", { "dependencies": { "unique-names-generator": "4.7.1", "zod": "^4.6.7" } }, "sha512-+DWVcMsHXqGZA3cfq9yivjl0RdkezUnUBpHT3VffcnfXF8lFcMZ0OWgYnt5Of8HErcrB5VcO9NFsM2U9wgx8gQ=="],
 
-    "@codethread/cli-changelog": ["@codethread/cli-changelog@github:codethread/cli-changelog#c457e0a", { "peerDependencies": { "zod": "^4.6.5" }, "bin": { "cli-changelog": "./src/cli.ts" } }, "codethread-cli-changelog-c457e0a", "sha512-TXlF66ztscwtNV7nUhax63y1AEnpVA1f8utblvs8+Fsd0URV9JrSXTZmSas3flpXHBTnx4N86feaRYS1t8aLnQ=="],
+    "@codethread/cli-changelog": ["@codethread/cli-changelog@0.1.1", "", { "peerDependencies": { "zod": "^4.6.5" }, "bin": { "cli-changelog": "src/cli.ts" } }, "sha512-PDJO+jcSHf50IiRR3RYe9RCKB7sSeVDx9u9fwOadhnJeDoTFwVzYW/KPDSm4FSdc4Ha94vAhIK+CUhmWO+WDOg=="],
 
     "@oxfmt/binding-android-arm-eabi": ["@oxfmt/binding-android-arm-eabi@0.78.0", "", { "os": "android", "cpu": "arm" }, "sha512-1x9NPGQG5WMOOT8spRP4hPbeqwB/P9ayxFo4EUDSle6mLmtYRqE6suXgHr93/S2nnszy77LlIa8klkKdWtHbMw=="],
 

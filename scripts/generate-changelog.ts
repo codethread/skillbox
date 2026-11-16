@@ -1,14 +1,33 @@
 import { parseArgs } from "node:util";
-import { changelogHistorySchema, renderChangelogMarkdown } from "@codethread/cli-changelog";
+import { changelogHistorySchema } from "@codethread/cli-changelog";
 import { type FormatConfig, format } from "oxfmt";
 import config from "../.oxfmtrc.json";
 import history from "../src/changelog.json";
 
 export async function markdown(recordedHistory: unknown): Promise<string> {
-	const rendered = renderChangelogMarkdown({
-		title: "Skillbox since 0.1.0",
-		history: changelogHistorySchema.parse(recordedHistory),
-	});
+	const releases = changelogHistorySchema.parse(recordedHistory);
+	const lines = [
+		"# Changelog",
+		"",
+		"All notable changes to Skillbox since 0.1.0 are documented in this file.",
+	];
+	for (const release of releases.toSorted((a, b) => Bun.semver.order(b.version, a.version))) {
+		lines.push("", `## ${release.version}`, "", "### Changes");
+		for (const change of release.changes) {
+			lines.push("", `- ${change.summary} (${change.commit.slice(0, 7)})`);
+			if (change.body !== "") {
+				lines.push("", ...change.body.split("\n").map((line) => `    ${line}`));
+			}
+			const notes = [
+				...change.breaking.map((note) => `    - **Breaking:** ${note}`),
+				...change.adoption.map(
+					(note) => `    - **Adoption (${note.requirement}):** ${note.text}`,
+				),
+			];
+			if (notes.length > 0) lines.push("", ...notes);
+		}
+	}
+	const rendered = `${lines.join("\n")}\n`;
 	const { code, errors } = await format("CHANGELOG.md", rendered, config as FormatConfig);
 	if (errors.length > 0) throw new AggregateError(errors, "Cannot format CHANGELOG.md.");
 	return code;
