@@ -12,22 +12,32 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { responseError } from "../response.ts";
 import { hashTree } from "../workspace/patches.ts";
-import { discover, isLocalSource, type Bundles } from "../workspace/bundles.ts";
-import { configPath, contributionIdentity, readConfig, type Config } from "../workspace/config.ts";
+import { exportIds, isLocalSource, type Bundles } from "../workspace/bundles.ts";
+import { contributionIdentity, type Config } from "../workspace/config.ts";
+import { emptyLock, jsonText, lockSchema, readLock, type Lock } from "../workspace/lock.ts";
+import { z } from "zod";
 import {
-	emptyLock,
-	jsonText,
-	lockPath,
-	lockSchema,
-	readLock,
-	type Lock,
-} from "../workspace/lock.ts";
+	selectWorkspace,
+	sharedPaths,
+	localPaths,
+	type WorkspaceContext,
+} from "../workspace/context.ts";
 import { applyInvocationPolicy } from "../workspace/invocation.ts";
-import { readOptional, statOptional } from "../workspace/paths.ts";
+import { readOptional, regularPath, statOptional } from "../workspace/paths.ts";
 import { publish } from "../workspace/publish.ts";
+
+export const receiptPath = "skillbox/.local/install-state.json";
+const receiptSchema = z.strictObject({
+	version: z.literal(1),
+	owner: z.enum(["shared", "local"]),
+	personalInitialized: z.boolean(),
+	installed: lockSchema.shape.installed,
+});
+export type InstallationReceipt = z.infer<typeof receiptSchema>;
 
 export interface SyncResult {
 	status: "synced" | "unchanged";
+	config: string;
 	installed: number;
 	unchanged: number;
 	removed: number;
@@ -37,27 +47,39 @@ export async function sync(input: {
 	cwd: string;
 	workspace?: string;
 }): Promise<SyncResult> {
-	const root = await realpath(resolve(input.cwd, input.workspace ?? "."));
-	const config = await readConfig(root);
+	const context = await selectWorkspace(
+		await realpath(resolve(input.cwd, input.workspace ?? ".")),
+	);
+	const { config, paths } = context;
 	if (!config)
-		throw responseError("CONFIG_NOT_FOUND", `Missing ${configPath}.`, { input: configPath });
-	const lock = await readLock(root);
-	if (!lock && config.sources.length)
-		throw responseError("LOCK_MISSING", `Missing ${lockPath}. Register sources with add.`, {
-			input: lockPath,
+		throw responseError("CONFIG_NOT_FOUND", `Missing ${paths.config}.`, {
+			input: paths.config,
 		});
-	return reconcile(input.bundles, root, config, lock ?? emptyLock());
+	const receipt = await installationState(context);
+	let lock = context.lock;
+	if (!lock && paths.kind === "local")
+		lock = await input.bundles.resolvePins({ ...context, config, lock: emptyLock() });
+	if (!lock && config.sources.length)
+		throw responseError("LOCK_MISSING", `Missing ${paths.lock}. Register sources with add.`, {
+			input: paths.lock,
+		});
+	return reconcile(input.bundles, { context, config, candidate: lock ?? emptyLock(), receipt });
 }
 
 /** Stage exports, selected installation and metadata together; publish only after all checks pass. */
 export async function reconcile(
 	bundles: Bundles,
-	root: string,
-	config: Config,
-	candidate: Lock,
-	writeConfig = false,
+	input: {
+		context: WorkspaceContext;
+		config: Config;
+		candidate: Lock;
+		receipt: InstallationReceipt;
+		writeConfig?: boolean;
+	},
 ): Promise<SyncResult> {
-	const current = await readLock(root);
+	const { context, config, receipt, writeConfig = false } = input;
+	const { root, paths, lock: current } = context;
+	let candidate = input.candidate;
 	const sources: Lock["sources"] = {};
 	for (const contribution of config.sources) {
 		const key = contributionIdentity(contribution);
@@ -75,32 +97,21 @@ export async function reconcile(
 		sources[key] = { contribution, pin: entry.pin };
 	}
 	candidate = { ...candidate, sources };
-	await preflight(root, current ?? emptyLock());
+	await preflight(root, receipt);
 	const staging = await mkdtemp(join(root, ".skillbox-sync-"));
 	let retain = false;
 	try {
-		const ids = new Set([...config.sources.map((source) => source.id), ...config.install]);
-		if (await statOptional(join(root, "skillbox")))
-			for (const entry of await readdir(join(root, "skillbox"), { withFileTypes: true })) {
-				if (
-					entry.isDirectory() &&
-					!["patches", ".prepare"].includes(entry.name) &&
-					(
-						await discover(
-							join(root, "skillbox", entry.name),
-							".",
-							`skillbox/${entry.name}`,
-						)
-					).length
-				)
-					ids.add(entry.name);
-			}
+		const ids = new Set([...(await exportIds({ ...context, config })), ...config.install]);
 		const next: Lock = { ...candidate, bundles: {}, installed: {} };
 		await mkdir(join(staging, ".agents/skills"), { recursive: true });
 		for (const id of [...ids].sort()) {
 			const directory = join(staging, "exports", id);
 			await mkdir(dirname(directory), { recursive: true });
-			const composed = await bundles.compose(root, config, candidate, id, directory);
+			const composed = await bundles.compose(
+				{ ...context, config, lock: candidate },
+				id,
+				directory,
+			);
 			next.bundles[id] = composed;
 			if (!config.install.includes(id)) continue;
 			for (const member of composed.members) {
@@ -129,35 +140,49 @@ export async function reconcile(
 			if ((await statOptional(path))?.isDirectory() && (await hashTree(path)) === entry.hash)
 				unchanged++;
 		}
-		const removed = Object.keys(current?.installed ?? {}).filter(
+		const removed = Object.keys(receipt.installed).filter(
 			(name) => !Object.hasOwn(next.installed, name),
 		).length;
+		const nextReceipt: InstallationReceipt = {
+			version: 1,
+			owner: paths.kind,
+			personalInitialized: receipt.personalInitialized || paths.kind === "local",
+			installed: next.installed,
+		};
+		const receiptText = jsonText(nextReceipt);
 		const configText = jsonText(config);
 		const nextText = jsonText(lockSchema.parse(next));
 		const sameConfig =
-			!writeConfig || (await readOptional(join(root, configPath))) === configText;
+			!writeConfig || (await readOptional(join(root, paths.config))) === configText;
 		if (
-			current &&
+			(await readOptional(join(root, receiptPath))) === receiptText &&
 			jsonText(current) === nextText &&
 			sameConfig &&
 			unchanged === Object.keys(next.installed).length &&
 			(await statOptional(join(root, ".agents/skills")))?.isDirectory() &&
 			(await hasClaudeLink(root))
 		)
-			return { status: "unchanged", installed: 0, unchanged, removed: 0 };
-		await mkdir(join(staging, "skillbox"), { recursive: true });
-		await writeFile(join(staging, lockPath), nextText);
+			return {
+				status: "unchanged",
+				config: paths.config,
+				installed: 0,
+				unchanged,
+				removed: 0,
+			};
+		await mkdir(dirname(join(staging, receiptPath)), { recursive: true });
+		await writeFile(join(staging, paths.lock), nextText);
+		await writeFile(join(staging, receiptPath), receiptText);
 		await mkdir(join(staging, ".claude"));
 		await symlink("../.agents/skills", join(staging, ".claude/skills"));
-		const paths = [".agents/skills", ".claude/skills", lockPath];
+		const targets = [".agents/skills", ".claude/skills", paths.lock, receiptPath];
 		if (writeConfig) {
-			await writeFile(join(staging, configPath), configText);
-			paths.push(configPath);
+			await writeFile(join(staging, paths.config), configText);
+			targets.push(paths.config);
 		}
 		try {
 			await publish(
 				staging,
-				paths.map((path) => ({ staged: join(staging, path), target: join(root, path) })),
+				targets.map((path) => ({ staged: join(staging, path), target: join(root, path) })),
 			);
 		} catch (cause) {
 			retain = true;
@@ -170,6 +195,7 @@ export async function reconcile(
 		}
 		return {
 			status: "synced",
+			config: paths.config,
 			installed: Object.keys(next.installed).length - unchanged,
 			unchanged,
 			removed,
@@ -179,7 +205,7 @@ export async function reconcile(
 	}
 }
 
-async function preflight(root: string, lock: Lock): Promise<void> {
+async function preflight(root: string, receipt: InstallationReceipt): Promise<void> {
 	const skills = join(root, ".agents/skills");
 	const entry = await statOptional(skills);
 	if (entry) {
@@ -190,13 +216,24 @@ async function preflight(root: string, lock: Lock): Promise<void> {
 				{ input: ".agents/skills" },
 			);
 		for (const name of await readdir(skills))
-			if (!Object.hasOwn(lock.installed, name))
+			if (!Object.hasOwn(receipt.installed, name))
 				throw responseError(
 					"UNMANAGED_SKILL",
 					`Unmanaged skill would be replaced: ${name}.`,
 					{ skill: name },
 				);
 	}
+	for (const [name, managed] of Object.entries(receipt.installed)) {
+		const path = join(skills, name);
+		const entry = await statOptional(path);
+		if (entry && (!entry.isDirectory() || (await hashTree(path)) !== managed.hash))
+			throw responseError(
+				"MANAGED_SKILL_MODIFIED",
+				`Managed skill was edited: ${path}. Back up or capture your edits before syncing.`,
+				{ skill: name, input: path },
+			);
+	}
+
 	if ((await statOptional(join(root, ".claude/skills"))) && !(await hasClaudeLink(root)))
 		throw responseError(
 			"CLAUDE_SKILLS_LINK_INVALID",
@@ -210,4 +247,56 @@ async function hasClaudeLink(root: string): Promise<boolean> {
 		(await statOptional(path))?.isSymbolicLink() === true &&
 		resolve(dirname(path), await readlink(path)) === join(root, ".agents/skills")
 	);
+}
+
+export async function installationState(context: WorkspaceContext): Promise<InstallationReceipt> {
+	const { root, paths, lock } = context;
+	const text = await readOptional(await regularPath(root, receiptPath));
+	let receipt: InstallationReceipt;
+	if (text !== undefined) {
+		try {
+			receipt = receiptSchema.parse(JSON.parse(text));
+		} catch (cause) {
+			throw responseError(
+				"INSTALL_STATE_INVALID",
+				`Invalid ${receiptPath}.`,
+				{ input: receiptPath },
+				cause,
+			);
+		}
+	} else {
+		const privateLock = await statOptional(join(root, localPaths.lock));
+		const output = join(root, ".agents/skills");
+		const outputEntry = await statOptional(output);
+		if (outputEntry && !outputEntry.isDirectory())
+			throw responseError(
+				"MANAGED_SKILLS_INVALID",
+				"Managed skills must be a real directory.",
+				{ input: ".agents/skills" },
+			);
+		if (privateLock && outputEntry && (await readdir(output)).length)
+			throw responseError(
+				"INSTALL_STATE_MISSING",
+				`Missing ${receiptPath} for an existing personal installation.`,
+				{ input: receiptPath },
+			);
+		const shared = privateLock
+			? undefined
+			: paths.kind === "shared"
+				? lock
+				: await readLock(root, sharedPaths.lock);
+		receipt = {
+			version: 1,
+			owner: "shared",
+			personalInitialized: privateLock !== undefined,
+			installed: privateLock ? {} : (shared?.installed ?? {}),
+		};
+	}
+	if (paths.kind === "local" && !lock && receipt.personalInitialized)
+		throw responseError(
+			"LOCK_MISSING",
+			`Restore ${paths.lock} before using this initialized personal workspace.`,
+			{ input: paths.lock },
+		);
+	return receipt;
 }

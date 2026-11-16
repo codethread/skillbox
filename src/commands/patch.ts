@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
-import { join, relative, resolve, sep } from "node:path";
+import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { stringify } from "smol-toml";
 import { z } from "zod";
 import { ResponseError, responseError } from "../response.ts";
@@ -13,19 +13,16 @@ import {
 	type PatchManifest,
 } from "../workspace/patches.ts";
 import { discover, isLocalSource, type Bundles } from "../workspace/bundles.ts";
-import {
-	bundleSchema,
-	contributionIdentity,
-	readConfig,
-	refSchema,
-	type Config,
-} from "../workspace/config.ts";
-import { jsonText, lockPath, lockSchema, readLock, type Lock } from "../workspace/lock.ts";
-import { statOptional } from "../workspace/paths.ts";
+import { bundleSchema, contributionIdentity, refSchema, type Config } from "../workspace/config.ts";
+import { jsonText, lockSchema, type Lock } from "../workspace/lock.ts";
+import { selectWorkspace, type WorkspaceSnapshot } from "../workspace/context.ts";
+import { regularPath, statOptional } from "../workspace/paths.ts";
 import { publish } from "../workspace/publish.ts";
 
 const preparedSchema = z.strictObject({
 	schema: z.literal(2),
+	workspace: z.string(),
+	kind: z.enum(["shared", "local"]),
 	bundle: bundleSchema,
 	configHash: z.string(),
 	sources: lockSchema.shape.sources,
@@ -50,10 +47,11 @@ interface PatchInput {
 }
 
 export async function patchPrepare(input: PatchInput & { output?: string }) {
-	const { config, lock } = await managed(input);
-	const output = editingDirectory(
-		input.workspace,
-		input.output ?? join("skillbox/.prepare", input.bundle, "edit"),
+	const context = await managed(input);
+	const { paths } = context;
+	const output = await preparedDirectory(
+		context,
+		input.output ?? join(paths.prepare, input.bundle, "edit"),
 	);
 	if (await statOptional(output))
 		throw responseError("DESTINATION_EXISTS", `Editing directory already exists: ${output}.`, {
@@ -61,7 +59,7 @@ export async function patchPrepare(input: PatchInput & { output?: string }) {
 		});
 	await mkdir(output, { recursive: true });
 	try {
-		return await prepare(input, config, lock, output);
+		return await prepare(input, context, output);
 	} catch (cause) {
 		await rm(output, { recursive: true, force: true });
 		throw cause;
@@ -70,7 +68,8 @@ export async function patchPrepare(input: PatchInput & { output?: string }) {
 
 export async function patchUpdate(input: PatchInput & { ref?: string }) {
 	if (input.ref !== undefined) refSchema.parse(input.ref);
-	const { config, lock } = await managed(input);
+	const context = await managed(input);
+	const { config, lock, paths } = context;
 	const refresh = new Map<string, string | undefined>();
 	for (const contribution of config.sources.filter(
 		(value) => value.id === input.bundle && !isLocalSource(value.source),
@@ -78,13 +77,13 @@ export async function patchUpdate(input: PatchInput & { ref?: string }) {
 		refresh.set(contributionIdentity(contribution), input.ref);
 	if (!refresh.size && input.ref)
 		throw responseError("REF_UNSUPPORTED", "This bundle has no Git source to update.");
-	const candidate = await input.bundles.resolvePins(input.workspace, config, lock, refresh);
-	const parent = join(input.workspace, "skillbox/.prepare", input.bundle);
+	const candidate = await input.bundles.resolvePins(context, refresh);
+	const parent = await preparedDirectory(context, join(paths.prepare, input.bundle));
 	await mkdir(parent, { recursive: true });
 	const output = await mkdtemp(join(parent, "update-"));
 	let retain = false;
 	try {
-		const result = await prepare(input, config, candidate, output, lock.sources);
+		const result = await prepare(input, { ...context, lock: candidate }, output, lock.sources);
 		retain = true;
 		return { ...result, from: lock.sources, to: candidate.sources };
 	} catch (cause) {
@@ -102,10 +101,11 @@ export async function patchUpdate(input: PatchInput & { ref?: string }) {
 export async function patchCapture(
 	input: PatchInput & { from: string; skill?: string; maps?: string[] },
 ) {
-	const { config, lock } = await managed(input);
+	const context = await managed(input);
+	const { config, lock, paths } = context;
 	if (input.skill) bundleSchema.parse(input.skill);
 	const mappings = parseMappings(input.maps ?? []);
-	const outer = resolve(input.workspace, input.from);
+	const outer = await preparedDirectory(context, input.from);
 	const manifest = preparedSchema.parse(
 		JSON.parse(await readFile(join(outer, "manifest.json"), "utf8")),
 	);
@@ -114,8 +114,10 @@ export async function patchCapture(
 		throw responseError("REGEN_WORKSPACE_INVALID", "Capture the complete update candidate.");
 	if (mappings.length && !updating)
 		throw responseError("RENAME_MAP_INVALID", "Rename mappings apply to update workspaces.");
-	const pack = join(input.workspace, "skillbox/patches", input.bundle);
+	const pack = join(context.root, context.paths.patches, input.bundle);
 	if (
+		manifest.workspace !== context.root ||
+		manifest.kind !== paths.kind ||
 		manifest.bundle !== input.bundle ||
 		manifest.configHash !== configHash(config) ||
 		jsonText(manifest.previousSources ?? manifest.sources) !== jsonText(lock.sources) ||
@@ -160,9 +162,7 @@ export async function patchCapture(
 		const candidate: Lock = { ...lock, sources: manifest.sources };
 		await mkdir(join(staging, "verify"));
 		await input.bundles.compose(
-			input.workspace,
-			config,
-			candidate,
+			{ ...context, lock: candidate },
 			input.bundle,
 			join(staging, "verify/skills"),
 			false,
@@ -280,9 +280,7 @@ export async function patchCapture(
 				entries.unshift({ staged: stagedPack, target: pack });
 			if (updating) {
 				const composed = await input.bundles.compose(
-					input.workspace,
-					config,
-					candidate,
+					{ ...context, lock: candidate },
 					input.bundle,
 					join(staging, "accepted"),
 					false,
@@ -307,7 +305,7 @@ export async function patchCapture(
 				await writeFile(join(staging, "lock.json"), jsonText(lockSchema.parse(candidate)));
 				entries.push({
 					staged: join(staging, "lock.json"),
-					target: join(input.workspace, lockPath),
+					target: join(context.root, paths.lock),
 				});
 			}
 			try {
@@ -325,6 +323,7 @@ export async function patchCapture(
 		const pending = await pendingIntents(pack);
 		return {
 			status: changed || updating ? "captured" : "unchanged",
+			config: paths.config,
 			bundle: input.bundle,
 			skills: selected.length,
 			changed,
@@ -340,27 +339,22 @@ export async function patchCapture(
 
 async function prepare(
 	input: PatchInput,
-	config: Config,
-	lock: Lock,
+	context: WorkspaceSnapshot,
 	output: string,
 	previousSources?: Lock["sources"],
 ) {
+	const { config, lock } = context;
 	await mkdir(join(output, "pristine"));
-	await input.bundles.compose(
-		input.workspace,
-		config,
-		lock,
-		input.bundle,
-		join(output, "pristine/skills"),
-		false,
-	);
+	await input.bundles.compose(context, input.bundle, join(output, "pristine/skills"), false);
 	await cp(join(output, "pristine"), join(output, "edited"), {
 		recursive: true,
 		preserveTimestamps: true,
 	});
-	const pack = join(input.workspace, "skillbox/patches", input.bundle);
+	const pack = join(context.root, context.paths.patches, input.bundle);
 	const manifest: Prepared = {
 		schema: 2,
+		workspace: context.root,
+		kind: context.paths.kind,
 		bundle: input.bundle,
 		configHash: configHash(config),
 		sources: lock.sources,
@@ -371,6 +365,7 @@ async function prepare(
 	await writeFile(join(output, "manifest.json"), jsonText(manifest));
 	const data = {
 		status: "prepared",
+		config: context.paths.config,
 		bundle: input.bundle,
 		workspace: output,
 		pristine: join(output, "pristine"),
@@ -408,14 +403,15 @@ async function prepare(
 }
 async function managed(input: PatchInput) {
 	bundleSchema.parse(input.bundle);
-	const config = await readConfig(input.workspace);
-	const lock = await readLock(input.workspace);
+	const context = await selectWorkspace(input.workspace);
+	const { config, lock } = context;
 	if (!config || !lock)
 		throw responseError(
 			"MANAGED_STATE_MISSING",
-			"A managed config and root lock are required. Register sources with add first.",
+			`Managed ${context.paths.config} and ${context.paths.lock} are required. Register sources with add first.`,
+			{ input: !config ? context.paths.config : context.paths.lock },
 		);
-	return { config, lock };
+	return { ...context, config, lock };
 }
 async function fileDigest(path: string): Promise<string | null> {
 	const entry = await statOptional(path);
@@ -432,19 +428,30 @@ async function fileDigest(path: string): Promise<string | null> {
 function configHash(config: Config): string {
 	return createHash("sha256").update(jsonText(config)).digest("hex");
 }
-function editingDirectory(workspace: string, output: string): string {
-	const directory = resolve(workspace, output);
-	const tracking = join(workspace, "skillbox");
-	if (
-		(directory === tracking || directory.startsWith(tracking + sep)) &&
-		!directory.startsWith(join(tracking, ".prepare") + sep)
-	)
-		throw responseError(
-			"DESTINATION_INVALID",
-			"Use skillbox/.prepare/<bundle>/ or a directory outside skillbox/ tracking files.",
-			{ input: output },
-		);
-	return directory;
+async function preparedDirectory(
+	{ root, paths }: WorkspaceSnapshot,
+	output: string,
+): Promise<string> {
+	const directory = resolve(root, output);
+	let ancestor = directory;
+	const missing: string[] = [];
+	while (!(await statOptional(ancestor))) {
+		missing.unshift(basename(ancestor));
+		ancestor = dirname(ancestor);
+	}
+	const destination = join(await realpath(ancestor), ...missing);
+	const tracking = join(root, "skillbox");
+	for (const path of new Set([directory, destination])) {
+		if (path !== tracking && !path.startsWith(tracking + sep)) continue;
+		if (!path.startsWith(join(root, paths.prepare) + sep))
+			throw responseError(
+				"DESTINATION_INVALID",
+				`Use ${paths.prepare}/<bundle>/ or a directory outside skillbox/ tracking files.`,
+				{ input: output },
+			);
+		await regularPath(root, relative(root, path).split(sep).join("/"));
+	}
+	return destination;
 }
 function parseMappings(values: string[]) {
 	const paths = new Set<string>();

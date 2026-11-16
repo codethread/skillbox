@@ -237,7 +237,7 @@ test("sync overrides permissive policy, preserves other metadata, and keeps exis
 	});
 });
 
-test("installed hashes converge, repair tampering, and remove generated policy when the flag is removed", async () => {
+test("installed hashes converge, protect edits, and remove generated policy when the flag is removed", async () => {
 	const f = await setup();
 	const authored =
 		"# Restore these bytes after flag removal.\npolicy: {allow_implicit_invocation: true}\n";
@@ -255,15 +255,17 @@ test("installed hashes converge, repair tampering, and remove generated policy w
 	});
 	expect(await snapshot(f.client)).toEqual(before);
 	expect((await lstat(join(f.client, "skillbox/lock.json"))).mtimeMs).toBe(lockStat.mtimeMs);
-	await put(
-		f.client,
-		".agents/skills/generated/agents/openai.yaml",
-		"policy: {allow_implicit_invocation: true}\n",
-	);
+	const generatedPath = ".agents/skills/generated/agents/openai.yaml";
+	const generated = await readFile(join(f.client, generatedPath), "utf8");
+	await put(f.client, generatedPath, "policy: {allow_implicit_invocation: true}\n");
+	const edited = await snapshot(f.client);
+	failure(await run(f.client, f.cache, "sync"), "MANAGED_SKILL_MODIFIED");
+	expect(await snapshot(f.client)).toEqual(edited);
+	await put(f.client, generatedPath, generated);
 	expect(success(await run(f.client, f.cache, "sync"))).toMatchObject({
-		status: "synced",
-		installed: 1,
-		unchanged: 1,
+		status: "unchanged",
+		installed: 0,
+		unchanged: 2,
 	});
 	expect(await snapshot(f.client)).toEqual(before);
 	expect(await readFile(join(f.client, "skillbox/lock.json"), "utf8")).toBe(lock);

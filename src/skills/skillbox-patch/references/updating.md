@@ -10,7 +10,7 @@ skillbox update <id>
 
 The destination can contain several contributions. Each direct Git contribution has its own configured ref and locked revision. Use command help for ref overrides; do not assume all sources share a branch or tag. Local filesystem sources use current worktree content rather than immutable Git pins. Update another local bundle's Git sources by addressing that bundle explicitly; updating its consumer does not advance them.
 
-Update creates a candidate workspace under `skillbox/.prepare/<id>/`. Use the returned paths rather than guessing its generated name:
+Update creates a candidate under `skillbox/.prepare/<id>/` for either config. Keep the same config active through capture. Use the returned paths rather than guessing the generated name:
 
 - `pristine/skills/` holds the candidate composition before your local patches.
 - `edited/skills/` holds the candidate with replayed local changes; conflicts may leave a partial result requiring repair.
@@ -35,7 +35,7 @@ Do not equate clean patch replay with a correct update.
     For raw skills, inspect their configured directory. For a Skillbox producer, inspect its native members, config, root lock, and patches, then compare materialized output. Do not pass a local worktree marker or content digest to Git as a revision.
 
 2. Review broad upstream changes, not only patched files: new files, renames, deletions, scripts, executable modes, and runtime assumptions.
-3. Read every affected file intent in `skillbox/patches/<id>/<skill>/patch.toml`. Compare that intent with the candidate under `edited/skills/`.
+3. Read every affected file intent in `<id>/<skill>/patch.toml` under the active patch directory. Compare that intent with the candidate under `edited/skills/`.
 4. If useful, prepare the currently recorded bundle in a separate fresh directory before capturing the candidate:
 
     ```sh
@@ -66,4 +66,4 @@ Capture rejects unresolved replay conflicts rather than dropping their patches. 
 
 New targets receive blank intent. Fill the reported `patch.toml` entries with the reason, required outcome, and constraints. Further ordinary captures append ordered changes as usual.
 
-Proceed with authorized routine changes; ask about unresolved product or policy decisions. Run `skillbox sync` only after intent and review findings are addressed. Verify the installed result, repeat sync for unchanged contents, and commit the root lock and changed patch artifacts together.
+Proceed with authorized routine changes; ask about unresolved product or policy decisions. Run `skillbox sync` only after intent and review findings are addressed. Verify the installed result and repeat sync for unchanged contents. Commit shared lock and patch changes together; keep personal lock and patches private.

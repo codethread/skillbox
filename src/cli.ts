@@ -47,7 +47,7 @@ addCommand
 	.description("Merge published Skillbox bundles into a destination local bundle.")
 	.argument("<source>", "producer repository URL, shorthand, or authored local path")
 	.argument("<id>", "destination local bundle name")
-	.requiredOption("--bundle <name>", "upstream bundle (repeatable)", collect, [])
+	.option("--bundle <name>", "upstream bundle (repeatable; default: all exports)", collect)
 	.option("--pick <json>", "bundle-to-skill-names selection map")
 	.option("--omit <json>", "bundle-to-skill-names exclusion map")
 	.option("--ref <ref>", "Git resolution and future update target")

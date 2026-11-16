@@ -18,24 +18,11 @@ import { z } from "zod";
 import { xdgCache } from "xdg-basedir";
 import { ResponseError, responseError } from "../response.ts";
 import { parseFrontmatter } from "../skills/frontmatter.ts";
-import {
-	bundleSchema,
-	contributionIdentity,
-	readConfig,
-	selectMembers,
-	type Config,
-} from "./config.ts";
-import {
-	emptyLock,
-	jsonText,
-	pinSchema,
-	readLock,
-	type Lock,
-	type Member,
-	type Pin,
-} from "./lock.ts";
+import { bundleSchema, contributionIdentity, selectMembers } from "./config.ts";
+import { emptyLock, jsonText, pinSchema, type Lock, type Member, type Pin } from "./lock.ts";
 import { hashTree, regularTree, replayPatches, requireIntents } from "./patches.ts";
-import { readOptional, statOptional } from "./paths.ts";
+import { readOptional, regularPath, statOptional } from "./paths.ts";
+import { readWorkspace, sharedPaths, type WorkspaceSnapshot } from "./context.ts";
 import type { PatchGit } from "./patch-git.ts";
 
 export interface ComposedBundle {
@@ -47,16 +34,12 @@ export interface ComposedBundle {
 export interface Bundles {
 	/** Resolve missing registrations or explicitly refreshed contributions; never float existing pins. */
 	resolvePins(
-		root: string,
-		config: Config,
-		lock: Lock,
+		context: WorkspaceSnapshot,
 		refresh?: Map<string, string | undefined>,
 	): Promise<Lock>;
 	/** Materialize a complete exported bundle, independently of install[]. */
 	compose(
-		root: string,
-		config: Config,
-		lock: Lock,
+		context: WorkspaceSnapshot,
 		bundle: string,
 		destination: string,
 		patches?: boolean,
@@ -64,10 +47,7 @@ export interface Bundles {
 	diffFiles: PatchGit["diffFiles"];
 	replay(pack: string, skills: string): Promise<void>;
 }
-interface Context {
-	root: string;
-	config: Config;
-	lock: Lock;
+interface Context extends WorkspaceSnapshot {
 	source: string;
 	revision?: string;
 	pinnedRoot?: string;
@@ -155,7 +135,7 @@ export function createBundles(git: PatchGit, configuredCache: string | undefined
 	return {
 		diffFiles: git.diffFiles,
 		replay: (pack, skills) => replayPatches(pack, skills, git),
-		async resolvePins(root, config, lock, refresh = new Map()) {
+		async resolvePins({ root, config, lock }, refresh = new Map()) {
 			const sources: Lock["sources"] = {};
 			for (const contribution of config.sources) {
 				const key = contributionIdentity(contribution);
@@ -182,9 +162,9 @@ export function createBundles(git: PatchGit, configuredCache: string | undefined
 			}
 			return { ...lock, sources };
 		},
-		async compose(root, config, lock, bundle, destination, patches = true) {
+		async compose(workspace, bundle, destination, patches = true) {
 			const active = new Set<string>();
-			const context: Context = { root: await realpath(root), config, lock, source: "." };
+			const context: Context = { ...workspace, source: "." };
 			const staging = await mkdtemp(join(dirname(destination), ".compose-"));
 			let sequence = 0;
 			async function composeBundle(
@@ -193,7 +173,7 @@ export function createBundles(git: PatchGit, configuredCache: string | undefined
 				target: string,
 				ownPatches: boolean,
 			): Promise<ComposedBundle> {
-				const key = `${ctx.root}\0${id}`;
+				const key = `${ctx.root}\0${ctx.paths.kind}\0${id}`;
 				if (active.has(key))
 					throw responseError(
 						"BUNDLE_IMPORT_CYCLE",
@@ -226,16 +206,19 @@ export function createBundles(git: PatchGit, configuredCache: string | undefined
 							members.push(member);
 						}
 					}
-					const native = await regularPath(ctx.root, `skillbox/${id}`);
-					await merge(
-						await discover(
+					const native = join(ctx.root, "skillbox", id);
+					if (ctx.paths.kind === "shared") {
+						await regularPath(ctx.root, `skillbox/${id}`);
+						await merge(
+							await discover(
+								native,
+								ctx.source,
+								originPath(ctx, `skillbox/${id}`),
+								ctx.revision,
+							),
 							native,
-							ctx.source,
-							originPath(ctx, `skillbox/${id}`),
-							ctx.revision,
-						),
-						native,
-					);
+						);
+					}
 					const contributions = ctx.config.sources.filter((value) => value.id === id);
 					if (!members.length && !contributions.length)
 						throw responseError("BUNDLE_NOT_FOUND", `No bundle named ${id}.`, {
@@ -283,11 +266,12 @@ export function createBundles(git: PatchGit, configuredCache: string | undefined
 									{ source: contribution.source },
 								);
 							upstream =
-								sourceRoot === ctx.root
+								sourceRoot === ctx.root && ctx.paths.kind === "shared"
 									? ctx
 									: contribution.type === "skills"
 										? {
 												root: sourceRoot,
+												paths: sharedPaths,
 												source: ctx.pinnedRoot
 													? ctx.source
 													: contribution.source,
@@ -313,6 +297,7 @@ export function createBundles(git: PatchGit, configuredCache: string | undefined
 								contribution.type === "skills"
 									? {
 											root: sourceRoot,
+											paths: sharedPaths,
 											source: contribution.source,
 											revision: entry.pin.revision,
 											config: { sources: [], install: [] },
@@ -351,9 +336,25 @@ export function createBundles(git: PatchGit, configuredCache: string | undefined
 								directory,
 							);
 						} else {
-							for (const selected of contribution.bundles) {
+							const requested = contribution.bundles ?? (await exportIds(upstream));
+							for (const selected of new Set([
+								...Object.keys(contribution.pick ?? {}),
+								...Object.keys(contribution.omit ?? {}),
+							]))
+								if (!requested.includes(selected))
+									throw responseError(
+										"BUNDLE_NOT_FOUND",
+										`Selector for unrequested bundle: ${selected}.`,
+										{ input: selected },
+									);
+							for (const selected of requested) {
 								// The native member is already present. Other local references recurse normally.
-								if (upstream.root === ctx.root && selected === id) {
+								if (
+									upstream.root === ctx.root &&
+									upstream.paths.kind === "shared" &&
+									ctx.paths.kind === "shared" &&
+									selected === id
+								) {
 									const ownNative = await discover(
 										native,
 										ctx.source,
@@ -397,7 +398,7 @@ export function createBundles(git: PatchGit, configuredCache: string | undefined
 					}
 					const sourceHash = await hashTree(target);
 					if (ownPatches) {
-						const pack = join(ctx.root, "skillbox/patches", id);
+						const pack = join(ctx.root, ctx.paths.patches, id);
 						await requireIntents(pack);
 						await replayPatches(pack, target, git);
 					}
@@ -445,15 +446,36 @@ async function producerContext(
 	revision?: string,
 	pinnedRoot?: string,
 ): Promise<Context> {
-	const config = (await readConfig(root)) ?? { sources: [], install: [] };
-	const lock = await readLock(root);
-	if (config.sources.length && !lock)
+	const context = await readWorkspace(root, "shared");
+	const config = context.config ?? { sources: [], install: [] };
+	if (config.sources.length && !context.lock)
 		throw responseError(
 			"PRODUCER_LOCK_MISSING",
 			`Producer ${source} has no committed source pins.`,
 			{ source },
 		);
-	return { root, config, lock: lock ?? emptyLock(), source, revision, pinnedRoot };
+	return { ...context, config, lock: context.lock ?? emptyLock(), source, revision, pinnedRoot };
+}
+
+export async function exportIds({
+	root,
+	config,
+	paths,
+}: Pick<WorkspaceSnapshot, "root" | "config" | "paths">): Promise<string[]> {
+	const ids = new Set(config.sources.map((source) => source.id));
+	const directory = join(root, "skillbox");
+	if (paths.kind === "shared" && (await statOptional(directory)))
+		for (const entry of await readdir(directory, { withFileTypes: true })) {
+			if (
+				!entry.isDirectory() ||
+				["patches", ".prepare", ".local"].includes(entry.name) ||
+				entry.name.startsWith(".skillbox-")
+			)
+				continue;
+			if ((await discover(join(directory, entry.name), ".", `skillbox/${entry.name}`)).length)
+				ids.add(entry.name);
+		}
+	return [...ids].sort();
 }
 
 export async function discover(
@@ -514,23 +536,6 @@ export async function discover(
 		});
 	}
 	return members;
-}
-
-async function regularPath(root: string, path: string): Promise<string> {
-	let current = root;
-	for (const part of path.split("/")) {
-		if (part === ".") continue;
-		current = join(current, part);
-		const entry = await statOptional(current);
-		if (entry?.isSymbolicLink())
-			throw responseError(
-				"SOURCE_PATH_UNSAFE",
-				`Source paths cannot traverse symlinks: ${current}.`,
-				{ input: current },
-			);
-		if (!entry) break;
-	}
-	return join(root, path);
 }
 
 async function cacheDigest(root: string): Promise<string> {

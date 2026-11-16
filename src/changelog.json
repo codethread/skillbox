@@ -1,5 +1,56 @@
 [
 	{
+		"version": "0.4.0",
+		"changes": [
+			{
+				"commit": "870c04f",
+				"summary": "Experiment with personal skills without changing shared configuration, locks, or patches.",
+				"body": "Create skillbox/.local/config.json to select a personal installation instead of the shared configuration. Reuse the existing importers and pick/omit selectors, import \".\" for shared bundles, and add personal sources independently. Personal config, lock, patches, and the installation receipt live under skillbox/.local/. Producers always export shared state.",
+				"breaking": [
+					"Sync now rejects modified managed skills instead of overwriting local edits. Prepared edit manifests now bind the workspace and active config kind; preparations created by earlier versions cannot be captured directly."
+				],
+				"adoption": [
+					{
+						"requirement": "optional",
+						"text": "To opt in, ignore /skillbox/.local/ in .gitignore or Git's private info/exclude, then create skillbox/.local/config.json and run sync. Keep /skillbox/.prepare/ ignored too. Import \".\" explicitly to include shared bundles. Personal config replaces shared config; it does not merge with it."
+					},
+					{
+						"requirement": "required",
+						"text": "Keep skillbox/.local/install-state.json when switching between shared and personal config. Move only skillbox/.local/config.json aside to return to shared mode, then run sync. Restore it and sync to resume personal mode. Existing version 2 shared locks work without recreation; the first sync bootstraps the installation receipt from the shared lock."
+					},
+					{
+						"requirement": "required",
+						"text": "Before upgrading, capture pending prepared edits with your current version or back up the editable files. To continue uncaptured edits after upgrading, prepare again under the intended config and transfer your edits into the new preparation. Shared and personal edits use skillbox/.prepare/; an existing preparation path fails without overwrite. Back up edits made directly to installed skills and restore the managed files before syncing."
+					}
+				]
+			},
+			{
+				"commit": "870c04f",
+				"summary": "Import every exported Skillbox bundle when bundle selection is omitted.",
+				"body": "Omit --bundle or the bundles config field to import all shared exported bundles, including bundles the producer does not install. Named bundle selections and per-bundle pick/omit remain available.",
+				"breaking": [],
+				"adoption": [
+					{
+						"requirement": "optional",
+						"text": "Omit --bundle when adding a Skillbox source to consume all its exports. Keep explicit --bundle selections to limit which upstream bundles you import."
+					}
+				]
+			},
+			{
+				"commit": "019c681",
+				"summary": "Apply manual-only invocation policy to installed skills.",
+				"body": "When the final patched SKILL.md has disable-model-invocation: true, installation sets policy.allow_implicit_invocation to false in agents/openai.yaml. Other metadata remains intact. Authored sources and patch exports do not gain generated policy files.",
+				"breaking": [],
+				"adoption": [
+					{
+						"requirement": "optional",
+						"text": "Run sync to apply invocation policy to existing managed installations. A missing or false disable-model-invocation flag leaves authored OpenAI metadata unchanged."
+					}
+				]
+			}
+		]
+	},
+	{
 		"version": "0.3.0",
 		"changes": [
 			{

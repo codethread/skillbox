@@ -4,7 +4,7 @@ These criteria define Skillbox's intended behavior. Release history belongs in [
 
 ## User goal
 
-As a user, I want to compose publishable bundles from upstream and locally authored skills, independently choose which bundles my project installs, and reproduce or explicitly update pinned sources with minimal effort. I want to customize upstream skills while retaining both my concrete changes and the intent behind them.
+As a user, I want to compose publishable bundles from upstream and locally authored skills, independently choose which bundles my project installs, and reproduce or explicitly update pinned sources with minimal effort. I want to customize upstream skills while retaining both my concrete changes and the intent behind them. I want to try personal skills without changing my team's shared setup.
 
 ## Common CLI contract
 
@@ -21,15 +21,33 @@ As a user, I want to compose publishable bundles from upstream and locally autho
 ### Select a workspace
 
 - **When** I run an operational command with `--workspace <dir>`,
-- **Then** `<dir>` selects the workspace for installed skills, `skillbox/config.json`, and lockfiles, rather than selecting a config file,
+- **Then** `<dir>` selects the workspace for installed skills, the active config, and lockfiles, rather than selecting a config file,
 - **And** relative directories are resolved from the invocation directory; absolute directories are supported,
 - **And** omitting the option selects the current directory.
+
+- **When** I run a command that uses workspace configuration,
+- **Then** `skillbox/.local/config.json` is active if present, otherwise `skillbox/config.json` is active,
+- **And** Skillbox does not automatically merge the two configs,
+- **And** local config includes only explicit contributions, with shared native and composed bundles available through a normal Skillbox import of `"."`.
 
 ### Keep lock ownership separate
 
 - **When** Skillbox manages a workspace installation,
 - **Then** Skillbox stores its lockfile within that workspace's `skillbox/` directory,
+- **And** it uses `skillbox/.local/lock.json` for local config and `skillbox/lock.json` for shared config,
+- **And** one ignored `skillbox/.local/install-state.json` tracks the physical installation across both configs,
 - **And** it does not read or modify the root `skills-lock.json` used by `npx skills`.
+
+- **Given** local config is active,
+- **When** I add, sync, prepare, capture, or update,
+- **Then** changes use the private lock and `skillbox/.local/patches/` as applicable,
+- **And** shared config, lock, and patches remain unchanged,
+- **And** both configs use `skillbox/.prepare/`, with prepared manifests retaining workspace and config ownership.
+
+- **Given** I keep personal config and state out of version control,
+- **When** I set up ignore rules,
+- **Then** one `skillbox/.local/` ignore pattern covers private config, lock, patches, and installation state, and `skillbox/.prepare/` covers preparation for both configs,
+- **And** Skillbox does not edit `.gitignore` or Git's `info/exclude` automatically.
 
 ### Return explicit JSON outcomes
 
@@ -42,6 +60,7 @@ As a user, I want to compose publishable bundles from upstream and locally autho
 
 - **When** a command changes project state or determines that no changes are needed,
 - **Then** its JSON response reports confirmed effects, including unchanged or no-op outcomes, and identifiers needed for the next action,
+- **And** mutators report the selected config path,
 - **And** it does not dump configuration or lockfile contents by default.
 
 ### Disclose detail on demand
@@ -88,12 +107,12 @@ Partial-result reporting does not authorize continuing mutations after a failure
 ### Add a contribution to a destination bundle
 
 - **Given** a source provides raw skill directories or publishable Skillbox bundles,
-- **When** I run `add skills <source> <id> --path <directory>` or `add skillbox <source> <id> --bundle <upstream-id> ...`,
-- **Then** Skillbox records a contribution to destination `<id>` in `skillbox/config.json`,
+- **When** I run `add skills <source> <id> --path <directory>` or `add skillbox <source> <id> [--bundle <upstream-id> ...]`,
+- **Then** Skillbox records a contribution to destination `<id>` in the active config,
 - **And** both commands accept an optional `--ref` and select the destination for installation by default,
 - **And** `--no-install` leaves the installation list unchanged.
 
-Config has `{sources: Contribution[], install: string[]}`. A contribution has `type`, destination `id`, `source`, and optional `ref`. Raw `skills` contributions require `path`; `skillbox` contributions require upstream `bundles`.
+Config has `{sources: Contribution[], install: string[]}`. A contribution has `type`, destination `id`, `source`, and optional `ref`. Raw `skills` contributions require `path`. Skillbox contributions may specify upstream `bundles`; omitting that field or CLI `--bundle` selects every published source bundle. This applies to local and remote sources independently of the producer's `install` list. Existing pick/omit, collision, and pin rules still apply.
 
 ### Select incoming skills
 
@@ -110,8 +129,9 @@ Raw CLI selectors repeat (`--pick a --pick b`, or `--omit x`). Skillbox CLI sele
 
 - **Given** multiple contributions use the same destination id,
 - **When** Skillbox resolves that bundle,
-- **Then** it combines their selected skills with any native `skillbox/<id>/<skill>/SKILL.md` members,
-- **And** a physical directory and virtual contributions with the same id form one bundle, not competing layouts,
+- **Then** it combines their selected skills,
+- **And** shared composition also includes native `skillbox/<id>/<skill>/SKILL.md` members, so a physical directory and shared virtual contributions form one bundle,
+- **And** local config receives shared native members only through explicit imports,
 - **And** local Skillbox sources can reference other native or composed bundles,
 - **And** composition cycles and skill-name collisions fail rather than choosing a winner.
 
@@ -119,27 +139,39 @@ Raw CLI selectors repeat (`--pick a --pick b`, or `--omit x`). Skillbox CLI sele
 
 - **Given** a repository defines native or composed bundles,
 - **When** another project imports one of those bundles,
-- **Then** its export is determined by native members and configured contributions, not the producer's `install` list,
+- **Then** its export is determined by native members and shared configured contributions, not the producer's `install` list,
+- **And** imports read only shared producer config, lock, and patches, including same-repository imports, without consulting personal state,
 - **And** a repository may publish more bundles than it installs, including installing none,
 - **And** a native-only producer needs no config,
 - **And** the consumer receives the composed output with producer-owned patches applied.
 
-Config defines composition/publication as well as installation.
+Shared config defines publication as well as installation. Personal composition is not published.
 
 ### Select local installation
 
-- **Given** my workspace defines publishable bundle ids,
+- **Given** my active configuration exposes destination bundle ids,
 - **When** I choose ids in the distinct `install` list and run sync,
 - **Then** only those bundles' skills enter the managed installation,
 - **And** deselecting a bundle removes its managed installation without removing its export,
 - **And** collisions between installed bundles fail rather than overwriting skills.
 
+- **Given** I have synced a personal configuration,
+- **When** I remove `skillbox/.local/config.json` from its active path and sync,
+- **Then** Skillbox reconciles the physical installation to shared config,
+- **And** restoring that file and syncing restores the personal selection without deleting its private lock, patches, or installation state.
+
 ### Reconcile configuration edits
 
-- **Given** I edit source contributions or the installation list in `skillbox/config.json`,
+- **Given** I edit source contributions or the installation list in the active config,
 - **When** I run sync,
 - **Then** Skillbox installs newly selected skills, removes deselected managed skills, and reconciles its lock with that configuration,
 - **And** retained Git sources keep their pins unless I explicitly update them.
+
+- **Given** I create a personal config without a private lock,
+- **When** I sync that personal config for the first time,
+- **Then** Skillbox resolves its own direct source pins into the private lock,
+- **And** shared producer locks and patched output remain authoritative for imports,
+- **And** later contributions with missing Git pins require `add`, rather than ordinary sync resolving new pins.
 
 ### Preserve unrelated skills
 
@@ -161,7 +193,7 @@ Config defines composition/publication as well as installation.
 - **Given** an external repository contains a skill with `SKILL.md` and supporting files,
 - **When** I add it to a bundle selected for installation,
 - **Then** its complete files install into my project without requiring a global skill installation,
-- **And** root `skillbox/lock.json` records immutable Git source pins and flattened member provenance, including source locations,
+- **And** the active config's lock records immutable Git source pins and flattened member provenance, including source locations,
 - **And** fetched Git revisions use the shared local cache.
 
 Filesystem-path sources are live local worktrees for owned authoring. Remote Git sources and `file://` Git sources use immutable revisions; a live local path is not an immutable pin.
@@ -326,7 +358,7 @@ Filesystem-path sources are live local worktrees for owned authoring. Remote Git
 
 ## Intent-backed patches
 
-Source registration uses `add`. Prepare/capture/update operate on the composed destination bundle. Per-skill `skillbox/patches/<id>/<skill>/patch.toml` records file intent, and `changes/` stores ordered patch payloads. Pins and flattened provenance belong in root `skillbox/lock.json`.
+Source registration uses `add`. Prepare/capture/update operate on the active config's composed destination bundle. Per-skill `patch.toml` records file intent, and `changes/` stores ordered patch payloads. Shared patches live at `skillbox/patches/<id>/<skill>/`; personal patches use `skillbox/.local/patches/<id>/<skill>/`. Pins and flattened provenance belong in the matching lock.
 
 Producer intent describes producer-owned changes; consumers keep only their additional changes and reasons. Optional collection-wide rationale belongs in ordinary repository prose and does not replace per-file intent or introduce another schema.
 
@@ -337,7 +369,7 @@ Producer intent describes producer-owned changes; consumers keep only their addi
 - **Then** the agent records what should change and why in TOML metadata within a repository-local patch directory for that skill,
 - **And** the target is recorded relative to the distributed skill root as `./references/strict-types.md`, not as an absolute filesystem path or URL,
 - **And** the agent creates concrete patch artifacts alongside the metadata, leaving the rest of the skill unchanged,
-- **And** the metadata and patch artifacts can be version-controlled with my project.
+- **And** shared metadata and patch artifacts can be version-controlled with my project, while personal patches remain private.
 
 ### Patch multiple files in a skill
 
