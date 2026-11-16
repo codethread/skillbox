@@ -468,7 +468,7 @@ export async function exportIds({
 		for (const entry of await readdir(directory, { withFileTypes: true })) {
 			if (
 				!entry.isDirectory() ||
-				["patches", "patches.local", ".prepare", ".prepare.local"].includes(entry.name) ||
+				["patches", ".prepare", ".local"].includes(entry.name) ||
 				entry.name.startsWith(".skillbox-")
 			)
 				continue;

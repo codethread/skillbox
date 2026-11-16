@@ -5,7 +5,7 @@ import { parse, stringify } from "smol-toml";
 import { failure, fixture, json, put, run, skill, snapshot, success } from "./helpers.ts";
 
 async function configure(root: string, sources: object[], install: string[]) {
-	await put(root, "skillbox/config.local.json", JSON.stringify({ sources, install }));
+	await put(root, "skillbox/.local/config.json", JSON.stringify({ sources, install }));
 }
 
 async function annotate(root: string, path: string) {
@@ -20,7 +20,7 @@ test("receipt bootstrap protects edits, restores missing output, and rejects los
 	try {
 		await put(f.client, "skillbox/team/alpha/SKILL.md", skill("alpha", "shared"));
 		success(await run(f.client, f.cache, "add", "skillbox", ".", "team", "--bundle", "team"));
-		await rm(join(f.client, "skillbox/install-state.local.json"));
+		await rm(join(f.client, "skillbox/.local/install-state.json"));
 		await configure(
 			f.client,
 			[{ type: "skillbox", id: "team", source: ".", bundles: ["team"] }],
@@ -35,14 +35,14 @@ test("receipt bootstrap protects edits, restores missing output, and rejects los
 		expect(await readFile(join(f.client, ".agents/skills/alpha/SKILL.md"), "utf8")).toBe(
 			skill("alpha", "shared"),
 		);
-		const receipt = await json(join(f.client, "skillbox/install-state.local.json"));
+		const receipt = await json(join(f.client, "skillbox/.local/install-state.json"));
 		expect(receipt).toMatchObject({ version: 1, owner: "local", personalInitialized: true });
 		expect(receipt.installed).toEqual(
-			(await json(join(f.client, "skillbox/lock.local.json"))).installed,
+			(await json(join(f.client, "skillbox/.local/lock.json"))).installed,
 		);
 		const paths = [
-			"skillbox/lock.local.json",
-			"skillbox/install-state.local.json",
+			"skillbox/.local/lock.json",
+			"skillbox/.local/install-state.json",
 			".agents/skills",
 			".agents/skills/alpha/SKILL.md",
 			".claude/skills",
@@ -52,7 +52,7 @@ test("receipt bootstrap protects edits, restores missing output, and rejects los
 		);
 		expect(success(await run(f.client, f.cache, "sync"))).toMatchObject({
 			status: "unchanged",
-			config: "skillbox/config.local.json",
+			config: "skillbox/.local/config.json",
 		});
 		expect(
 			await Promise.all(
@@ -60,20 +60,22 @@ test("receipt bootstrap protects edits, restores missing output, and rejects los
 			),
 		).toEqual(mtimes);
 		await chmod(join(f.client, ".agents/skills/alpha/SKILL.md"), 0o755);
-		await rename(join(f.client, "skillbox/config.local.json"), join(f.root, "saved.json"));
+		await rename(join(f.client, "skillbox/.local/config.json"), join(f.root, "saved.json"));
 		before = await snapshot(f.client);
 		failure(await run(f.client, f.cache, "sync"), "MANAGED_SKILL_MODIFIED");
 		expect(await snapshot(f.client)).toEqual(before);
 		await chmod(join(f.client, ".agents/skills/alpha/SKILL.md"), 0o644);
-		await rename(join(f.root, "saved.json"), join(f.client, "skillbox/config.local.json"));
-		await rm(join(f.client, "skillbox/install-state.local.json"));
+		await rename(join(f.root, "saved.json"), join(f.client, "skillbox/.local/config.json"));
+		await rm(join(f.client, "skillbox/.local/install-state.json"));
 		before = await snapshot(f.client);
 		failure(await run(f.client, f.cache, "sync"), "INSTALL_STATE_MISSING");
 		expect(await snapshot(f.client)).toEqual(before);
 		expect(success(await run(f.client, f.cache, "patch", "prepare", "team"))).toMatchObject({
-			config: "skillbox/config.local.json",
+			config: "skillbox/.local/config.json",
 		});
-		expect(await readdir(join(f.client, "skillbox"))).not.toContain("install-state.local.json");
+		expect(await readdir(join(f.client, "skillbox/.local"))).not.toContain(
+			"install-state.json",
+		);
 	} finally {
 		await rm(f.root, { recursive: true, force: true });
 	}
@@ -90,20 +92,20 @@ test("initialized private state rejects malformed files and missing pins without
 			["personal"],
 		);
 		success(await run(f.client, f.cache, "sync"));
-		const privateLock = await json(join(f.client, "skillbox/lock.local.json"));
+		const privateLock = await json(join(f.client, "skillbox/.local/lock.json"));
 		for (const [value, code] of [
 			["{invalid", "LOCK_INVALID"],
 			[JSON.stringify({ ...privateLock, sources: {} }), "PIN_MISSING"],
 		]) {
-			await put(f.client, "skillbox/lock.local.json", value!);
+			await put(f.client, "skillbox/.local/lock.json", value!);
 			const before = await snapshot(f.client);
 			const result = await run(f.client, f.cache, "sync");
 			failure(result, code!);
 			if (code === "LOCK_INVALID")
-				expect(result.response.errors[0]?.message).toContain("skillbox/lock.local.json");
+				expect(result.response.errors[0]?.message).toContain("skillbox/.local/lock.json");
 			expect(await snapshot(f.client)).toEqual(before);
 		}
-		await rm(join(f.client, "skillbox/lock.local.json"));
+		await rm(join(f.client, "skillbox/.local/lock.json"));
 		const before = await snapshot(f.client);
 		failure(
 			await run(f.client, f.cache, "add", "skillbox", ".", "personal", "--bundle", "team"),
@@ -136,7 +138,17 @@ test("personal patches layer over shared patches and reject a changed shared pre
 			["team"],
 		);
 		success(await run(f.client, f.cache, "sync"));
-		const personal = success(await run(f.client, f.cache, "patch", "prepare", "team"));
+		const personal = success(
+			await run(
+				f.client,
+				f.cache,
+				"patch",
+				"prepare",
+				"team",
+				"--output",
+				"skillbox/.prepare/team/personal",
+			),
+		);
 		expect(await readFile(join(personal.pristine, "skills/alpha/SKILL.md"), "utf8")).toBe(
 			skill("alpha", "shared patch"),
 		);
@@ -144,7 +156,7 @@ test("personal patches layer over shared patches and reject a changed shared pre
 		const captured = success(
 			await run(f.client, f.cache, "patch", "capture", "team", "--from", personal.workspace),
 		);
-		expect(captured.intentFiles).toEqual(["skillbox/patches.local/team/alpha/patch.toml"]);
+		expect(captured.intentFiles).toEqual(["skillbox/.local/patches/team/alpha/patch.toml"]);
 		await annotate(f.client, captured.intentFiles[0]);
 		success(await run(f.client, f.cache, "sync"));
 		expect(await readFile(join(f.client, ".agents/skills/alpha/SKILL.md"), "utf8")).toBe(
@@ -161,7 +173,7 @@ test("personal patches layer over shared patches and reject a changed shared pre
 				"prepare",
 				"team",
 				"--output",
-				"skillbox/.prepare.local/team/stale",
+				"skillbox/.prepare/team/stale",
 			),
 		);
 		await put(f.client, "skillbox/team/alpha/new.txt", "new upstream resource\n");
@@ -192,7 +204,7 @@ test("personal-only composition does not inspect an unused same-id shared native
 		expect(await readFile(join(f.client, ".agents/skills/alpha/SKILL.md"), "utf8")).toBe(
 			skill("alpha", "personal source"),
 		);
-		expect((await json(join(f.client, "skillbox/lock.local.json"))).bundles).toHaveProperty(
+		expect((await json(join(f.client, "skillbox/.local/lock.json"))).bundles).toHaveProperty(
 			"team",
 		);
 	} finally {

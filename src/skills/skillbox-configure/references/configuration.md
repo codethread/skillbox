@@ -27,7 +27,7 @@ Changing `ref` in config changes the future update target, not the existing pin.
 
 ## Config
 
-`skillbox/config.local.json` is active when present; otherwise `skillbox/config.json` is active. Mutators report the selected path. Both files use the same schema, but they are never automatically merged.
+`skillbox/.local/config.json` is active when present; otherwise `skillbox/config.json` is active. Mutators report the selected path. Both files use the same schema, but they are never automatically merged.
 
 For a personal installation, create this local config using your source's exact bundle and skill names:
 
@@ -53,7 +53,7 @@ For a personal installation, create this local config using your source's exact 
 
 This imports all shared bundles except `pstack`'s `poteto-mode` skill and adds skills from `../my-skills/skills/`. Run sync to install the selection. Personal config has only explicit contributions. The `"."` source uses the normal importer to read shared output, including native bundles, shared pins, and producer patches.
 
-To switch to shared config, move `config.local.json` out of its active path and sync. Restore it and sync to return to personal config. Keep private state through both switches.
+To switch to shared config, move `skillbox/.local/config.json` out of its active path and sync. Restore it and sync to return to personal config. Keep private state through both switches.
 
 The config has two fields, `sources` and `install`.
 
@@ -72,7 +72,7 @@ A repository publishing only native directories needs no config. A composition p
 
 ## Lock and patch ownership
 
-Shared config uses `skillbox/lock.json` and `skillbox/patches/`. Personal config uses `skillbox/lock.local.json` and `skillbox/patches.local/`. Each lock records source pins and flattened member provenance. One `skillbox/install-state.local.json` tracks the physical installation across both configs. Keep it when switching.
+Shared config uses `skillbox/lock.json` and `skillbox/patches/`. Personal config uses `skillbox/.local/lock.json` and `skillbox/.local/patches/`. Each lock records source pins and flattened member provenance. One `skillbox/.local/install-state.json` tracks the physical installation across both configs. Keep it when switching.
 
 The first personal sync resolves its own direct Git pins without changing shared state. Imports use the producer's shared lock and patched output; personal sync does not resolve missing producer pins. Later contributions with missing Git pins require `add`. Losing an initialized private lock is an error, not a request to resolve fresh pins. Git sources retain immutable revisions; filesystem sources remain live worktrees. Do not hand-edit or delete pins to silence an error. Skillbox does not use or modify `skills-lock.json` belonging to `npx skills`.
 
@@ -88,11 +88,7 @@ Keep personal sources outside the repository or in a separately ignored director
 /.agents/skills/
 /.claude/skills
 /skillbox/.prepare/
-/skillbox/config.local.json
-/skillbox/lock.local.json
-/skillbox/patches.local/
-/skillbox/.prepare.local/
-/skillbox/install-state.local.json
+/skillbox/.local/
 ```
 
 Use no trailing slash on the `.claude/skills` symlink rule. Capture wanted edits before deleting a preparation workspace.

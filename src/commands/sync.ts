@@ -25,7 +25,7 @@ import {
 import { readOptional, regularPath, statOptional } from "../workspace/paths.ts";
 import { publish } from "../workspace/publish.ts";
 
-export const receiptPath = "skillbox/install-state.local.json";
+export const receiptPath = "skillbox/.local/install-state.json";
 const receiptSchema = z.strictObject({
 	version: z.literal(1),
 	owner: z.enum(["shared", "local"]),
@@ -167,7 +167,7 @@ export async function reconcile(
 				unchanged,
 				removed: 0,
 			};
-		await mkdir(join(staging, "skillbox"), { recursive: true });
+		await mkdir(dirname(join(staging, receiptPath)), { recursive: true });
 		await writeFile(join(staging, paths.lock), nextText);
 		await writeFile(join(staging, receiptPath), receiptText);
 		await mkdir(join(staging, ".claude"));

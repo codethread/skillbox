@@ -22,8 +22,9 @@ test("all imports enumerate shared exports and repeated add preserves all with n
 		await put(producer, "skillbox/first/alpha/SKILL.md", skill("alpha"));
 		await put(producer, "skillbox/first/extra/SKILL.md", skill("extra"));
 		await put(producer, "skillbox/second/beta/SKILL.md", skill("beta"));
-		await put(producer, "skillbox/patches.local/fake/SKILL.md", skill("fake"));
-		await put(producer, "skillbox/.prepare.local/fake/SKILL.md", skill("fake"));
+		await put(producer, "skillbox/.local/fake/SKILL.md", skill("fake"));
+		await put(producer, "skillbox/.local/patches/private/SKILL.md", skill("private"));
+		await put(producer, "skillbox/.prepare/fake/SKILL.md", skill("fake"));
 		await put(producer, "raw/gamma/SKILL.md", skill("gamma"));
 		success(
 			await run(
@@ -38,7 +39,7 @@ test("all imports enumerate shared exports and repeated add preserves all with n
 				"--no-install",
 			),
 		);
-		await put(producer, "skillbox/config.local.json", "{poisoned");
+		await put(producer, "skillbox/.local/config.json", "{poisoned");
 		await commit(producer);
 		for (const [index, source] of [producer, url].entries()) {
 			const client = join(f.root, `client-${index}`);

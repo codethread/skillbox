@@ -26,7 +26,7 @@ As a user, I want to compose publishable bundles from upstream and locally autho
 - **And** omitting the option selects the current directory.
 
 - **When** I run a command that uses workspace configuration,
-- **Then** `skillbox/config.local.json` is active if present, otherwise `skillbox/config.json` is active,
+- **Then** `skillbox/.local/config.json` is active if present, otherwise `skillbox/config.json` is active,
 - **And** Skillbox does not automatically merge the two configs,
 - **And** local config includes only explicit contributions, with shared native and composed bundles available through a normal Skillbox import of `"."`.
 
@@ -34,19 +34,19 @@ As a user, I want to compose publishable bundles from upstream and locally autho
 
 - **When** Skillbox manages a workspace installation,
 - **Then** Skillbox stores its lockfile within that workspace's `skillbox/` directory,
-- **And** it uses `skillbox/lock.local.json` for local config and `skillbox/lock.json` for shared config,
-- **And** one ignored `skillbox/install-state.local.json` tracks the physical installation across both configs,
+- **And** it uses `skillbox/.local/lock.json` for local config and `skillbox/lock.json` for shared config,
+- **And** one ignored `skillbox/.local/install-state.json` tracks the physical installation across both configs,
 - **And** it does not read or modify the root `skills-lock.json` used by `npx skills`.
 
 - **Given** local config is active,
 - **When** I add, sync, prepare, capture, or update,
-- **Then** changes use the private lock, `skillbox/patches.local/`, and `skillbox/.prepare.local/` as applicable,
+- **Then** changes use the private lock and `skillbox/.local/patches/` as applicable,
 - **And** shared config, lock, and patches remain unchanged,
-- **And** shared preparation continues to use `skillbox/.prepare/`.
+- **And** both configs use `skillbox/.prepare/`, with prepared manifests retaining workspace and config ownership.
 
 - **Given** I keep personal config and state out of version control,
 - **When** I set up ignore rules,
-- **Then** documented patterns cover private config, lock, patches, preparation, and installation state,
+- **Then** one `skillbox/.local/` ignore pattern covers private config, lock, patches, and installation state, and `skillbox/.prepare/` covers preparation for both configs,
 - **And** Skillbox does not edit `.gitignore` or Git's `info/exclude` automatically.
 
 ### Return explicit JSON outcomes
@@ -156,7 +156,7 @@ Shared config defines publication as well as installation. Personal composition 
 - **And** collisions between installed bundles fail rather than overwriting skills.
 
 - **Given** I have synced a personal configuration,
-- **When** I remove `config.local.json` from its active path and sync,
+- **When** I remove `skillbox/.local/config.json` from its active path and sync,
 - **Then** Skillbox reconciles the physical installation to shared config,
 - **And** restoring that file and syncing restores the personal selection without deleting its private lock, patches, or installation state.
 
@@ -358,7 +358,7 @@ Filesystem-path sources are live local worktrees for owned authoring. Remote Git
 
 ## Intent-backed patches
 
-Source registration uses `add`. Prepare/capture/update operate on the active config's composed destination bundle. Per-skill `patch.toml` records file intent, and `changes/` stores ordered patch payloads. Shared patches live at `skillbox/patches/<id>/<skill>/`; personal patches use `skillbox/patches.local/<id>/<skill>/`. Pins and flattened provenance belong in the matching lock.
+Source registration uses `add`. Prepare/capture/update operate on the active config's composed destination bundle. Per-skill `patch.toml` records file intent, and `changes/` stores ordered patch payloads. Shared patches live at `skillbox/patches/<id>/<skill>/`; personal patches use `skillbox/.local/patches/<id>/<skill>/`. Pins and flattened provenance belong in the matching lock.
 
 Producer intent describes producer-owned changes; consumers keep only their additional changes and reasons. Optional collection-wide rationale belongs in ordinary repository prose and does not replace per-file intent or introduce another schema.
 

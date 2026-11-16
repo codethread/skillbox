@@ -9,7 +9,7 @@ Use this workflow to change imported instructions without editing generated inst
 
 Source registration belongs to `add skills` or `add skillbox`. For source selection or personal setup, load `skillbox skills get skillbox-configure`. An unchanged import has config and a matching lock, but no patch directory.
 
-Check the active config before preparing or capturing. `skillbox/config.local.json` selects personal config when present; otherwise `skillbox/config.json` is active. Mutators report that path. Personal commands use `lock.local.json`, `patches.local/`, and `.prepare.local/` under `skillbox/`, leaving shared state unchanged.
+Check the active config before preparing or capturing. `skillbox/.local/config.json` selects personal config when present; otherwise `skillbox/config.json` is active. Mutators report that path. Personal commands use `lock.json` and `patches/` under `skillbox/.local/`, leaving shared config, lock, and patches unchanged.
 
 ## Prepare an edit
 
@@ -17,12 +17,12 @@ Check the active config before preparing or capturing. `skillbox/config.local.js
 skillbox patch prepare <id>
 ```
 
-Record the returned `workspace` and `editable` paths. Shared preparation uses `skillbox/.prepare/<id>/edit/`; personal preparation uses `skillbox/.prepare.local/<id>/edit/`. `--output <directory>` chooses another workspace. Capture with the same config active as when you prepared it.
+Record the returned `workspace` and `editable` paths. Both configs use `skillbox/.prepare/<id>/edit/`. `--output <directory>` chooses another workspace when an existing edit occupies that path. Capture with the same config active as when you prepared it.
 
 - Edit distributed skill files under `<workspace>/edited/skills/<original-directory>/`.
 - Do not edit `<workspace>/pristine/` or `manifest.json`; these are CLI-managed preparation state.
 - Preparation preserves original skill directory names, which can differ from frontmatter names. Selectors and installed names use frontmatter names; a capture `--skill` filter uses the original directory.
-- Ignore both preparation directories. Capture wanted edits before deleting or recreating a workspace.
+- Ignore `skillbox/.prepare/`. Capture wanted edits before deleting or recreating a workspace.
 - Treat `.agents/skills/` and `.claude/skills` as generated installations.
 
 The pristine baseline is the composed output before this workspace's patches. For a producer contribution, it already includes producer-owned adaptations. Do not copy producer patch payloads or intent into your own patch files.

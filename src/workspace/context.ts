@@ -14,10 +14,10 @@ export const sharedPaths = {
 } as const;
 export const localPaths = {
 	kind: "local",
-	config: "skillbox/config.local.json",
-	lock: "skillbox/lock.local.json",
-	patches: "skillbox/patches.local",
-	prepare: "skillbox/.prepare.local",
+	config: "skillbox/.local/config.json",
+	lock: "skillbox/.local/lock.json",
+	patches: "skillbox/.local/patches",
+	prepare: sharedPaths.prepare,
 } as const;
 export type WorkspacePaths = typeof sharedPaths | typeof localPaths;
 export interface WorkspaceContext {
@@ -50,7 +50,6 @@ export async function readWorkspace(
 	root = await realpath(root);
 	const paths = kind === "shared" ? sharedPaths : localPaths;
 	for (const path of [paths.config, paths.lock, paths.patches]) await regularPath(root, path);
-	if (paths.kind === "local") await regularPath(root, paths.prepare);
 	return {
 		root,
 		paths,

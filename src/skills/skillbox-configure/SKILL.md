@@ -21,7 +21,7 @@ Use `npx skillbox` in a terminal or `skillbox` in package scripts, for example `
 
 ## Compose, then select installation
 
-1. Select `skillbox/config.local.json` if present, otherwise `skillbox/config.json`. Inspect its matching lock and patches, shared native bundles, `.agents/skills/`, and `.claude/skills`. Preserve unmanaged skills and existing tracking files. Before setting up personal skills, load `skillbox skills file skillbox-configure references/configuration.md` for explicit shared imports, private paths, and ignore rules.
+1. Select `skillbox/.local/config.json` if present, otherwise `skillbox/config.json`. Inspect its matching lock and patches, shared native bundles, `.agents/skills/`, and `.claude/skills`. Preserve unmanaged skills and existing tracking files. Before setting up personal skills, load `skillbox skills file skillbox-configure references/configuration.md` for explicit shared imports, private paths, and ignore rules.
 2. Choose a destination bundle id and the source layout:
 
     ```sh

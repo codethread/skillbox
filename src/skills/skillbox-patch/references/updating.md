@@ -10,7 +10,7 @@ skillbox update <id>
 
 The destination can contain several contributions. Each direct Git contribution has its own configured ref and locked revision. Use command help for ref overrides; do not assume all sources share a branch or tag. Local filesystem sources use current worktree content rather than immutable Git pins. Update another local bundle's Git sources by addressing that bundle explicitly; updating its consumer does not advance them.
 
-Update creates a candidate under `skillbox/.prepare/<id>/` for shared config or `skillbox/.prepare.local/<id>/` for personal config. Keep the same config active through capture. Use the returned paths rather than guessing the generated name:
+Update creates a candidate under `skillbox/.prepare/<id>/` for either config. Keep the same config active through capture. Use the returned paths rather than guessing the generated name:
 
 - `pristine/skills/` holds the candidate composition before your local patches.
 - `edited/skills/` holds the candidate with replayed local changes; conflicts may leave a partial result requiring repair.

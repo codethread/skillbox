@@ -21,7 +21,7 @@ async function setup() {
 }
 
 async function localConfig(root: string, sources: object[], install: string[]) {
-	await put(root, "skillbox/config.local.json", JSON.stringify({ sources, install }, null, 2));
+	await put(root, "skillbox/.local/config.json", JSON.stringify({ sources, install }, null, 2));
 }
 
 test("omitted bundles imports all exports from filesystem and pinned Git producers", async () => {
@@ -104,20 +104,20 @@ test("same-root personal selection switches repeatedly without changing shared c
 		expect(await readFile(join(f.client, ".agents/skills/alpha/SKILL.md"), "utf8")).toBe(
 			skill("alpha", "shared alpha"),
 		);
-		expect(await json(join(f.client, "skillbox/lock.local.json"))).toBeDefined();
+		expect(await json(join(f.client, "skillbox/.local/lock.json"))).toBeDefined();
 		const before = await snapshot(f.client);
 		expect(success(await run(f.client, f.cache, "sync"))).toMatchObject({
 			status: "unchanged",
 		});
 		expect(await snapshot(f.client)).toEqual(before);
 		for (let i = 0; i < 2; i++) {
-			await rename(join(f.client, "skillbox/config.local.json"), join(f.root, "saved.json"));
+			await rename(join(f.client, "skillbox/.local/config.json"), join(f.root, "saved.json"));
 			success(await run(f.client, f.cache, "sync"));
 			expect((await readdir(join(f.client, ".agents/skills"))).sort()).toEqual([
 				"alpha",
 				"beta",
 			]);
-			await rename(join(f.root, "saved.json"), join(f.client, "skillbox/config.local.json"));
+			await rename(join(f.root, "saved.json"), join(f.client, "skillbox/.local/config.json"));
 			success(await run(f.client, f.cache, "sync"));
 			expect(await readdir(join(f.client, ".agents/skills"))).toEqual(["alpha"]);
 		}
@@ -150,7 +150,7 @@ test("add registers a private source without changing shared files", async () =>
 		expect(await readFile(join(f.client, ".agents/skills/beta/SKILL.md"), "utf8")).toBe(
 			skill("beta", "private addition"),
 		);
-		expect((await json(join(f.client, "skillbox/config.local.json"))).sources).toHaveLength(2);
+		expect((await json(join(f.client, "skillbox/.local/config.json"))).sources).toHaveLength(2);
 		expect(await readFile(join(f.client, "skillbox/config.json"), "utf8")).toBe(sharedConfig);
 		expect(await readFile(join(f.client, "skillbox/lock.json"), "utf8")).toBe(sharedLock);
 	} finally {
@@ -165,7 +165,7 @@ test("malformed local config, missing selectors, cycles and collisions fail with
 		success(
 			await run(f.client, f.cache, "add", "skillbox", ".", "shared", "--bundle", "shared"),
 		);
-		await put(f.client, "skillbox/config.local.json", "{invalid");
+		await put(f.client, "skillbox/.local/config.json", "{invalid");
 		let before = await snapshot(f.client);
 		failure(await run(f.client, f.cache, "sync"), "CONFIG_INVALID");
 		expect(await snapshot(f.client)).toEqual(before);
@@ -259,7 +259,7 @@ test("filesystem and Git producers ignore their personal config and retain neste
 			),
 		);
 		const producerLock = await readFile(join(producer, "skillbox/lock.json"), "utf8");
-		await put(producer, "skillbox/config.local.json", "{invalid personal configuration");
+		await put(producer, "skillbox/.local/config.json", "{invalid personal configuration");
 		await commit(producer);
 		await put(raw, "skills/alpha/SKILL.md", skill("alpha", "new upstream version"));
 		await commit(raw);
@@ -315,7 +315,7 @@ test("personal patch and update leave shared config, lock and patches untouched"
 		);
 		success(await run(f.client, f.cache, "sync"));
 		const update = success(await run(f.client, f.cache, "update", "personal"));
-		expect(update.workspace).toContain("skillbox/.prepare.local/personal/update-");
+		expect(update.workspace).toContain("skillbox/.prepare/personal/update-");
 		const prepared = success(await run(f.client, f.cache, "patch", "prepare", "personal"));
 		await put(prepared.editable, "skills/alpha/SKILL.md", skill("alpha", "private change"));
 		const captured = success(
@@ -330,7 +330,7 @@ test("personal patch and update leave shared config, lock and patches untouched"
 			),
 		);
 		expect(captured.changed).toBeGreaterThan(0);
-		expect(captured.intentFiles).toEqual(["skillbox/patches.local/personal/alpha/patch.toml"]);
+		expect(captured.intentFiles).toEqual(["skillbox/.local/patches/personal/alpha/patch.toml"]);
 		expect(await readFile(join(f.client, captured.intentFiles[0]), "utf8")).toContain(
 			'intent = ""',
 		);

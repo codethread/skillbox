@@ -72,7 +72,7 @@ Every shared composed bundle is publishable, whether or not it appears in `insta
 
 ## Try personal skills
 
-Add the [private ignore rules](#what-to-commit). Create `skillbox/config.local.json` to choose your own installation without changing the shared setup. It selects personal config instead of `config.json`, without merging either file. Import `"."` to include shared bundles explicitly:
+Add the [private ignore rules](#what-to-commit). Create `skillbox/.local/config.json` to choose your own installation without changing the shared setup. It selects personal config instead of `config.json`, without merging either file. Import `"."` to include shared bundles explicitly:
 
 ```json
 {
@@ -98,7 +98,9 @@ This example imports all shared bundles, omits `poteto-mode` from `pstack`, and 
 
 Run `skillbox sync`. The first personal sync resolves its own Git pins; shared producer pins and patches remain authoritative. Later additions that need new pins use `add`. Commands that mutate state report the selected config path.
 
-Personal commands use `skillbox/lock.local.json`, `skillbox/patches.local/`, and `skillbox/.prepare.local/`. To return to the shared installation, move `config.local.json` out of that path and run sync. Restore it and sync to resume your personal setup. Keep the private lock, patches, and installation state through both switches.
+Personal config, lock, patches, and installation state live under `skillbox/.local/`. Both configs use `skillbox/.prepare/` for prepared edits. Capture with the same config active as when you prepared the edit.
+
+To return to the shared installation, move `skillbox/.local/config.json` out of that path and run sync. Restore it and sync to resume your personal setup. Keep the rest of `.local/` through both switches.
 
 ## Published workflow skills
 
@@ -148,13 +150,9 @@ Edit owned sources or prepared skills, not generated installations. Capture want
 /.agents/skills/
 /.claude/skills
 /skillbox/.prepare/
-/skillbox/config.local.json
-/skillbox/lock.local.json
-/skillbox/patches.local/
-/skillbox/.prepare.local/
-/skillbox/install-state.local.json
+/skillbox/.local/
 ```
 
-`skillbox/install-state.local.json` tracks the physical installation across shared and personal syncs. Keep it when switching configs.
+`skillbox/.local/install-state.json` tracks the physical installation across shared and personal syncs. Keep it when switching configs.
 
 See [release history](CHANGELOG.md), also available through `skillbox changelog`.
