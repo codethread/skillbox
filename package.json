@@ -61,7 +61,7 @@
 		"zod": "^4.6.7"
 	},
 	"overrides": {
-		"@botlake/core": "0.5.3"
+		"@botlake/core": "0.7.0"
 	},
 	"lint-staged": {
 		"*": "oxfmt --no-error-on-unmatched-pattern"
