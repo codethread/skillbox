@@ -97,6 +97,23 @@ export async function reconcile(
 			`Lock ${paths.lock} is out of date. Run sync without --frozen.`,
 			{ input: paths.lock },
 		);
+	const sources: Lock["sources"] = {};
+	for (const contribution of config.sources) {
+		const key = contributionIdentity(contribution);
+		const entry = candidate.sources[key];
+		if (!entry)
+			throw responseError(
+				"PIN_MISSING",
+				`Missing source pin for ${contribution.source}. Register it with add.`,
+				{ source: contribution.source },
+			);
+		if (isLocalSource(contribution.source) && contribution.ref)
+			throw responseError("REF_UNSUPPORTED", "Local authored sources do not accept ref.", {
+				source: contribution.source,
+			});
+		sources[key] = { contribution, pin: entry.pin };
+	}
+	if (frozen && !isDeepStrictEqual(candidate.sources, sources)) throw outOfDate();
 	if (frozen) {
 		const selected: Record<string, { bundle: string; directory: string }> = {};
 		for (const id of config.install) {
@@ -115,24 +132,6 @@ export async function reconcile(
 		);
 		if (!isDeepStrictEqual(selected, installed)) throw outOfDate();
 	}
-	const sources: Lock["sources"] = {};
-	for (const contribution of config.sources) {
-		const key = contributionIdentity(contribution);
-		const entry = candidate.sources[key];
-		if (!entry && frozen) throw outOfDate();
-		if (!entry)
-			throw responseError(
-				"PIN_MISSING",
-				`Missing source pin for ${contribution.source}. Register it with add.`,
-				{ source: contribution.source },
-			);
-		if (isLocalSource(contribution.source) && contribution.ref)
-			throw responseError("REF_UNSUPPORTED", "Local authored sources do not accept ref.", {
-				source: contribution.source,
-			});
-		sources[key] = { contribution, pin: entry.pin };
-	}
-	if (frozen && !isDeepStrictEqual(candidate.sources, sources)) throw outOfDate();
 	candidate = { ...candidate, sources };
 	await preflight(root, receipt);
 	const staging = await mkdtemp(join(root, ".skillbox-sync-"));

@@ -24,17 +24,30 @@ test("frozen rejects changed selection and contribution metadata without side ef
 		success(await run(f.client, f.cache, "add", "skills", source, "team", "--path", "skills"));
 		const configPath = join(f.client, "skillbox/config.json");
 		const config = await json(configPath);
-		for (const changed of [
-			{ ...config, install: [] },
-			{ ...config, install: ["team", "constructor"] },
-			{ ...config, sources: [{ ...config.sources[0], ref: "different" }] },
-		]) {
+		for (const [changed, code, hint] of [
+			[{ ...config, install: [] }, "LOCK_OUT_OF_DATE", "skillbox/lock.json"],
+			[
+				{ ...config, install: ["team", "constructor"] },
+				"LOCK_OUT_OF_DATE",
+				"skillbox/lock.json",
+			],
+			[
+				{ ...config, sources: [{ ...config.sources[0], ref: "different" }] },
+				"LOCK_OUT_OF_DATE",
+				"skillbox/lock.json",
+			],
+			[
+				{ sources: [{ ...config.sources[0], id: "other" }], install: ["other"] },
+				"PIN_MISSING",
+				"Register it with add.",
+			],
+		] as const) {
 			await put(f.client, "skillbox/config.json", JSON.stringify(changed));
 			await rm(f.cache, { recursive: true, force: true });
 			const before = await snapshot(f.client);
 			const result = await run(f.client, f.cache, "sync", "--frozen");
-			failure(result, "LOCK_OUT_OF_DATE");
-			expect(result.response.errors[0]?.message).toContain("skillbox/lock.json");
+			failure(result, code);
+			expect(result.response.errors[0]?.message).toContain(hint);
 			expect(await snapshot(f.client)).toEqual(before);
 			expect(
 				await stat(f.cache).then(
