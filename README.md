@@ -21,6 +21,8 @@ Skills and their supporting files install into `.agents/skills/`; `.claude/skill
 npx skillbox sync
 ```
 
+In CI, run `npx skillbox sync --frozen` to install from a matching lockfile without rewriting it. If the active lockfile is missing or stale, frozen sync exits without changing installed skills. It can fetch recorded Git revisions on a cache miss. To refresh a stale lockfile, register any missing sources with `add`, then run `skillbox sync` locally. Review the changes before committing the shared lockfile.
+
 Skills with `disable-model-invocation: true` in their final, patched `SKILL.md` install with `policy.allow_implicit_invocation: false` in `agents/openai.yaml`. Sync preserves other metadata and leaves authored sources and patch exports unchanged. If the flag is absent or false, it copies authored metadata unchanged and creates no policy file.
 
 Below, use `npx skillbox` in a terminal or `skillbox` in package scripts, such as `"skills:sync": "skillbox sync"`.

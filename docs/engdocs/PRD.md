@@ -293,6 +293,8 @@ Filesystem-path sources are live local worktrees for owned authoring. Remote Git
 
 ## Sync and updates
 
+See [Get started](../../README.md#get-started) for the CI workflow with `sync --frozen`.
+
 ### Repeat an add without changes
 
 - **Given** a contribution and its installation selection are already recorded,

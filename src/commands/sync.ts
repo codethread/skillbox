@@ -10,6 +10,7 @@ import {
 	writeFile,
 } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import { isDeepStrictEqual } from "node:util";
 import { responseError } from "../response.ts";
 import { hashTree } from "../workspace/patches.ts";
 import { exportIds, isLocalSource, type Bundles } from "../workspace/bundles.ts";
@@ -46,6 +47,7 @@ export async function sync(input: {
 	bundles: Bundles;
 	cwd: string;
 	workspace?: string;
+	frozen?: boolean;
 }): Promise<SyncResult> {
 	const context = await selectWorkspace(
 		await realpath(resolve(input.cwd, input.workspace ?? ".")),
@@ -55,6 +57,8 @@ export async function sync(input: {
 		throw responseError("CONFIG_NOT_FOUND", `Missing ${paths.config}.`, {
 			input: paths.config,
 		});
+	if (input.frozen && !context.lock)
+		throw responseError("LOCK_MISSING", `Missing ${paths.lock}.`, { input: paths.lock });
 	const receipt = await installationState(context);
 	let lock = context.lock;
 	if (!lock && paths.kind === "local")
@@ -63,7 +67,13 @@ export async function sync(input: {
 		throw responseError("LOCK_MISSING", `Missing ${paths.lock}. Register sources with add.`, {
 			input: paths.lock,
 		});
-	return reconcile(input.bundles, { context, config, candidate: lock ?? emptyLock(), receipt });
+	return reconcile(input.bundles, {
+		context,
+		config,
+		candidate: lock ?? emptyLock(),
+		receipt,
+		frozen: input.frozen,
+	});
 }
 
 /** Stage exports, selected installation and metadata together; publish only after all checks pass. */
@@ -75,15 +85,41 @@ export async function reconcile(
 		candidate: Lock;
 		receipt: InstallationReceipt;
 		writeConfig?: boolean;
+		frozen?: boolean;
 	},
 ): Promise<SyncResult> {
-	const { context, config, receipt, writeConfig = false } = input;
+	const { context, config, receipt, writeConfig = false, frozen = false } = input;
 	const { root, paths, lock: current } = context;
 	let candidate = input.candidate;
+	const outOfDate = () =>
+		responseError(
+			"LOCK_OUT_OF_DATE",
+			`Lock ${paths.lock} is out of date. Run sync without --frozen.`,
+			{ input: paths.lock },
+		);
+	if (frozen) {
+		const selected: Record<string, { bundle: string; directory: string }> = {};
+		for (const id of config.install) {
+			const bundle = Object.hasOwn(candidate.bundles, id) ? candidate.bundles[id] : undefined;
+			if (!bundle) throw outOfDate();
+			for (const member of bundle.members) {
+				if (Object.hasOwn(selected, member.name)) throw outOfDate();
+				selected[member.name] = { bundle: id, directory: member.directory };
+			}
+		}
+		const installed = Object.fromEntries(
+			Object.entries(candidate.installed).map(([name, entry]) => [
+				name,
+				{ bundle: entry.bundle, directory: entry.directory },
+			]),
+		);
+		if (!isDeepStrictEqual(selected, installed)) throw outOfDate();
+	}
 	const sources: Lock["sources"] = {};
 	for (const contribution of config.sources) {
 		const key = contributionIdentity(contribution);
 		const entry = candidate.sources[key];
+		if (!entry && frozen) throw outOfDate();
 		if (!entry)
 			throw responseError(
 				"PIN_MISSING",
@@ -96,6 +132,7 @@ export async function reconcile(
 			});
 		sources[key] = { contribution, pin: entry.pin };
 	}
+	if (frozen && !isDeepStrictEqual(candidate.sources, sources)) throw outOfDate();
 	candidate = { ...candidate, sources };
 	await preflight(root, receipt);
 	const staging = await mkdtemp(join(root, ".skillbox-sync-"));
@@ -134,6 +171,8 @@ export async function reconcile(
 				};
 			}
 		}
+		const parsedNext = lockSchema.parse(next);
+		if (frozen && !isDeepStrictEqual(current, parsedNext)) throw outOfDate();
 		let unchanged = 0;
 		for (const [name, entry] of Object.entries(next.installed)) {
 			const path = join(root, ".agents/skills", name);
@@ -151,12 +190,12 @@ export async function reconcile(
 		};
 		const receiptText = jsonText(nextReceipt);
 		const configText = jsonText(config);
-		const nextText = jsonText(lockSchema.parse(next));
+		const nextText = jsonText(parsedNext);
 		const sameConfig =
 			!writeConfig || (await readOptional(join(root, paths.config))) === configText;
 		if (
 			(await readOptional(join(root, receiptPath))) === receiptText &&
-			jsonText(current) === nextText &&
+			(frozen || jsonText(current) === nextText) &&
 			sameConfig &&
 			unchanged === Object.keys(next.installed).length &&
 			(await statOptional(join(root, ".agents/skills")))?.isDirectory() &&
@@ -170,11 +209,15 @@ export async function reconcile(
 				removed: 0,
 			};
 		await mkdir(dirname(join(staging, receiptPath)), { recursive: true });
-		await writeFile(join(staging, paths.lock), nextText);
+		const targets = [".agents/skills", ".claude/skills"];
+		if (!frozen) {
+			await writeFile(join(staging, paths.lock), nextText);
+			targets.push(paths.lock);
+		}
 		await writeFile(join(staging, receiptPath), receiptText);
 		await mkdir(join(staging, ".claude"));
 		await symlink("../.agents/skills", join(staging, ".claude/skills"));
-		const targets = [".agents/skills", ".claude/skills", paths.lock, receiptPath];
+		targets.push(receiptPath);
 		if (writeConfig) {
 			await writeFile(join(staging, paths.config), configText);
 			targets.push(paths.config);
