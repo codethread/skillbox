@@ -191,12 +191,14 @@ program
 program
 	.command("sync")
 	.description("Install configured skills from recorded sources and patches.")
-	.action(async () => {
+	.option("--frozen", "require an up-to-date lock without replacing it")
+	.action(async (options) => {
 		const cwd = process.cwd();
 		const result = await sync({
 			bundles: workspaceBundles(),
 			cwd,
 			workspace: await selectedWorkspace(cwd),
+			frozen: options.frozen,
 		});
 		writeJson(successResponse(result));
 	});
