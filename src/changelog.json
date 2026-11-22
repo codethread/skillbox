@@ -1,5 +1,22 @@
 [
 	{
+		"version": "0.5.0",
+		"changes": [
+			{
+				"commit": "40e9b5c",
+				"summary": "Require a current lockfile with sync --frozen.",
+				"body": "Frozen sync refuses a missing or stale active lockfile without changing installed skills. A matching lockfile can restore missing skills without being rewritten. Frozen sync can fetch recorded Git revisions on a cache miss. Plain sync is unchanged.",
+				"breaking": [],
+				"adoption": [
+					{
+						"requirement": "optional",
+						"text": "Use skillbox sync --frozen in CI. To refresh a stale lockfile, register any missing sources with add, then run sync locally. Review and commit the shared lockfile changes."
+					}
+				]
+			}
+		]
+	},
+	{
 		"version": "0.4.0",
 		"changes": [
 			{

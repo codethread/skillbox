@@ -2,6 +2,16 @@
 
 All notable changes to Skillbox since 0.1.0 are documented in this file.
 
+## 0.5.0
+
+### Changes
+
+- Require a current lockfile with sync --frozen. (40e9b5c)
+
+    Frozen sync refuses a missing or stale active lockfile without changing installed skills. A matching lockfile can restore missing skills without being rewritten. Frozen sync can fetch recorded Git revisions on a cache miss. Plain sync is unchanged.
+
+    - **Adoption (optional):** Use skillbox sync --frozen in CI. To refresh a stale lockfile, register any missing sources with add, then run sync locally. Review and commit the shared lockfile changes.
+
 ## 0.4.0
 
 ### Changes
